@@ -163,6 +163,7 @@ export const en = {
     tlDoneFix: "One thing to fix",
     wait: "This usually takes about 2 minutes. You can close this page — we will send a message to {mobile}.",
     waitDemo: "For this demo it takes about 8 seconds.",
+    closeOk: "You can close this page. We will send a message to {mobile}.",
     refLabel: "Your reference number",
     refHelp: "Keep this. It opens this page again.",
     announceChecking: "Still checking.",
@@ -250,7 +251,7 @@ export const en = {
       "This is a front end. In production it would call the existing Jeevan Pramaan and UIDAI face-match services through an authorised pension-agency integration — the government stays the system of record. Nothing here duplicates a government database.",
     scale2Head: "What we would never store.",
     scale2:
-      "Aadhaar numbers, raw biometrics and photos are transient. The photo goes to the matching service and is discarded; only the resulting reference number and status persist.",
+      "Aadhaar numbers, fingerprint and face data, and photos are all transient. The photo goes to the matching service and is discarded; only the resulting reference number and status persist.",
     scale3Head: "The AI is advisory only.",
     scale3:
       "It never decides an outcome. It only explains an outcome the government system already returned, and warns about a photo before it is sent. A wrong AI guess costs one retake, never a pension.",

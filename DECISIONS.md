@@ -1,195 +1,180 @@
 # Decisions
 
-Every judgement call the brief left open, and why it went the way it did. The
-tie-breaker throughout: *whichever option is simpler for a 78-year-old on a
-cheap Android phone.*
+Every judgement call the brief left open, and every place I departed from it.
+The rule I used where something was ambiguous: **pick whatever is simpler for
+a 78-year-old on a cheap Android phone.**
+
+---
+
+## Departures from the brief
+
+These are the four places where I did not do exactly what MASTER_PROMPT.md
+says. Each one is a conflict between two of its own rules.
+
+### 1. "Certificate" is banned, so the accepted screen does not say it
+
+§4 gives the accepted sub-headline as *"Your life certificate has been
+accepted."* §9 bans the word *certificate* from all user-facing text, and
+calls the copy rules non-negotiable.
+
+I followed §9: **"The pension office has your proof. Nothing more to do until
+November 2027."** Same meaning, no jargon. §9 is the later and more explicit
+rule, and "certificate" is exactly the kind of word that makes a pensioner
+call their son.
+
+### 2. Two tokens are a shade darker than specified
+
+§3 fixes `--ink-soft: #56504A`. §10 requires every text/background pair at
+AAA 7:1. Those conflict: #56504A on `--primary-tint` measures **6.81:1**.
+
+- `--ink-soft` → `#534D47` (7.13:1 on tint). Visually indistinguishable.
+- Added `--attention-text: #83321D`. The specified `--attention` (#A8452A) is
+  a *fill* colour; as small text it only reaches 5.6:1. The new token is the
+  same hue taken to AAA, used only where rust becomes words. `--attention`
+  itself is untouched for banners and buttons.
+- Placeholder text darkened to `#767068` for 4.9:1.
+
+`npm run check:contrast` asserts all 22 pairs on every run.
+
+### 3. Screen 1 shows the tagline three times
+
+§4 says screen 1 has "no other content except the product name and one line",
+but also says nothing may render in a language the visitor has not chosen.
+Those cannot both hold — one line has to be in *some* language.
+
+The tagline appears once per language, at 15px, under a product name shown in
+all three scripts. A language chooser that speaks only English has already
+failed the person it exists for.
+
+### 4. `/demo` is English-only
+
+Everything else goes through i18n. The presenter controls do not: they are a
+tool for whoever is holding the camera, and translating them would imply a
+pensioner might one day see the screen. It is unreachable from the journey.
 
 ---
 
 ## Product
 
-**The word "rejected" appears nowhere in the UI.**
-The failure screen is titled *"One small thing to fix."* A pensioner reading
-"rejected" concludes their pension has stopped. It has not — they need to
-retake a photo. The technical code is still shown, collapsed, under
-*"Technical details"*, because judges deserve the truth and pensioners deserve
-the plain version. Both, in the right order.
+**Name comes from a mocked PPO lookup, not a fourth field.**
+§4 specifies exactly three fields on `/details`, but the receipt and review
+screens need a name. §8 lists "PPO lookup" as mocked — so the PPO *is* the key
+into the pension office, and **Send code** returns the pensioner's name along
+with the OTP. One round trip, no extra field. If the PPO is unknown, a name
+field appears in place with *"We could not find that PPO number. Type the name
+below and carry on."* Three PPOs are seeded; `PPO-2024-000123` is the demo one.
 
-**Rust, not red, for failure.**
-`--attention: #A8452A`. Alarm red says *you did something wrong*. This screen
-means *the light was bad*. The colour should not accuse.
+**The reference number keeps the `DLC-` prefix but is never called a DLC.**
+§6.2 requires the real `DLC-{YYYY}-{8 chars}` format; §9 bans "DLC" from
+user-facing copy. The ban is about jargon as a *label*, so the string keeps
+the real format and every language calls it "your reference number". The
+alphabet drops I, O, 0 and 1 — this number gets read aloud over a phone.
 
-**Assisted mode changes the copy, never the payload.**
-Selecting *"I'm helping a family member"* rewrites guidance into the second
-person about the pensioner and adds a helper-name field. It does not hide a
-single field or alter what is submitted. The problem it solves is that helpers
-currently have to impersonate a parent; the fix is to let them say so, not to
-give them a shortcut.
+**Assisted mode adds a field rather than hiding one.**
+It changes who the copy addresses and asks who filled the form in. It never
+changes what is sent. The whole point is to stop a son having to pretend to be
+his father — obscuring the difference would reintroduce the problem.
 
-**No progress beads on `/`, `/about`, `/help`, `/outbox`, `/demo`.**
-The beads exist to answer *"how much more of this is there?"* during the
-journey. On a page outside the journey they answer a question nobody asked.
+**"Needs fixing" is never "rejected", including in the SMS.**
+The outbox messages use the same vocabulary as the screens. A pensioner who
+gets a message saying "rejected" has already had the bad afternoon, whatever
+the app says later.
 
-**Errors sit under the field, in words, with the number the person typed.**
-*"That's 11 digits. Aadhaar has 12."* not *"Invalid input"*. The error has to
-be actionable without a second reading.
-
-**The OTP appears on screen in demo mode.**
-A reviewer with no Indian phone number would otherwise be stranded at step 3.
-The line is explicit that it is a demo affordance.
+**Every outbound message carries the prototype disclosure**, and so does the
+receipt PNG. If someone photographs the receipt and forwards it, the
+disclosure travels with it.
 
 ---
 
-## Design
+## Technical
 
-**Base font size is 20px, and the type scale is in absolute pixels.**
-Not rem. A large share of this audience already runs the OS font scale high;
-rem would compound the two into a layout that no longer fits. Absolute px plus
-an unrestricted browser zoom (`maximumScale: 5`) is the combination that
-actually works at 200%.
+**Language lives in a cookie as well as sessionStorage.**
+sessionStorage alone means the server renders English and the right script
+appears a beat later. A cookie lets the root layout render the correct
+language, `<html lang>` and font stack on the first paint.
 
-**Noto Sans / Devanagari / Gujarati, swapped by a class on `<html>`.**
-It is the only family with correct, legible coverage of all three scripts at
-the weights needed. Devanagari and Gujarati get `line-height: 1.8` against
-Latin's 1.6 — the conjuncts collide otherwise.
+> This bit me: `LANG_COOKIE` was originally exported from `lib/app-state.tsx`,
+> which is `"use client"`. Every export of a client module becomes a client
+> *reference* when a server component imports it — so the layout was calling
+> `cookies().get(<proxy object>)` and silently getting `undefined`. Plain
+> constants now live in `lib/constants.ts`.
 
-**The receipt is the only place the design gets loud.**
-Ruled passbook paper, a rotated circular ink stamp, one large date. This is
-the artefact a pensioner wants: proof they can show their son. Every other
-screen stays quiet so this one lands.
+**The mock pension office resolves lazily on read, not on a timer.**
+Nothing in a serverless function may outlive its request. Each record carries
+`resolveAt`; `/api/status/[id]` settles it if due. From the client this is
+indistinguishable from a worker queue, and it survives a cold start — a
+`setTimeout` would not.
 
-**Icons are hand-written inline SVG and never appear alone.**
-No icon library — it would have been most of the JS budget. Every icon sits
-next to a word, so all of them are `aria-hidden`; an icon-only button is
-unreadable to the people this app is for.
+**`globalThis` holds the store** so Next.js dev hot-reloads do not silently
+drop every record between edits.
 
-**The primary action is sticky to the bottom on mobile.**
-Reachable by thumb without scrolling past the content that explains it.
+**Only the last four Aadhaar digits are stored, even in the mock.** Storing
+the full number "just for the demo" is how habits get formed. The client sends
+twelve; the server keeps four.
 
----
+**Outcomes are decided honestly, not randomly.** If the pre-check flagged the
+photo, the pension office returns `ERR_FACE_QUALITY_LOW` 85% of the time;
+otherwise it accepts 70% of the time. That coupling is what makes the
+pre-check feel truthful rather than decorative. An unknown PPO returns
+`ERR_PPO_NOT_FOUND` on the first attempt only — otherwise a reviewer typing a
+made-up number would be stuck in a loop. `/demo` always wins.
 
-## Language
+**Demo settings travel as request headers**, so the mock backend honours them
+server-side. The UI never fakes a result it was told to show.
 
-**Written, not translated.**
-The Hindi and Gujarati dictionaries deliberately avoid Sanskritised officialese
-(`प्रमाणीकरण`, `સત્યાપન`) in favour of the words people say out loud. A literal
-translation of the English would have been faster and would have read like the
-circular this project exists to replace.
+**Slow-3G simulation is real added latency** in the fetch wrapper, both ways.
+A fake spinner would prove nothing.
 
-**One dictionary, keys checked at compile time.**
-`Dict` is derived from `en.ts`, so a missing or misspelled key in `hi.ts` or
-`gu.ts` is a build error rather than an `undefined` in front of a pensioner.
-This is also the argument that 22 scheduled languages is a content-pipeline
-problem and not a rebuild.
+**Layer 1 of the pre-check throttles to ~4 readings a second** and reuses one
+96×128 canvas. Allocating a canvas per frame is what makes naive versions of
+this stutter on a five-year-old Android.
 
-**Language choice is stored in `localStorage`; the application is not.**
-The language should survive coming back tomorrow. Somebody else's Aadhaar
-number on a shared phone should not — that lives in `sessionStorage` and dies
-with the tab. A cookie carries the language too, so the server can render the
-right script on the first paint instead of flashing English.
+**The receipt PNG is drawn by hand on a canvas**, including the arc text on
+the stamp. html2canvas is ~200 KB — more than the entire rest of the app — and
+it renders Devanagari and Gujarati badly. `fillText` uses the same font stack
+the page already loaded, so all three scripts come out right. Print is offered
+alongside, for anyone whose browser blocks the download.
 
----
+**`hasKey()` rejects the `sk-...` placeholder from `.env.example`.** Treating
+it as real cost every call a 7-second timeout before falling back — exactly
+the delay the fallback exists to prevent.
 
-## AI
-
-**Three jobs, all server-side, all with fallbacks.**
-`OPENAI_API_KEY` is read only inside route handlers. Remove it and the whole
-app still works: the explainer falls back to a hardcoded table covering all six
-codes in all three languages, and the pre-check falls back to the client-side
-canvas verdict. This was built table-first and API-second, deliberately —
-a demo that dies when a key expires is not a demo.
-
-**The pre-check never blocks submission.**
-A warning plus **"Take it again"** next to **"Send anyway"**. The model is
-advisory; it does not get a veto over somebody's pension. A wrong guess costs
-one retake.
-
-**Two layers of photo checking, because the cheap one is instant.**
-Layer 1 is client-side canvas analysis — mean luminance, Laplacian variance,
-centre-region variance — running live during preview at low resolution. It
-costs nothing, needs no network, and is what makes capture feel guided instead
-of silent. Layer 2 is a single vision call on `/review`, on a photo resized to
-512px at quality 0.7, because bandwidth is a real constraint here.
-
-**The vision prompt forbids commenting on appearance, age, clothing, or
-background, and forbids identifying the person.**
-It is asked one question: would this photo fail an automated face match.
-
-**Explanations are cached by `code + language`.**
-The same six codes recur forever; the second pensioner to hit
-`ERR_FACE_QUALITY_LOW` should not cost a second call.
-
-**Voice is Web Speech API first, OpenAI TTS second and behind a flag.**
-`speechSynthesis` is free, instant, and costs no bandwidth — which matters on
-3G more than voice quality does.
+**Validity is 30 November of the following year.** Whatever month it is sent
+in, the next annual window closes then.
 
 ---
 
-## Backend
+## Dependencies
 
-**A real state machine behind real HTTP, not `setTimeout` in a component.**
-`DRAFT → SUBMITTED → VERIFYING → ACCEPTED | NEEDS_FIX`, with illegal
-transitions throwing and every transition appending to an audit log. The point
-of the exercise is end-to-end thinking; faking the round trip would have
-skipped it.
+The budget was "justify anything you reach for". The full list:
 
-**The mock pension office resolves honestly, not randomly.**
-If our own pre-check flagged the photo, the outcome weights heavily toward
-`ERR_FACE_QUALITY_LOW`. Otherwise it accepts about 70% of the time. Real
-first-attempt failure rates for elderly users are considerably worse than 30%;
-this number keeps the demo watchable while still exercising the recovery path.
-Outcomes forced from `/demo` always win.
+| Package | Why |
+|---|---|
+| `next`, `react`, `react-dom` | The stack, fixed by the brief. Pinned to 15.5.24 — 15.5.2 carries CVE-2025-66478. |
+| `openai` | The brief's SDK. Server-only; `verify:no-key` proves it never ships to the browser. |
+| `tailwindcss` v4 + `@tailwindcss/postcss` | The brief's styling layer. |
+| `server-only` | ~1 KB, zero runtime. Turns "do not import this on the client" into a build error. |
 
-**`LATENCY_MS` and `FAILURE_RATE` are constants at the top of `lib/mockPda.ts`.**
-So degraded-network behaviour can be demonstrated on camera by changing one
-line, and so a reader can see exactly where the pretending happens.
-
-**Submission is idempotent on a client-generated `requestId`.**
-Pressing Send twice, or retrying after the connection drops, reuses the same
-id and does not create a second record. The retry button deliberately reuses
-the id rather than minting a new one.
-
-**Storage is a module-level `Map`, and the app says so out loud.**
-On `/about` and in the README. In production it is a Postgres row and a job
-queue; on Vercel it means a submission is lost on cold start. That is the right
-trade for a prototype and the wrong one for a pension, and hiding it would have
-been the actual mistake.
-
-**The status page survives a hard refresh.**
-The id is in the URL and the state is on the server, so a reload re-reads
-rather than restarts.
-
-**Only the last four digits of the Aadhaar number are ever stored, even in the
-mock.**
-There is no reason for the rest to exist past validation, and building the mock
-the careless way teaches the wrong shape.
+Nothing else. No animation, chart, icon, UI or state library. Every icon and
+illustration in `components/Icons.tsx` is hand-written SVG; the whole set
+costs less than the import statement for a library would. First-load JS is
+~127 KB gzipped against a 150 KB budget.
 
 ---
 
-## Deployment
+## Left undone, deliberately
 
-**`bom1` (Mumbai) as the Vercel region.**
-Every user of this is in India. The round trip should not cross an ocean.
-
-**`X-Robots-Tag: noindex, nofollow` on everything.**
-An app that resembles a government pension service must not turn up in a search
-for one. The same reasoning drives the permanent banner and the
-`notAffiliated` line on `/about`.
-
-**`Permissions-Policy: camera=(self), microphone=(), geolocation=()`.**
-The app needs a camera. It has no business asking for anything else.
-
----
-
-## Things deliberately not built
-
-- **Auth.** A login wall between a pensioner and their pension is the problem,
-  not the solution. It also means the public URL opens for a reviewer with no
-  account.
-- **A database.** Out of scope, and `lib/store.ts` makes the boundary legible.
-- **Real SMS.** Written to a visible outbox at `/outbox` instead, so the
-  notification design can be reviewed without a gateway.
-- **An animation library, a chart library, a UI component library, a state
-  management library.** The performance budget is 150 KB of first-load JS, and
-  the finished app lands at 125–130 KB. Every one of these would have been
-  spent on something the pensioner did not ask for.
+- **No OpenAI TTS by default.** `speechSynthesis` is free, instant and costs
+  no bandwidth, which is the entire argument on 3G. The TTS route exists and
+  works, behind `NEXT_PUBLIC_ENABLE_TTS_FALLBACK`, for devices with no local
+  Hindi or Gujarati voice. An MP3 is the heaviest thing this app could send.
+- **No real face detection in layer 1.** Three cheap statistics — mean
+  luminance, Laplacian variance, centre-region variance — correlate well with
+  how elderly users' photos actually fail. A face-detection model would be
+  megabytes to catch the same problems.
+- **`TRANSPORT_FAILURE_RATE` ships at 0.** The injected-failure path is built
+  and the recovery UI works; a demo that randomly fails is a worse demo. Set
+  it in `lib/mockPda.ts` to show it.
+- **No tests.** With the deadline where it is, the budget went into three
+  audits that run in a second (`npm run check`) and cover the things most
+  likely to rot: banned copy, contrast, and the key leaking into the bundle.

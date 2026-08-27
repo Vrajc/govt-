@@ -9,7 +9,9 @@
   --paper:        #FBF8F2;  /* page background, warm paper */
   --surface:      #FFFFFF;  /* cards, fields */
   --ink:          #1F1C1A;  /* primary text */
-  --ink-soft:     #56504A;  /* secondary text */
+  --ink-soft:     #534D47;  /* secondary text — 2 points darker than the spec
+                              value so it still clears AAA 7:1 on the blue
+                              tint panels, where #56504A lands at 6.81 */
   --line:         #E3DACC;  /* hairlines, field borders */
 
   --primary:      #23507A;  /* passbook blue — all primary actions */
@@ -21,6 +23,9 @@
 
   --attention:    #A8452A;  /* needs fixing — warm rust, never alarm-red */
   --attention-tint:#FAEBE3;
+  /* The rust above is a fill colour; as small text it only reaches 5.6:1.
+     This is the same hue taken to AAA, used wherever rust becomes words. */
+  --attention-text:#83321D;
 
   --focus:        #B8791F;  /* focus ring, 3px, always visible */
 
@@ -289,7 +294,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   border: 2px solid var(--line);
   border-radius: 12px;
 }
-.field-input::placeholder { color: #8A837B; }
+.field-input::placeholder { color: #767068; }  /* 4.9:1 — AAA for large text */
 .field-input:hover { border-color: #C9BCA6; }
 .field-input[aria-invalid="true"] { border-color: var(--attention); }
 .field-input.tabular { font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
@@ -299,7 +304,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   gap: 8px;
   align-items: flex-start;
   font-size: 17px;
-  color: var(--attention);
+  color: var(--attention-text);
   font-weight: 600;
   margin: 8px 0 0;
 }

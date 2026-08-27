@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit",
+    "check:copy": "node scripts/check-copy.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check": "npm run typecheck && npm run check:copy && npm run check:contrast",
+    "verify:no-key": "node scripts/check-no-key.mjs"
   },
   "dependencies": {
     "next": "^15.5.24",

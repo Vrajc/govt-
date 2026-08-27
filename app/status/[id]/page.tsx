@@ -86,7 +86,7 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
       step={6}
       title={t("status.title")}
       guide={t("status.lead")}
-      speakExtra={demoMode ? t("status.waitDemo") : t("status.wait", { mobile: record?.mobile ?? "" })}
+      speakExtra={`${demoMode ? t("status.waitDemo") : t("status.wait", { mobile: record?.mobile ?? "" })} ${demoMode ? t("status.closeOk", { mobile: record?.mobile ?? "" }) : ""}`}
     >
       <ol className="timeline" aria-live="polite" aria-atomic="false">
         <li className="done">
@@ -136,9 +136,16 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
       <div className="note note-info" style={{ marginTop: 28 }}>
         <Clock size={22} />
         <span>
-          {demoMode
-            ? t("status.waitDemo")
-            : t("status.wait", { mobile: record?.mobile ?? "" })}
+          {/* The duration changes in demo mode; the promise that you can walk
+              away and still hear back does not. That promise is the point. */}
+          {demoMode ? (
+            <>
+              {t("status.waitDemo")}{" "}
+              {t("status.closeOk", { mobile: record?.mobile ?? "" })}
+            </>
+          ) : (
+            t("status.wait", { mobile: record?.mobile ?? "" })
+          )}
         </span>
       </div>
 

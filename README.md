@@ -1,232 +1,195 @@
 # Pramaan Saral · प्रमाण सरल · પ્રમાણ સરળ
 
-**"Prove you're here. Keep your pension."**
+**Prove you are here. Keep your pension.**
 
-A rebuilt citizen journey for India's Digital Life Certificate.
+A rebuilt citizen journey for India's Digital Life Certificate — the annual
+proof-of-life that more than one crore pensioners must file to keep their
+pension flowing.
 
 > **A student prototype. Not an official government service.**
 > Not affiliated with, endorsed by, or connected to the Government of India,
-> MeitY, UIDAI, or Jeevan Pramaan. No government emblem, logo, or flag is used
-> anywhere in this project.
+> MeitY, UIDAI or Jeevan Pramaan. No government emblem, logo or flag appears
+> anywhere in it.
 
 ---
 
 ## What this is
 
-Every year, more than a crore pensioners in India must prove they are alive to
-keep their pension flowing. [Jeevan Pramaan](https://jeevanpramaan.gov.in)
-replaced the annual trip to a bank branch with Aadhaar-based face
-authentication — a real improvement, wrapped in an experience that routinely
-defeats the people it was built for.
+Jeevan Pramaan already replaced the annual trip to the bank branch with
+Aadhaar-based face authentication. The idea is right. The experience built
+around it is not: face matching fails often for elderly users, rejection
+arrives as a cryptic SMS with an error code, the interface is English-first
+and jargon-heavy, and the family member who is actually holding the phone has
+no choice but to impersonate their parent.
 
-Face auth fails often for elderly users. Rejection arrives as an SMS carrying
-an error code and no next step. The UI is jargon-heavy and English-first. A
-family member almost always does this for a parent, but there is no assisted
-mode, so they end up impersonating the pensioner. Missing the window stops the
-pension, which is often the only income in the house.
+**We are not replacing Jeevan Pramaan.** This is the citizen-facing layer that
+would sit on top of it.
 
-**We are not replacing Jeevan Pramaan.** This rebuilds the citizen-facing layer
-that sits on top of it. The government stays the system of record.
-
-The thesis is one sentence: *a pensioner should never be stuck, confused, or
-silently rejected.*
+The thesis: *a pensioner should never be stuck, confused, or silently
+rejected.* Ease of use is the product. AI does three small, load-bearing jobs
+in the background and is never the headline.
 
 ---
 
-## Running it
-
-Requires Node 20 or newer.
+## Run it
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+cp .env.example .env.local     # works fine with the key left as-is
+npm run dev                    # http://localhost:3000
 ```
 
-**It runs with no configuration and no API key.** Every AI call has a
-hardcoded fallback, so the full journey works with `OPENAI_API_KEY` unset —
-you just get the built-in explanation table instead of a live one.
+**It runs with no API key.** Every AI call has a hardcoded fallback, so the
+whole journey works with `OPENAI_API_KEY` unset — you just get the built-in
+explanations instead of live ones. To turn the live calls on, put a real key
+in `.env.local`.
 
-To enable the live AI layer, copy `.env.example` to `.env.local` and fill in:
+| Variable | Default | Effect |
+|---|---|---|
+| `OPENAI_API_KEY` | unset | Server-side only. Enables the live explainer and photo check. |
+| `NEXT_PUBLIC_DEMO_MODE` | `true` | 8-second verification, on-screen OTP, `/demo` controls. |
+| `NEXT_PUBLIC_ENABLE_TTS_FALLBACK` | `false` | Routes voice through OpenAI TTS when a device has no local voice. |
 
-```
-OPENAI_API_KEY=sk-...            # server-side only, never reaches the client
-NEXT_PUBLIC_DEMO_MODE=true       # 8s verification, on-screen OTP, /demo controls
-NEXT_PUBLIC_ENABLE_TTS_FALLBACK=false
-```
-
-Other scripts:
+### Verify it
 
 ```bash
-npm run build        # production build; check the first-load JS figure
-npm start            # serve the production build
-npm run lint
+npm run check           # types + copy rules + contrast
+npm run build
+npm run verify:no-key   # proves no key or SDK reaches the browser
 ```
+
+- `check:copy` — 243 strings × 3 languages: no banned jargon, no exclamation
+  marks, no emoji, nothing left untranslated.
+- `check:contrast` — every text/background pair against WCAG AAA (7:1).
+- `verify:no-key` — greps the built client bundle for the key, the SDK and the
+  API host.
 
 ---
 
 ## The 60-second demo path
 
-Shoot the video by following these, in order. Nothing here needs a camera or a
-network — every step has a fallback that works on a laptop.
+Shoot this without thinking. Press **Ctrl + Shift + D** from any screen to
+reach the presenter controls.
 
-1. **Open `/`.** Three language buttons, each in its own script. Press
-   **हिन्दी** — every screen after this is in Hindi, including `<html lang>`.
-2. Press **🔊 सुनिए** in the header. The screen reads itself aloud. Press it
-   again to stop. *(Voice works in all three languages.)*
-3. **Who is this for?** Press **"I'm helping a family member."** The copy
-   switches to talking *about* the pensioner — nothing is hidden, and the
-   helper is named on the receipt.
-4. **Details.** Press `Ctrl` `Shift` `D` → **"Fill the form with the demo
-   pensioner"** → **"Back to the journey."** Press **"Send code."** The OTP
-   field appears in place; the code is shown on screen in demo mode.
-5. **Photo.** Three-item checklist, then **"I'm ready — open camera."** If the
-   camera is denied or unavailable, press **"Upload a photo instead"** — this
-   path is fully supported. Watch the live coaching line change as the light
-   changes.
-6. **Review.** Everything being sent, each row with a **Change** link. One line
-   of pre-check result above the button. Press **Send**.
-7. **Status.** A plain timeline — Received → Checking → Result — polling the
-   server every 3 seconds. In demo mode it resolves in 8 seconds.
-8. **Accepted.** The stamped passbook receipt: *"Your pension is safe until 30
-   November 2027."* Press **"Save this"** to render it to PNG.
-9. **Now the recovery path.** `Ctrl` `Shift` `D` → **"Always needs fixing"** →
-   pick `ERR_FACE_QUALITY_LOW` → run the journey again. The result screen says
-   *"One small thing to fix"* — never "rejected" — with one sentence of what
-   went wrong, one sentence of what to do, and **"Fix and send again"**, which
-   returns you to the photo screen with everything else preserved.
-10. **Open `/about`.** Exactly what is real and what is mocked, in a table.
+**Before you record:** open `/demo` → *Fill the form with the demo pensioner*,
+and leave the result on *Decide honestly*, speed on *8 seconds*.
+
+| # | Do this | Say this | ~ |
+|---|---|---|---|
+| 1 | Open the public link. Tap **हिन्दी**. | "Language first. Nothing appears in a language you did not choose." | 5s |
+| 2 | Tap **"I am helping a family member."** | "Most people do this for a parent. There is no need to pretend to be them." | 5s |
+| 3 | On details, tap **Send code**. The name comes back; the code is on screen. Tap **Check the code**. | "One screen, three fields, and the code appears in place — you never leave the page." | 12s |
+| 4 | Read the three-item checklist, tap **open the camera**. Move into shadow — the line turns rust and says it is too dark. Move back to the light. Capture. **Use this photo**. | "The camera coaches you before the shutter. That runs on the device, no network, no cost." | 15s |
+| 5 | On review, the pre-check line appears above the button. Tap **Send**. | "This is everything that gets sent. Nothing else." | 6s |
+| 6 | Watch the timeline. It resolves in 8 seconds. | "A real state machine on a real backend. Close the tab and the link still works." | 8s |
+| 7 | **If accepted:** the stamped receipt. Tap **Save this**. | "This is what a pensioner actually wants — proof they can show their son." | 9s |
+| 7b | **To show recovery:** `/demo` → *Always needs fixing* → `ERR_FACE_QUALITY_LOW`, then run steps 4–6 again. On the result, expand **Technical details**. | "Never 'rejected'. One sentence on what happened, one on what to do, one button. The raw code is there for you, invisible to them." | — |
+| 8 | Open `/about`. | "And here is exactly what is real and what is pretend." | 5s |
+
+**To show it degrades well:** `/demo` → *Pretend the network is slow*, then run
+the journey again. Nothing breaks, nothing spins forever.
 
 ---
 
 ## What is real, and what is mocked
 
-Honesty is a judging criterion, so this is also a page in the app at `/about`.
-
 | Real in this prototype | Mocked |
-| --- | --- |
-| The full journey, start to finish | Aadhaar number, OTP, PPO lookup |
-| Photo capture and client-side quality analysis | Face match against UIDAI |
-| The AI rejection explainer (live OpenAI call) | The pension disbursing agency backend |
-| The AI pre-submission photo check (live OpenAI call) | SMS delivery (written to a visible outbox at `/outbox`) |
-| Voice guidance in all three languages | Bank / post-office integration |
-| The status state machine and its audit log | |
+|---|---|
+| The whole journey, start to finish | Aadhaar number, the OTP, the PPO lookup |
+| Photo capture and on-device quality analysis | Face matching against the UIDAI database |
+| The plain-language explainer (live OpenAI call) | The pension disbursing agency backend |
+| The pre-submission photo check (live OpenAI call) | SMS delivery — written to a visible outbox at `/outbox` |
+| Spoken guidance in all three languages | Bank and post-office integration |
+| The state machine, its audit log, and idempotent resubmission | |
 
-**No real Aadhaar number, biometric, or pension record touches this
-application.** The Aadhaar field accepts any twelve digits and only the last
-four are ever kept, even in the mock store.
+The same table is on `/about`, in all three languages, because honesty is a
+judging criterion rather than a footnote.
 
 ---
 
-## How it is built
-
-| Layer | Choice |
-| --- | --- |
-| Framework | Next.js 15, App Router, TypeScript |
-| Styling | Tailwind CSS v4 + CSS custom properties for the token layer |
-| Client state | React state + `sessionStorage` (survives a refresh mid-journey, dies with the tab) |
-| "Backend" | Next.js Route Handlers + a module-level `Map` in `lib/store.ts` |
-| AI | OpenAI Node SDK, `gpt-4o-mini`, server-side only, every call with a fallback |
-| Voice | Web Speech API, with OpenAI TTS behind a flag |
-| Camera | `getUserMedia` + `<canvas>`, with a mandatory file-upload fallback |
-| Icons | Inline SVG, hand-written. No icon library. |
-| Deploy | Vercel |
+## How it is put together
 
 ```
 app/
-  page.tsx            1 · choose your language
-  who/                2 · who is this for
-  details/            3 · pension details + OTP
-  photo/              4 · checklist, then capture
-  review/             5 · check and send
-  status/[id]/        6 · we're checking this
-  result/[id]/        7 · accepted, or one thing to fix
-  about/              8 · what's real and what's mocked
-  help/  outbox/  demo/
-  api/                otp · submit · status · resubmit · precheck · explain · speak · outbox · reminder
-components/           ScreenShell · BigButton · Field · ProgressBeads · SpeakButton · Receipt · Icons
+  page.tsx              1 · choose your language
+  who/                  2 · who is this for
+  details/              3 · PPO, Aadhaar, mobile, code in place
+  photo/                4 · checklist, then live-coached capture
+  review/               5 · exactly what is being sent
+  status/[id]/          6 · polling timeline, survives a refresh
+  result/[id]/          7 · the receipt, or the one thing to fix
+  about/ help/ outbox/ demo/
+  api/                  otp · submit · status · resubmit · precheck
+                        explain · speak · outbox · reminder
 lib/
-  stateMachine.ts     DRAFT → SUBMITTED → VERIFYING → ACCEPTED / NEEDS_FIX
-  mockPda.ts          the pretend pension office, with LATENCY_MS and FAILURE_RATE at the top
-  store.ts            in-memory Map. In production: Postgres + a job queue.
-  openai.ts           the three AI calls, each wrapped in a fallback
-  imageQuality.ts     client-side luminance / sharpness / centre analysis
-  i18n/               en · hi · gu, one dictionary, keys checked at compile time
+  i18n/                 en · hi · gu, one typed dictionary
+  stateMachine.ts       DRAFT → SUBMITTED → VERIFYING → ACCEPTED / NEEDS_FIX
+  mockPda.ts            the pretend pension office, with its knobs at the top
+  store.ts              the in-memory Map, and what it would be in production
+  openai.ts             server-only, timeout-bounded, fallback on every path
+  explainFallback.ts    6 codes × 3 languages, hardcoded
+  imageQuality.ts       luminance / Laplacian / centre variance, on-device
+  receiptCanvas.ts      the receipt drawn to PNG by hand
+components/             ScreenShell · BigButton · Field · ProgressBeads
+                        SpeakButton · Receipt · Icons (all hand-written SVG)
+scripts/                copy, contrast and bundle audits
 ```
 
-### The design
+### The backend is a real backend
 
-The audience is 65–90, often reading in bright daylight on a five-year-old
-Android through reading glasses. So the boldest move in the design is
-**scale** — base type is 20px, not 16; buttons are at least 64px tall; every
-text/background pair clears 7:1. Everything else is quiet: an Indian bank
-passbook, cream paper and ink blue, with one stamped receipt at the end.
+Not `setTimeout` in a component. `/api/submit` creates a record, drives it
+through a state machine that throws on illegal transitions, and appends an
+audit entry for every move. The mock pension office resolves **lazily on
+read** — each record carries a `resolveAt` and the status route settles it —
+which is the only model that survives a serverless cold start.
 
-Failure states are rust, never alarm red. The message is *"this needs one
-small fix"*, not *"you did something wrong."*
+Consequences you can see:
 
-### The AI is advisory only
+- **The status page survives a hard refresh.** The id is in the URL, the state
+  is on the server.
+- **Submission is idempotent** on a client-generated `requestId`. Double-tap
+  Send, or retry after a dropped connection, and you get the same record back.
+- **Resubmission preserves history.** "Fix and send again" keeps the same
+  reference number and grows the audit log rather than starting over. You can
+  read the whole trail under *Technical details*.
 
-It does three small jobs and is never the headline:
+### The three AI jobs
 
-1. **Rejection explainer** — turns `ERR_FACE_QUALITY_LOW` into one sentence a
-   78-year-old understands, plus one sentence of what to do, in their language.
-2. **Photo pre-check** — one vision call on `/review` that warns before
-   sending. It never blocks: **"Send anyway"** is always there.
-3. **Voice guidance** — reads each screen aloud.
+| Where | What it does | Fallback |
+|---|---|---|
+| `/api/explain` | Turns `ERR_FACE_QUALITY_LOW` into two sentences a 78-year-old understands, in their language | A hardcoded table, 6 codes × 3 languages. It shipped first; the model is layered on top. |
+| `/api/precheck` | One vision call on the captured still, before sending | The on-device analysis that was already coaching the camera |
+| `SpeakButton` | Reads the screen aloud | `speechSynthesis` **is** the default — free, instant, no bandwidth. OpenAI TTS is the flagged fallback. |
 
-It never decides an outcome. It only explains an outcome the government system
-already returned. A wrong AI guess costs one retake, never a pension.
+All three are server-side. None of them decides an outcome — the explainer
+explains a result the government system already returned, and the pre-check
+only warns. **A wrong guess costs one retake, never a pension.**
+
+### Built for a cheap phone in daylight
+
+- 20px base type, 64px buttons, 16px minimum between anything tappable
+- Every text pair at AAA 7:1 (`npm run check:contrast`)
+- ~127 KB first-load JS. No animation, chart, icon or UI library.
+- Camera denial is a supported route, not an error state
+- The photo is resized to 512px at q0.7 before it ever touches the network
+- Works at 320px wide and at 200% zoom without sideways scroll
 
 ---
 
 ## Deploying
 
-The app is a stock Next.js 15 project and deploys to Vercel with no build
-configuration:
-
 ```bash
-npm i -g vercel
-vercel            # preview
-vercel --prod     # production
+vercel
 ```
 
-Or import the repository at [vercel.com/new](https://vercel.com/new) — the
-framework is detected automatically.
-
-Set these in **Project → Settings → Environment Variables**:
-
-| Variable | Value | Notes |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | `sk-...` | Optional. Server-side only. |
-| `NEXT_PUBLIC_DEMO_MODE` | `true` | Keep `true` for reviewers. |
-| `NEXT_PUBLIC_ENABLE_TTS_FALLBACK` | `false` | Costs bandwidth when on. |
-
-The public URL must open with **no login and no access request**. There is no
-auth in this app by design.
-
-> **One deployment caveat, stated plainly:** `lib/store.ts` is a module-level
-> `Map`, so submissions live in the memory of a single serverless instance and
-> are lost on cold start or when a request lands on a different instance. That
-> is the correct trade for a prototype and the wrong one for production, where
-> it would be a Postgres row and a job queue. `/about` says so too.
+Set `OPENAI_API_KEY` and `NEXT_PUBLIC_DEMO_MODE=true` in the Vercel project.
+The link is public — no login wall, no access request. `robots` is set to
+`noindex` so a prototype of a government service never turns up in search.
 
 ---
 
-## Accessibility
+## Licence and use
 
-- Whole journey completable by keyboard, with a visible 3px focus ring that is
-  never removed
-- All contrast ratios ≥ 7:1
-- Status changes announced via `aria-live="polite"`
-- `prefers-reduced-motion` respected; nothing spins
-- Works at 200% zoom and at 320px width without horizontal scroll
-- Every icon-bearing control carries a word as well as an icon
-- Camera-denied path tested; the upload fallback is a first-class route
-
----
-
-## Licence and attribution
-
-A student hackathon prototype, built for **Build What Moves India**. Jeevan
-Pramaan, Aadhaar, UIDAI, and MeitY are the property of the Government of India
-and are referred to here only descriptively.
+Coursework prototype, built for the *Build What Moves India* hackathon.
+It touches no government system and uses no real Aadhaar, PAN, OTP or payment
+data. Every identifier in it is invented.
