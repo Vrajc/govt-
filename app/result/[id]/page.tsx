@@ -65,7 +65,12 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
 
   if (gone) {
     return (
-      <ScreenShell title={t("status.notFound")} guide={t("status.notFoundBody")}>
+      <ScreenShell
+        back="/start"
+        crumbs={[{ label: t("nav.home"), href: "/start" }]}
+        title={t("status.notFound")}
+        guide={t("status.notFoundBody")}
+      >
         <BigLink href="/start" variant="secondary">
           {t("common.startOver")}
         </BigLink>
@@ -205,6 +210,12 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         wide
         step={total}
         totalSteps={total}
+        back="/start"
+        crumbs={[
+          { label: t("nav.home"), href: "/start" },
+          { label: SVC[`${record.serviceId}Name`], href: `/service/${record.serviceId}` },
+          { label: title },
+        ]}
         title={title}
         guide={sub}
         speakExtra={`${bigFor().label} ${bigFor().value}`}
@@ -287,6 +298,12 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
     <ScreenShell
       step={total}
       totalSteps={total}
+      back="/start"
+      crumbs={[
+        { label: t("nav.home"), href: "/start" },
+        { label: SVC[`${record.serviceId}Name`], href: `/service/${record.serviceId}` },
+        { label: t("needsFix.title") },
+      ]}
       title={t("needsFix.title")}
       guide={explain?.reason}
       speakExtra={explain ? `${explain.reason} ${explain.action}` : undefined}

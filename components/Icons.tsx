@@ -264,3 +264,19 @@ export const Rupee = ({ size = 22, className }: P) => (
     <path d="M14 5c0 3-2.2 4.5-5 4.5h-2l8 9.5" />
   </svg>
 );
+
+export const Home = ({ size = 22, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="m3 11 9-7 9 7" />
+    <path d="M5.5 9.6V20h13V9.6" />
+    <path d="M10 20v-6h4v6" />
+  </svg>
+);
+
+export const Globe = ({ size = 22, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3.5 9h17M3.5 15h17" />
+    <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
+  </svg>
+);

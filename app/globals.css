@@ -956,3 +956,167 @@ img, svg, video { max-width: 100%; }
 /* Push the chevron on a service card to the bottom, so cards of
    different text lengths still line up. */
 .grid-list > .card > .card-sub { flex: 1; }
+
+/* ==================================================================
+   Site header
+   ==================================================================
+   A government website needs a way out of every screen that is not the
+   browser's own Back button, which a lot of this audience does not
+   think to use. Three links and a language switch — every item is a
+   place a citizen actually needs, and nothing else earns the space.
+   ================================================================== */
+.site-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--line);
+  position: sticky;
+  /* Sits directly under the disclosure banner, which is also sticky. */
+  top: 41px;
+  z-index: 30;
+}
+.site-header-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.site-brand {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 8px 2px;
+  white-space: nowrap;
+}
+.site-brand:hover { color: var(--primary-dark); }
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.site-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.site-nav-link:hover { background: var(--primary-tint); color: var(--primary-dark); }
+.site-nav-link[aria-current="page"] {
+  color: var(--primary-dark);
+  background: var(--primary-tint);
+  /* An underline as well as a fill, so the current page is not signalled
+     by colour alone. */
+  box-shadow: inset 0 -3px 0 var(--primary);
+}
+.site-nav-link svg { flex-shrink: 0; }
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 10px 0 12px;
+  margin-left: 4px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.lang-switch:hover { border-color: var(--primary); color: var(--primary-dark); }
+.lang-switch:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.lang-switch select {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  color: inherit;
+  padding: 10px 2px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.lang-switch select:focus { outline: none; }
+
+/* Narrow phones: the brand takes its own line so the links keep full
+   size rather than shrinking below a comfortable target. */
+@media (max-width: 560px) {
+  .site-header-inner { justify-content: center; padding: 6px 12px; }
+  .site-brand { width: 100%; text-align: center; padding-bottom: 2px; }
+  .site-nav { width: 100%; justify-content: center; }
+  .site-nav-link { font-size: 16px; padding: 8px 10px; }
+}
+
+/* ==================================================================
+   Breadcrumbs
+   ==================================================================
+   Not just how to go back one step, but where back leads and what is
+   above it. Four screens into an application, that is the difference
+   between orientation and guessing.
+   ================================================================== */
+.crumbs { margin: 0 0 4px; }
+.crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+.crumbs li { display: inline-flex; align-items: center; gap: 4px; }
+.crumbs a {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 6px 2px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
+.crumbs a:hover { color: var(--primary); }
+.crumbs span { color: var(--ink-soft); padding: 6px 0; }
+.crumbs span[aria-current="page"] { font-weight: 600; color: var(--ink); }
+.crumb-sep { color: var(--line); flex-shrink: 0; }
+
+/* The screen header now carries Back and the trail, so it wraps. */
+.shell-top { flex-wrap: wrap; }
+
+/* ==================================================================
+   Progress beads you can go back through
+   ================================================================== */
+.bead-btn {
+  border: none;
+  background: none;
+  padding: 6px 3px;
+  margin: -6px -3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+}
+.bead-btn:hover .bead { box-shadow: 0 0 0 5px var(--primary-tint); }
+.bead-static { display: inline-flex; align-items: center; padding: 6px 3px; margin: -6px -3px; }
+
+.shell-top-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+}

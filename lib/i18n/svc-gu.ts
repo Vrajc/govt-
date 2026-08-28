@@ -2,6 +2,24 @@ import type { SvcDict } from "./svc-en";
 
 /** Gujarati for the service catalogue. The register of a counter, not a circular. */
 export const svcGu: SvcDict = {
+  nav: {
+    home: "મુખ્ય પાનું",
+    homeSub: "તમે જે કરી શકો એ બધું અહીં",
+    help: "મદદ મેળવો",
+    about: "શું સાચું છે",
+    outbox: "મેસેજ",
+    language: "ભાષા",
+    breadcrumb: "તમે ક્યાં છો",
+    skip: "સીધા મુખ્ય વાત પર જાઓ",
+    backTo: "{page} પર પાછા",
+    backOne: "એક પગલું પાછળ જાઓ",
+    stepDone: "{step} — થઈ ગયું, પાછા જવા દબાવો",
+    stepNow: "{step} — તમે અહીં છો",
+    stepTodo: "{step} — હજી બાકી",
+    menu: "યાદી",
+    close: "બંધ કરો",
+  },
+
   hub: {
     title: "તમારે શું કરવું છે?",
     guide: "જે તમારી વાત લાગે એ પસંદ કરો.",
@@ -19,7 +37,7 @@ export const svcGu: SvcDict = {
     track: "જે મોકલી દીધું છે એની તપાસ કરો",
     trackSub: "રેફરન્સ નંબર જોઈશે",
     trackLabel: "રેફરન્સ નંબર",
-    trackHelp: "આવો દેખાય છે — DLC-2026-ABCD1234. અમે મોકલેલા મેસેજમાં લખેલો છે.",
+    trackHelp: "આવો દેખાય છે — PS-2026-ABCD1234. અમે મોકલેલા મેસેજમાં લખેલો છે.",
     trackGo: "બતાવો",
     trackEmpty: "પહેલાં રેફરન્સ નંબર લખો.",
   },

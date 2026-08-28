@@ -14,10 +14,19 @@ export const TOTAL_STEPS = 6;
 export function ProgressBeads({
   step,
   total = TOTAL_STEPS,
+  labelFor,
+  onGo,
 }: {
   step: number;
   /** Services have different numbers of steps, so this is not fixed at six. */
   total?: number;
+  /** Name of a step, for the label a screen reader reads out. */
+  labelFor?: (n: number) => string;
+  /**
+   * Go back to an earlier step. Only completed steps are offered — going
+   * forward past unanswered questions is how people end up stuck.
+   */
+  onGo?: (n: number) => void;
 }) {
   const { t } = useApp();
   const beads = Array.from({ length: total }, (_, i) => i + 1);
@@ -33,10 +42,30 @@ export function ProgressBeads({
           {i > 0 && (
             <span className={`bead-link ${n <= step ? "bead-link-done" : ""}`} aria-hidden="true" />
           )}
-          <span
-            className={`bead ${n < step ? "bead-done" : n === step ? "bead-now" : ""}`}
-            aria-hidden="true"
-          />
+          {onGo && n < step ? (
+            <button
+              type="button"
+              className="bead-btn"
+              onClick={() => onGo(n)}
+              aria-label={t("nav.stepDone", { step: labelFor?.(n) ?? String(n) })}
+            >
+              <span className="bead bead-done" aria-hidden="true" />
+            </button>
+          ) : (
+            <span
+              className="bead-static"
+              aria-label={
+                labelFor
+                  ? t(n === step ? "nav.stepNow" : "nav.stepTodo", { step: labelFor(n) })
+                  : undefined
+              }
+            >
+              <span
+                className={`bead ${n < step ? "bead-done" : n === step ? "bead-now" : ""}`}
+                aria-hidden="true"
+              />
+            </span>
+          )}
         </span>
       ))}
     </div>

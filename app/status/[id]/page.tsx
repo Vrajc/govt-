@@ -73,7 +73,12 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
 
   if (gone) {
     return (
-      <ScreenShell title={t("status.notFound")} guide={t("status.notFoundBody")}>
+      <ScreenShell
+        back="/start"
+        crumbs={[{ label: t("nav.home"), href: "/start" }]}
+        title={t("status.notFound")}
+        guide={t("status.notFoundBody")}
+      >
         <BigLink href="/start" variant="secondary">
           {t("common.startOver")}
         </BigLink>
@@ -101,6 +106,12 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
       wide
       step={total}
       totalSteps={total}
+      back="/start"
+      crumbs={[
+        { label: t("nav.home"), href: "/start" },
+        ...(record ? [{ label: SVC[`${record.serviceId}Name`], href: `/service/${record.serviceId}` }] : []),
+        { label: t("status.title") },
+      ]}
       title={t("status.title")}
       guide={record ? SVC[`${record.serviceId}Name`] : t("status.lead")}
       speakExtra={waitLine}

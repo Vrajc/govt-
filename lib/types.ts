@@ -139,7 +139,7 @@ export interface OutcomeData {
 
 /** Server-side record. Would be a Postgres row in production. */
 export interface Record_ {
-  id: string; // DLC-2026-XXXXXXXX
+  id: string; // PS-2026-XXXXXXXX
   requestId: string;
   serviceId: ServiceId;
   createdAt: string;

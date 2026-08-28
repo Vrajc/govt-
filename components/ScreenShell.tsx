@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useApp } from "@/lib/app-state";
 import { ArrowLeft, Phone } from "./Icons";
 import { ProgressBeads } from "./ProgressBeads";
+import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
 import { SpeakButton } from "./SpeakButton";
 
 interface Props {
@@ -15,8 +16,18 @@ interface Props {
   totalSteps?: number;
   title: string;
   guide?: string;
-  /** Where Back goes. Omit for screen 1, which has no Back. */
+  /**
+   * Where Back goes. Always give it a real destination — history alone is
+   * unreliable when someone lands from a message link, and a Back button
+   * that sometimes leaves the site is worse than none.
+   */
   back?: string;
+  /** The trail above the title. The last crumb is the current screen. */
+  crumbs?: Crumb[];
+  /** Screen-reader name for each progress bead. */
+  stepLabelFor?: (n: number) => string;
+  /** Jump back to a completed step. */
+  onGoToStep?: (n: number) => void;
   /** Extra words the Listen button should read after the title and guidance. */
   speakExtra?: string;
   /** Rendered in the sticky dock at the bottom. */
@@ -38,6 +49,9 @@ export function ScreenShell({
   title,
   guide,
   back,
+  crumbs,
+  stepLabelFor,
+  onGoToStep,
   speakExtra,
   action,
   hideHelpline = false,
@@ -52,7 +66,7 @@ export function ScreenShell({
   return (
     <div className={`sheet ${wide ? "sheet-wide" : ""}`}>
       <div className="shell-top">
-        <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+        <div className="shell-top-left">
           {back ? (
             <button
               type="button"
@@ -70,16 +84,20 @@ export function ScreenShell({
           ) : (
             <span />
           )}
-          {/* Only appears once there is room for it — see .shell-brand. */}
-          <Link href="/start" className="shell-brand">
-            {d.common.appName}
-          </Link>
         </div>
         <SpeakButton text={spoken} />
       </div>
 
       <main className="shell-main" id="main">
-        {step !== null && <ProgressBeads step={step} total={totalSteps} />}
+        {crumbs && crumbs.length > 0 && <Breadcrumbs crumbs={crumbs} />}
+        {step !== null && (
+          <ProgressBeads
+            step={step}
+            total={totalSteps}
+            labelFor={stepLabelFor}
+            onGo={onGoToStep}
+          />
+        )}
 
         <h1 className="screen-title">{title}</h1>
         {guide && <p className="screen-guide">{guide}</p>}

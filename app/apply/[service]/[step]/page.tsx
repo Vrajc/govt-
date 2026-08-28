@@ -103,20 +103,42 @@ function Engine({ svc, step }: { svc: ServiceDef; step: Step }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [svc.id]);
 
+  const SVC = d.svc as Record<string, string>;
+
+  /* Names for each step, so a bead means something to a screen reader and
+     a completed one can say where going back would take you. */
+  const stepName = (st: Step): string =>
+    st === "who"
+      ? t("who.title")
+      : st === "eligibility"
+        ? t("elig.title")
+        : st === "documents"
+          ? t("apply.docsTitle")
+          : st === "details"
+            ? t("apply.detailsTitle")
+            : st === "photo"
+              ? t("photo.title")
+              : t("review.title");
+
   /* Steps whose content is a grid or a two-column form get the wider
      sheet on a desktop. "who", "eligibility" and "photo" ask one thing at
      a time and stay narrow at every size. */
-  const shell = {
+  const shell: Shell = {
     step: idx + 1,
     totalSteps: steps.length,
     back: backHref,
     wide: step === "documents" || step === "details",
+    crumbs: [
+      { label: t("nav.home"), href: "/start" },
+      { label: SVC[`${svc.id}Name`], href: `/service/${svc.id}` },
+      { label: stepName(step) },
+    ],
+    stepLabelFor: (n: number) => stepName(steps[n - 1]),
+    /* Only completed beads are offered, so nobody skips a question and
+       lands on review with nothing filled in. */
+    onGoToStep: (n: number) => router.push(`/apply/${svc.id}/${steps[n - 1]}`),
   };
 
-  const SVC = d.svc as Record<string, string>;
-  const FIELDS = d.fields as Record<string, string>;
-  const DOCS = d.docs as Record<string, string>;
-  const ELIG = d.elig as Record<string, string>;
 
   /* ================================================================
    * 1 — who is this for
@@ -191,7 +213,15 @@ function Engine({ svc, step }: { svc: ServiceDef; step: Step }) {
   return <ReviewStep svc={svc} shell={shell} />;
 }
 
-type Shell = { step: number; totalSteps: number; back: string; wide: boolean };
+type Shell = {
+  step: number;
+  totalSteps: number;
+  back: string;
+  wide: boolean;
+  crumbs: { label: string; href?: string }[];
+  stepLabelFor: (n: number) => string;
+  onGoToStep: (n: number) => void;
+};
 
 /* ==================================================================
  * Eligibility

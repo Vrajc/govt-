@@ -51,6 +51,7 @@ export default function StartScreen() {
       step={null}
       back="/"
       wide
+      crumbs={[{ label: t("nav.home") }]}
       title={t("hub.title")}
       guide={t("hub.guide")}
       speakExtra={cards.map((c) => c.title).join(". ")}
@@ -100,7 +101,7 @@ export default function StartScreen() {
           className="tabular"
           autoCapitalize="characters"
           spellCheck={false}
-          placeholder="DLC-2026-ABCD1234"
+          placeholder="PS-2026-ABCD1234"
           onChange={(e) => {
             setRef(e.target.value.toUpperCase());
             setRefErr(null);

@@ -2,6 +2,24 @@ import type { SvcDict } from "./svc-en";
 
 /** Hindi for the service catalogue. Spoken register, not circular register. */
 export const svcHi: SvcDict = {
+  nav: {
+    home: "मुख्य पन्ना",
+    homeSub: "आप जो कर सकते हैं, सब यहाँ",
+    help: "मदद लीजिए",
+    about: "क्या असली है",
+    outbox: "मैसेज",
+    language: "भाषा",
+    breadcrumb: "आप कहाँ हैं",
+    skip: "सीधे मुख्य बात पर जाइए",
+    backTo: "{page} पर वापस",
+    backOne: "एक कदम पीछे जाइए",
+    stepDone: "{step} — हो गया, वापस जाने के लिए दबाइए",
+    stepNow: "{step} — आप यहाँ हैं",
+    stepTodo: "{step} — अभी बाकी",
+    menu: "सूची",
+    close: "बंद कीजिए",
+  },
+
   hub: {
     title: "आपको क्या करना है?",
     guide: "जो आपकी बात लगे, वही चुनिए.",
@@ -19,7 +37,7 @@ export const svcHi: SvcDict = {
     track: "जो भेज चुके हैं उसका पता कीजिए",
     trackSub: "रेफ़रेंस नंबर चाहिए होगा",
     trackLabel: "रेफ़रेंस नंबर",
-    trackHelp: "ऐसा दिखता है — DLC-2026-ABCD1234. हमारे भेजे मैसेज में लिखा है.",
+    trackHelp: "ऐसा दिखता है — PS-2026-ABCD1234. हमारे भेजे मैसेज में लिखा है.",
     trackGo: "दिखाइए",
     trackEmpty: "पहले रेफ़रेंस नंबर लिखिए.",
   },

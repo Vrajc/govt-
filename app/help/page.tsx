@@ -25,7 +25,15 @@ export default function HelpScreen() {
   const steps = [d.help.step1, d.help.step2, d.help.step3, d.help.step4, d.help.step5];
 
   return (
-    <ScreenShell wide step={null} back="/" title={t("help.title")} guide={t("help.guide")} hideHelpline>
+    <ScreenShell
+      wide
+      step={null}
+      back="/start"
+      crumbs={[{ label: t("nav.home"), href: "/start" }, { label: t("help.title") }]}
+      title={t("help.title")}
+      guide={t("help.guide")}
+      hideHelpline
+    >
       <div className="grid-cards">
       <a href={`tel:${tel}`} className="card">
         <span className="card-title">

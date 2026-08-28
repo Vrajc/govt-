@@ -54,7 +54,11 @@ export default function FinderScreen() {
     return (
       <ScreenShell
         step={null}
-        back={trail.length ? undefined : "/start"}
+        back="/start"
+        crumbs={[
+          { label: t("nav.home"), href: "/start" },
+          { label: t("finder.title") },
+        ]}
         title={F[node.questionKey]}
         guide={t("finder.guide")}
         speakExtra={node.options.map((o) => F[o.labelKey]).join(". ")}
@@ -95,6 +99,11 @@ export default function FinderScreen() {
     return (
       <ScreenShell
         step={null}
+        back="/start"
+        crumbs={[
+          { label: t("nav.home"), href: "/start" },
+          { label: t("finder.title") },
+        ]}
         title={t("finder.resultTitle")}
         guide={SVC[`${id}Short`]}
         speakExtra={`${SVC[`${id}Name`]}. ${SVC[`${id}Short`]}`}
@@ -127,6 +136,11 @@ export default function FinderScreen() {
   return (
     <ScreenShell
       step={null}
+      back="/start"
+      crumbs={[
+        { label: t("nav.home"), href: "/start" },
+        { label: t("finder.title") },
+      ]}
       title={t("finder.noneTitle")}
       guide={F[view.messageKey]}
       speakExtra={F[view.messageKey]}

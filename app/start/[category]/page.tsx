@@ -43,6 +43,7 @@ export default function CategoryScreen({
       step={null}
       wide
       back="/start"
+      crumbs={[{ label: t("nav.home"), href: "/start" }, { label: title }]}
       title={title}
       guide={t("hub.guide")}
       speakExtra={services

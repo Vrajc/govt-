@@ -8,6 +8,7 @@ import { isLang } from "@/lib/i18n";
 import { dictFor } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
 import { PrototypeBanner } from "@/components/PrototypeBanner";
+import { SiteHeader } from "@/components/SiteHeader";
 import { DemoShortcut } from "@/components/DemoShortcut";
 
 /**
@@ -70,10 +71,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <AppProvider initialLang={lang} dict={d}>
           <a href="#main" className="sr-only">
-            Skip to the main content
+            {d.nav.skip}
           </a>
           <div className="app-frame">
             <PrototypeBanner text={d.common.protoBanner} />
+            <SiteHeader />
             {children}
           </div>
           <DemoShortcut />

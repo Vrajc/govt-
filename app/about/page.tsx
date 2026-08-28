@@ -28,7 +28,14 @@ export default function AboutScreen() {
   ];
 
   return (
-    <ScreenShell wide step={null} back="/" title={t("about.title")} guide={t("about.guide")}>
+    <ScreenShell
+      wide
+      step={null}
+      back="/start"
+      crumbs={[{ label: t("nav.home"), href: "/start" }, { label: t("about.title") }]}
+      title={t("about.title")}
+      guide={t("about.guide")}
+    >
       <div className="tbl-wrap">
         <table className="plain">
           <thead>

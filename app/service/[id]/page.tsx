@@ -51,6 +51,16 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
       wide
       step={null}
       back={`/start/${svc.category}`}
+      crumbs={[
+        { label: t("nav.home"), href: "/start" },
+        {
+          label: (d.hub as Record<string, string>)[
+            svc.category === "start" ? "catStart" : svc.category === "have" ? "catHave" : "catFamily"
+          ],
+          href: `/start/${svc.category}`,
+        },
+        { label: name },
+      ]}
       title={name}
       guide={SVC[`${svc.id}Short`]}
       speakExtra={`${SVC[`${svc.id}Who`]}. ${SVC[`${svc.id}What`]}`}

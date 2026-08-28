@@ -103,7 +103,8 @@ export default function DemoScreen() {
   return (
     <ScreenShell
       step={null}
-      back="/"
+      back="/start"
+      crumbs={[{ label: "Home", href: "/start" }]}
       title="Presenter controls"
       guide="Not part of the journey. Press Ctrl + Shift + D from any screen to get back here."
       hideHelpline

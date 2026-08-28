@@ -74,8 +74,15 @@ function tail(n = 8): string {
   return out;
 }
 
+/**
+ * One reference format for all eleven services. It used to read `DLC-`, from
+ * when this app was only the life certificate — which meant someone chasing a
+ * pension that never arrived got a receipt stamped "Digital Life Certificate".
+ * `PS-` says Pramaan Saral and nothing more, which is the honest thing for a
+ * number that has to cover a grievance and an enrolment alike.
+ */
 export function newDlcId(now = new Date()): string {
-  return `DLC-${now.getFullYear()}-${tail(8)}`;
+  return `PS-${now.getFullYear()}-${tail(8)}`;
 }
 
 /**
@@ -162,11 +169,64 @@ function addDays(d: Date, days: number): Date {
   return out;
 }
 
+/**
+ * The additional pension does not stop at eighty. CCS (Pension) Rules 2021,
+ * Rule 44(6): twenty per cent at 80, thirty at 85, forty at 90, fifty at 95
+ * and the whole pension again at 100. Banks are supposed to apply each step
+ * automatically and routinely miss them, so a ninety-year-old is often still
+ * being paid the twenty per cent — which is exactly the money this service
+ * exists to go and get.
+ */
+const AGE_SLABS: { from: number; rate: number }[] = [
+  { from: 80, rate: 0.2 },
+  { from: 85, rate: 0.3 },
+  { from: 90, rate: 0.4 },
+  { from: 95, rate: 0.5 },
+  { from: 100, rate: 1.0 },
+];
+
+/** The first day of the month in which someone turns `age`. */
+function slabStart(born: Date, age: number): Date {
+  return new Date(Date.UTC(born.getUTCFullYear() + age, born.getUTCMonth(), 1));
+}
+
 /** The 80+ increase runs from the FIRST DAY OF THE MONTH, not the birthday. */
 export function age80EffectiveFrom(dob: string): Date | null {
   const born = new Date(dob);
   if (Number.isNaN(born.getTime())) return null;
-  return new Date(Date.UTC(born.getUTCFullYear() + 80, born.getUTCMonth(), 1));
+  return slabStart(born, 80);
+}
+
+/**
+ * The rate they should be on today, and every rupee missed since they turned
+ * eighty — accumulated slab by slab, because someone who is ninety-two was
+ * owed twenty per cent for five years and thirty for five more before the
+ * forty they are owed now.
+ */
+export function additionalPension(
+  dob: string,
+  monthly: number,
+  now = new Date()
+): { rate: number; uplift: number; arrears: number } {
+  const born = new Date(dob);
+  if (Number.isNaN(born.getTime())) return { rate: 0, uplift: 0, arrears: 0 };
+
+  let rate = 0;
+  let arrears = 0;
+
+  for (let i = 0; i < AGE_SLABS.length; i++) {
+    const slab = AGE_SLABS[i];
+    const start = slabStart(born, slab.from);
+    if (start > now) break;
+    rate = slab.rate;
+
+    const nextSlab = AGE_SLABS[i + 1];
+    const nextStart = nextSlab ? slabStart(born, nextSlab.from) : null;
+    const end = nextStart && nextStart < now ? nextStart : now;
+    arrears += Math.round(monthly * slab.rate) * monthsBetween(start, end);
+  }
+
+  return { rate, uplift: Math.round(monthly * rate), arrears };
 }
 
 function monthsBetween(from: Date, to: Date): number {
@@ -206,13 +266,13 @@ export function computeOutcome(rec: Record_, svc: ServiceDef): OutcomeData {
     case "increase": {
       const current = num(rec.values.currentPension, 12000);
       const from = age80EffectiveFrom(rec.values.dob ?? "");
-      const months = from ? monthsBetween(from, now) : 0;
-      const uplift = Math.round(current * 0.2);
+      // Every rupee since the first of the month they turned 80, at whatever
+      // rate applied along the way.
+      const { uplift, arrears } = additionalPension(rec.values.dob ?? "", current, now);
       return {
         kind: "increase",
         newMonthly: current + uplift,
-        // Every rupee since the first of the month they turned 80.
-        arrears: uplift * months,
+        arrears,
         owedFrom: from ? from.toISOString() : undefined,
       };
     }

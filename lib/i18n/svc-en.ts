@@ -14,6 +14,25 @@ export const svcEn = {
   /* ================================================================
    * The hub — what do you need to do?
    * ================================================================ */
+  /** Site-wide navigation. */
+  nav: {
+    home: "Home",
+    homeSub: "All the things you can do",
+    help: "Get help",
+    about: "What is real",
+    outbox: "Messages",
+    language: "Language",
+    breadcrumb: "Where you are",
+    skip: "Skip to the main content",
+    backTo: "Back to {page}",
+    backOne: "Go back one step",
+    stepDone: "{step} — done, go back to it",
+    stepNow: "{step} — you are here",
+    stepTodo: "{step} — not yet",
+    menu: "Menu",
+    close: "Close",
+  },
+
   hub: {
     title: "What do you need to do?",
     guide: "Pick the one that sounds like you.",
@@ -31,7 +50,7 @@ export const svcEn = {
     track: "Check something I already sent",
     trackSub: "You will need the reference number",
     trackLabel: "Reference number",
-    trackHelp: "It looks like DLC-2026-ABCD1234. It is in the message we sent you.",
+    trackHelp: "It looks like PS-2026-ABCD1234. It is in the message we sent you.",
     trackGo: "Show me",
     trackEmpty: "Type the reference number first.",
   },
