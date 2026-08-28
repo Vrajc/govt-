@@ -33,6 +33,51 @@ export const svcEn = {
     close: "Close",
   },
 
+  /** The landing page — what this is, before anyone commits to a journey. */
+  landing: {
+    heroTitle: "Find your pension. Claim it. Keep it.",
+    heroSub:
+      "Fourteen government schemes for pensioners and their families, in one place — in Hindi, Gujarati or English, in words a 78-year-old actually uses.",
+    ctaStart: "Show me what I can do",
+    ctaFind: "I do not know which one I need",
+    ctaTrack: "Check something I already sent",
+
+    whyTitle: "Why this exists",
+    why1:
+      "More than one crore pensioners have to prove they are alive every year, or the money stops.",
+    why2:
+      "But that is only the last step. Applying for the first time, claiming after a death, chasing money that never came — each one is a different office, a different form, and a different set of words.",
+    why3:
+      "The people who need these schemes most are the people least able to find them. A widow in a village has no way to learn that a widow pension exists, let alone that she qualifies for it and not for the three listed beside it.",
+
+    doTitle: "What you can do here",
+    doSub: "Fourteen services, behind three doors.",
+
+    howTitle: "How it works",
+    how1Title: "Find the right one",
+    how1: "Four questions in plain words, and it names the scheme you qualify for.",
+    how2Title: "Check before you fill",
+    how2: "The rules are checked first, so a long form is never filled in for nothing.",
+    how3Title: "Photograph your papers",
+    how3: "The phone camera is enough. No scanner, no shop, no queue.",
+    how4Title: "Watch it move",
+    how4: "See which office is holding your file, all the way to the Collector.",
+
+    builtTitle: "Made for the phone in your pocket",
+    built1: "Big type and big buttons, made for reading in daylight with tired eyes.",
+    built2: "Three complete languages — not one language with two translations bolted on.",
+    built3: "A helper mode, so a son can fill it in without pretending to be his father.",
+    built4: "Never a dead end. Every screen carries a phone number that works.",
+
+    honestTitle: "What is real here",
+    honestBody:
+      "This is a student prototype, not a government service. The journeys are real and so is everything you can press; the offices behind them are not. The page below sets out exactly where that line falls.",
+    honestLink: "See what is real and what is pretend",
+
+    gateTitle: "Choose your language",
+    gateNote: "You can change it later, at the top of any page.",
+  },
+
   hub: {
     title: "What do you need to do?",
     guide: "Pick the one that sounds like you.",

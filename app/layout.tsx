@@ -9,6 +9,7 @@ import { dictFor } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
 import { PrototypeBanner } from "@/components/PrototypeBanner";
 import { SiteHeader } from "@/components/SiteHeader";
+import { LanguageGate } from "@/components/LanguageGate";
 import { DemoShortcut } from "@/components/DemoShortcut";
 
 /**
@@ -61,6 +62,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const jar = await cookies();
   const raw = jar.get(LANG_COOKIE)?.value;
   const lang: Lang = isLang(raw) ? raw : "en";
+  /* No cookie means nobody has chosen yet, so the gate goes up over
+     whatever page they landed on — including a deep link from a message. */
+  const chosen = isLang(raw);
   const d = dictFor(lang);
 
   return (
@@ -83,6 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
             {children}
           </div>
+          {!chosen && <LanguageGate />}
           <DemoShortcut />
         </AppProvider>
       </body>

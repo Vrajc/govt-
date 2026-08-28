@@ -148,16 +148,23 @@ console.log("\n4. Sentence case (no Title Case On Buttons)");
 for (const { key, value } of en) {
   // The receipt stamp is a rubber stamp. Rubber stamps are all-caps.
   if (key.startsWith("stamp")) continue;
-  const words = value
-    .split(" ")
-    .filter((w) => /^[A-Za-z]+$/.test(w))
-    // PF, PPO, IFSC, UAN, BPL are acronyms, not capitalised words. Counting
-    // them as Title Case flags perfectly good sentences like "The PF office".
-    .filter((w) => !/^[A-Z]{2,5}$/.test(w));
-  if (words.length < 3) continue;
-  const capped = words.filter((w) => /^[A-Z]/.test(w)).length;
-  if (capped >= words.length - 1 && words.length >= 3) {
-    warn(`en.${key} looks like Title Case: "${value.slice(0, 60)}"`);
+  /* Check each sentence on its own. "Find your pension. Claim it. Keep it."
+     is three sentences in correct sentence case, and counting capitals
+     across the whole string reads it as Title Case. */
+  for (const sentence of value.split(/(?<=[.?!])\s+/)) {
+    const words = sentence
+      .split(" ")
+      .filter((w) => /^[A-Za-z]+$/.test(w))
+      // PF, PPO, IFSC, UAN, BPL are acronyms, not capitalised words.
+      .filter((w) => !/^[A-Z]{2,5}$/.test(w))
+      // The first word of a sentence is supposed to be capitalised.
+      .slice(1);
+    if (words.length < 3) continue;
+    const capped = words.filter((w) => /^[A-Z]/.test(w)).length;
+    if (capped >= words.length - 1) {
+      warn(`en.${key} looks like Title Case: "${sentence.slice(0, 60)}"`);
+      break;
+    }
   }
 }
 if (failures === before4) console.log("  ✓ clean");
