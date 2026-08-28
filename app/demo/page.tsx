@@ -23,16 +23,75 @@ export default function DemoScreen() {
   const [note, setNote] = useState<string | null>(null);
 
   function prefill() {
+    // Fills every field name used anywhere in the catalogue, so the demo
+    // pensioner works whichever of the eleven services you open.
     patch({
-      name: DEMO_PENSIONER.name,
-      ppo: DEMO_PENSIONER.ppo,
-      aadhaar: DEMO_PENSIONER.aadhaar,
-      mobile: DEMO_PENSIONER.mobile,
+      values: {
+        fullName: DEMO_PENSIONER.name,
+        deceasedName: DEMO_PENSIONER.name,
+        dob: DEMO_PENSIONER.dob,
+        gender: "m",
+        ppo: DEMO_PENSIONER.ppo,
+        deceasedPpo: DEMO_PENSIONER.ppo,
+        aadhaar: DEMO_PENSIONER.aadhaar,
+        mobile: DEMO_PENSIONER.mobile,
+        address: "Naranpura, Ahmedabad",
+        district: "Ahmedabad",
+        rationCard: "GJ-01-2019-004471",
+        annualIncome: "42000",
+        bankName: "Bank of Baroda",
+        accountNumber: "20194400871",
+        ifsc: "BARB0NARANP",
+        newBankName: "State Bank of India",
+        newAccountNumber: "38810042219",
+        newIfsc: "SBIN0001234",
+        uan: "100234567890",
+        employerName: "Arvind Mills",
+        officeName: "Office of the Collector, Ahmedabad",
+        serviceYears: "32",
+        retireDate: "2026-08-31",
+        currentPension: "18400",
+        husbandName: "Manubhai Patel",
+        husbandDeathDate: "2025-03-14",
+        deathDate: "2025-03-14",
+        relationship: "spouse",
+        nameInPpo: "yes",
+        disabilityPercent: "85",
+        apyAmount: "3000",
+        nomineeName: "Nisha Patel",
+        complaintAbout: "notcredited",
+        monthsMissing: "3",
+      },
+      // Eligibility answers that pass every service in the catalogue.
+      eligibility: {
+        age: "80",
+        bpl: "yes",
+        otherPension: "no",
+        widowed: "yes",
+        remarried: "no",
+        certified: "yes",
+        severity: "yes",
+        pfCut: "yes",
+        tenYears: "yes",
+        uanKnown: "yes",
+        govtJob: "yes",
+        retiringSoon: "yes",
+        savings: "yes",
+        taxpayer: "no",
+        wasPensioner: "yes",
+        relationship: "spouse",
+        haveDeathCert: "yes",
+        havePpo: "yes",
+        newAccountOpen: "yes",
+        alreadyIncreased: "no",
+      },
       otpVerified: false,
       fixingId: null,
       lang,
     });
-    setNote("Filled in. Ramanbhai Patel, PPO-2024-000123. Go to Details and press Send code.");
+    setNote(
+      "Filled in. Ramanbhai Patel, PPO-2024-000123, born 12 Nov 1944 (so the 80+ arrears have something to count). Pick any service and walk through."
+    );
   }
 
   async function resetAll() {

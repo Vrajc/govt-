@@ -11,15 +11,22 @@ export const TOTAL_STEPS = 6;
  * reassuring, a numeral is one more thing to read. The full count goes to
  * screen readers through the label.
  */
-export function ProgressBeads({ step }: { step: number }) {
+export function ProgressBeads({
+  step,
+  total = TOTAL_STEPS,
+}: {
+  step: number;
+  /** Services have different numbers of steps, so this is not fixed at six. */
+  total?: number;
+}) {
   const { t } = useApp();
-  const beads = Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1);
+  const beads = Array.from({ length: total }, (_, i) => i + 1);
 
   return (
     <div
       className="beads"
       role="group"
-      aria-label={t("common.stepOf", { n: step })}
+      aria-label={t("common.stepOf", { n: step, total })}
     >
       {beads.map((n, i) => (
         <span key={n} style={{ display: "contents" }}>

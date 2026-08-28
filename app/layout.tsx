@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`lang-${lang} ${notoSans.variable} ${notoDeva.variable} ${notoGuj.variable}`}
     >
       <body>
-        <AppProvider initialLang={lang}>
+        <AppProvider initialLang={lang} dict={d}>
           <a href="#main" className="sr-only">
             Skip to the main content
           </a>

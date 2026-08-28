@@ -1,9 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useApp } from "@/lib/app-state";
-import { LANG_NAMES } from "@/lib/i18n";
+import { LANG_NAMES } from "@/lib/i18n/util";
 import { LANGS, type Lang } from "@/lib/types";
 import { Chevron } from "@/components/Icons";
 
@@ -16,12 +15,11 @@ import { Chevron } from "@/components/Icons";
  * English has already failed the person it exists for.
  */
 export default function LanguageScreen() {
-  const { setLang, d } = useApp();
-  const router = useRouter();
+  const { chooseLang, d } = useApp();
 
   function choose(l: Lang) {
-    setLang(l);
-    router.push("/who");
+    // A full navigation, so the server sends only the chosen language.
+    chooseLang(l, "/start");
   }
 
   return (

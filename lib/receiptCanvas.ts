@@ -13,6 +13,8 @@ import type { PublicRecord } from "./publicRecord";
 export interface ReceiptStrings {
   head: string;
   ppoLabel: string;
+  bigLabel: string;
+  bigValue: string;
   refLabel: string;
   onLabel: string;
   safeUntil: string;
@@ -42,7 +44,7 @@ export function drawReceipt(
   record: PublicRecord,
   lang: Lang,
   s: ReceiptStrings,
-  dates: { created: string; valid: string }
+  dates: { created: string; valid: string; ppo: string }
 ): HTMLCanvasElement | null {
   const canvas = document.createElement("canvas");
   // 2x for a screen that will be pinch-zoomed and possibly printed.
@@ -98,7 +100,7 @@ export function drawReceipt(
   ctx.fillStyle = SOFT;
   set(400, 26);
   for (const line of [
-    `${s.ppoLabel}: ${record.ppo}`,
+    `${s.ppoLabel}: ${dates.ppo}`,
     `${s.refLabel}: ${record.id}`,
     `${s.onLabel}: ${dates.created}`,
   ]) {
@@ -119,12 +121,12 @@ export function drawReceipt(
   /* ---- the one big number ---- */
   ctx.fillStyle = SOFT;
   set(400, 26);
-  ctx.fillText(s.safeUntil, PAD, y);
+  ctx.fillText(s.bigLabel || s.safeUntil, PAD, y);
   y += 60;
 
   ctx.fillStyle = GREEN;
   set(700, 54);
-  y = wrap(ctx, dates.valid, PAD, y, W - PAD * 2, 64);
+  y = wrap(ctx, s.bigValue || dates.valid, PAD, y, W - PAD * 2, 64);
 
   /* ---- stamp ---- */
   drawStamp(ctx, W - 230, H - 300, 130, face, s);

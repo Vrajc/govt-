@@ -25,7 +25,7 @@ export const hi: Dict = {
     needHelp: "मदद चाहिए? फ़ोन कीजिए",
     helpNumber: "1800 180 1947",
     aboutLink: "इसमें क्या असली है और क्या बनावटी",
-    stepOf: "6 में से {n}वाँ कदम",
+    stepOf: "{total} में से {n}वाँ कदम",
     loading: "एक पल",
     yes: "हाँ",
     no: "नहीं",

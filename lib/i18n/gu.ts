@@ -24,7 +24,7 @@ export const gu: Dict = {
     needHelp: "મદદ જોઈએ છે? ફોન કરો",
     helpNumber: "1800 180 1947",
     aboutLink: "અહીં શું સાચું છે અને શું નમૂનો છે",
-    stepOf: "6 માંથી {n} પગલું",
+    stepOf: "{total} માંથી {n} પગલું",
     loading: "એક ક્ષણ",
     yes: "હા",
     no: "ના",

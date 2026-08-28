@@ -7,8 +7,10 @@ import { apiFetch } from "@/lib/api";
 import { ScreenShell } from "@/components/ScreenShell";
 import { BigButton, BigLink } from "@/components/BigButton";
 import { Receipt } from "@/components/Receipt";
-import { Alert, Bell, Check, Phone, Printer, Refresh, Save } from "@/components/Icons";
+import { Alert, Bell, Check, Info, Phone, Printer, Refresh, Save } from "@/components/Icons";
 import { drawReceipt, downloadCanvas } from "@/lib/receiptCanvas";
+import { serviceById } from "@/lib/services/catalogue";
+import { stepsFor } from "@/lib/services/engine";
 import type { PublicRecord } from "@/lib/publicRecord";
 
 interface ExplainResponse {
@@ -20,13 +22,12 @@ interface ExplainResponse {
 
 export default function ResultScreen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, lang, app, patch } = useApp();
+  const { t, d, lang, app, patch } = useApp();
   const router = useRouter();
 
   const [record, setRecord] = useState<PublicRecord | null>(null);
   const [gone, setGone] = useState(false);
   const [explain, setExplain] = useState<ExplainResponse | null>(null);
-
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [remindMsg, setRemindMsg] = useState<string | null>(null);
 
@@ -39,7 +40,6 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
       }
       const rec = res.data.record;
       setRecord(rec);
-
       // Still in flight — send them back to watch it.
       if (rec.state !== "ACCEPTED" && rec.state !== "NEEDS_FIX") {
         router.replace(`/status/${id}`);
@@ -65,46 +65,109 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
 
   if (gone) {
     return (
-      <ScreenShell step={6} title={t("status.notFound")} guide={t("status.notFoundBody")}>
-        <BigButton variant="secondary" onClick={() => router.push("/")}>
+      <ScreenShell title={t("status.notFound")} guide={t("status.notFoundBody")}>
+        <BigLink href="/start" variant="secondary">
           {t("common.startOver")}
-        </BigButton>
+        </BigLink>
       </ScreenShell>
     );
   }
 
   if (!record) {
     return (
-      <ScreenShell step={6} title={t("common.loading")}>
+      <ScreenShell title={t("common.loading")}>
         <p className="pulsing text-soft">…</p>
       </ScreenShell>
     );
   }
 
+  const svc = serviceById(record.serviceId);
+  const total = svc ? stepsFor(svc).length : 6;
+  const SVC = d.svc as Record<string, string>;
+  const OUT = d.outcome as Record<string, string>;
+
+  const locale = lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN";
+  const fmt = (iso: string, withTime = false) =>
+    new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+      ...(withTime ? {} : { timeZone: "UTC" }),
+    }).format(new Date(iso));
+  const money = (n: number) =>
+    new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(n);
+
   /* ================================================================
-   * 7a — accepted
+   * Accepted — the shape depends on what kind of service it was
    * ================================================================ */
   if (record.state === "ACCEPTED") {
-    const year = record.validUntil ? new Date(record.validUntil).getUTCFullYear() : "";
+    const o = record.outcome;
 
-    const locale = lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN";
-    const fmt = (iso: string, withTime = false) =>
-      new Intl.DateTimeFormat(locale, {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
-        ...(withTime ? {} : { timeZone: "UTC" }),
-      }).format(new Date(iso));
+    let title = t("accepted.title");
+    let sub = "";
+    let extraNote: string | null = null;
+
+    if (o?.kind === "lifecert") {
+      const year = o.validUntil ? new Date(o.validUntil).getUTCFullYear() : "";
+      sub = t("accepted.sub", { year: String(year) });
+    } else if (o?.kind === "sanction") {
+      title = t("outcome.sanctionTitle");
+      sub = t("outcome.sanctionSub", {
+        date: o.firstPaymentDate ? fmt(o.firstPaymentDate) : "",
+      });
+      extraNote = t("outcome.sanctionKeep");
+    } else if (o?.kind === "change") {
+      title = t("outcome.changeTitle");
+      sub = t("outcome.changeSub", { date: o.effectiveFrom ? fmt(o.effectiveFrom) : "" });
+      // The thing that catches everybody out after a bank transfer.
+      extraNote = t("outcome.changeLifecert");
+    } else if (o?.kind === "increase") {
+      title = t("outcome.increaseTitle");
+      sub = t("outcome.increaseSub");
+    } else if (o?.kind === "grievance") {
+      title = t("outcome.grievanceTitle");
+      sub = t("outcome.grievanceSub", { date: o.answerBy ? fmt(o.answerBy) : "" });
+      extraNote = t("outcome.grievanceQuote");
+    }
+
+    function bigFor(): { label: string; value: string } {
+      if (o?.kind === "sanction") {
+        return { label: t("outcome.sanctionAmount"), value: money(o.monthly ?? 0) };
+      }
+      if (o?.kind === "increase") {
+        return { label: t("outcome.increaseNow"), value: money(o.newMonthly ?? 0) };
+      }
+      if (o?.kind === "change") {
+        return {
+          label: t("outcome.changeEffective"),
+          value: o.effectiveFrom ? fmt(o.effectiveFrom) : "—",
+        };
+      }
+      if (o?.kind === "grievance") {
+        return { label: t("outcome.grievanceDocket"), value: o.docket ?? "—" };
+      }
+      return {
+        label: t("accepted.safeUntil"),
+        value: o?.validUntil ? fmt(o.validUntil) : "—",
+      };
+    }
 
     function saveAsPng() {
       if (!record) return;
+      const big = bigFor();
       const canvas = drawReceipt(
         record,
         lang,
         {
-          head: t("accepted.receiptHead"),
+          head: SVC[`${record.serviceId}Name`] ?? t("accepted.receiptHead"),
           ppoLabel: t("accepted.receiptPpo"),
+          bigLabel: big.label,
+          bigValue: big.value,
           refLabel: t("accepted.receiptRef"),
           onLabel: t("accepted.receiptOn"),
           safeUntil: t("accepted.safeUntil"),
@@ -115,7 +178,8 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         },
         {
           created: fmt(record.createdAt, true),
-          valid: record.validUntil ? fmt(record.validUntil) : "—",
+          valid: big.value,
+          ppo: record.values.ppo ?? record.values.deceasedPpo ?? record.id,
         }
       );
       if (canvas && downloadCanvas(canvas, `pramaan-saral-${record.id}.png`)) {
@@ -131,41 +195,53 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         method: "POST",
         body: JSON.stringify({ id: record.id }),
       });
-      if (res.ok) {
-        setRemindMsg(t("accepted.reminded", { date: fmt(res.data.remindAt) }));
-      } else {
-        setRemindMsg(t("errors.generic"));
-      }
+      setRemindMsg(
+        res.ok ? t("accepted.reminded", { date: fmt(res.data.remindAt) }) : t("errors.generic")
+      );
     }
 
     return (
       <ScreenShell
-        step={6}
-        title={t("accepted.title")}
-        guide={t("accepted.sub", { year: String(year) })}
-        speakExtra={`${t("accepted.safeUntil")} ${record.validUntil ? fmt(record.validUntil) : ""}`}
+        step={total}
+        totalSteps={total}
+        title={title}
+        guide={sub}
+        speakExtra={`${bigFor().label} ${bigFor().value}`}
         action={
           <>
             <BigButton onClick={saveAsPng} icon={<Save size={22} />}>
               {t("accepted.save")}
             </BigButton>
-            <BigButton variant="secondary" onClick={setReminder} icon={<Bell size={22} />}>
-              {t("accepted.remind")}
-            </BigButton>
+            {/* A reminder only makes sense for the thing that lapses. */}
+            {o?.kind === "lifecert" && (
+              <BigButton variant="secondary" onClick={setReminder} icon={<Bell size={22} />}>
+                {t("accepted.remind")}
+              </BigButton>
+            )}
+            <BigLink href="/start" variant="quiet">
+              {t("hub.title")}
+            </BigLink>
           </>
         }
       >
         <Receipt record={record} />
 
-        <div aria-live="polite" style={{ marginTop: 20 }}>
+        {extraNote && (
+          <div className="note note-info" style={{ marginTop: 20 }}>
+            <Info size={22} />
+            <span>{extraNote}</span>
+          </div>
+        )}
+
+        <div aria-live="polite">
           {saveMsg && (
-            <p className="note note-good" style={{ marginBottom: 12 }}>
+            <p className="note note-good">
               <Check size={22} />
               <span>{saveMsg}</span>
             </p>
           )}
           {remindMsg && (
-            <p className="note note-good" style={{ marginBottom: 12 }}>
+            <p className="note note-good">
               <Bell size={22} />
               <span>{remindMsg}</span>
             </p>
@@ -194,18 +270,20 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
   }
 
   /* ================================================================
-   * 7b — needs fixing
+   * Needs fixing
    * ================================================================ */
   function fixAndResend() {
-    // Everything except the photo is preserved; the photo screen is told
-    // which record it is fixing so the resend keeps the same reference.
-    patch({ photo: null, photoQuality: null, fixingId: record!.id });
-    router.push(`/photo?fix=${record!.id}`);
+    if (!record) return;
+    // Everything except the photo is preserved; the engine is told which
+    // record it is fixing so the resend keeps the same reference number.
+    patch({ photo: null, photoQuality: null, fixingId: record.id });
+    router.push(svc?.needsPhoto ? `/apply/${record.serviceId}/photo` : `/apply/${record.serviceId}/details`);
   }
 
   return (
     <ScreenShell
-      step={6}
+      step={total}
+      totalSteps={total}
       title={t("needsFix.title")}
       guide={explain?.reason}
       speakExtra={explain ? `${explain.reason} ${explain.action}` : undefined}
@@ -220,14 +298,12 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         </>
       }
     >
+      {/* Exactly two sentences: what happened, and what to do. */}
       <div className="panel panel-warn">
-        {/* Exactly two sentences: what happened, and what to do. */}
         <p style={{ fontSize: 22, fontWeight: 600, margin: "0 0 12px", color: "#7C3018" }}>
           {explain?.reason ?? <span className="pulsing">…</span>}
         </p>
-        <p style={{ fontSize: 20, margin: 0, color: "var(--ink)" }}>
-          {explain?.action ?? ""}
-        </p>
+        <p style={{ fontSize: 20, margin: 0, color: "var(--ink)" }}>{explain?.action ?? ""}</p>
       </div>
 
       <details className="tech">
@@ -237,6 +313,9 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         </summary>
         <div className="tech-body">
           <p style={{ marginTop: 0 }}>{t("needsFix.techIntro")}</p>
+          <p>
+            {t("svc.realSystem")}: <code>{svc?.realPortal}</code>
+          </p>
           <p>
             {t("needsFix.techCode")}: <code>{record.errorCode}</code>
           </p>
@@ -253,9 +332,9 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
         </div>
       </details>
 
-      {app.mode === "assisted" && app.helperName && (
+      {record.mode === "assisted" && record.helperName && (
         <p className="helper" style={{ marginTop: 16 }}>
-          {t("review.rowHelper")}: {app.helperName}
+          {t("review.rowHelper")}: {record.helperName}
         </p>
       )}
     </ScreenShell>

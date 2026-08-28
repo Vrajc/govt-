@@ -250,3 +250,17 @@ export const Printer = ({ size = 22, className }: P) => (
     <path d="M5 8h14a2 2 0 0 1 2 2v6h-4v5H7v-5H3v-6a2 2 0 0 1 2-2z" />
   </svg>
 );
+
+export const Search = ({ size = 22, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m16.5 16.5 4 4" />
+  </svg>
+);
+
+export const Rupee = ({ size = 22, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M7 5h10M7 9.5h10" />
+    <path d="M14 5c0 3-2.2 4.5-5 4.5h-2l8 9.5" />
+  </svg>
+);

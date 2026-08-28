@@ -44,10 +44,15 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
   rec.attempts += 1;
   rec.errorCode = null;
+  rec.outcome = null;
   rec.precheckFlagged = body?.precheckFlagged === true;
   rec.forced = forced;
-  transition(rec, "SUBMITTED", "citizen", `New photo sent (attempt ${rec.attempts})`);
-  rec.resolveAt = Date.now() + resolveInMs;
+  // Back to the start of the approval chain, but the audit log keeps every
+  // stage of the first attempt — that continuity is the whole point.
+  rec.stageIndex = 0;
+  rec.totalMs = resolveInMs;
+  transition(rec, "SUBMITTED", "citizen", `Sent again (attempt ${rec.attempts})`);
+  rec.nextStageAt = Date.now() + resolveInMs;
   queueSms(rec, "received");
 
   if (requestId) store.idempotency.set(requestId, rec.id);

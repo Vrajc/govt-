@@ -22,9 +22,10 @@ export async function POST(req: Request) {
   const id = typeof body?.id === "string" ? body.id : "";
   const rec = store.records.get(id);
   if (!rec) return fail("NOT_FOUND", "We could not find that reference number.", 404);
-  if (!rec.validUntil) return fail("NOT_ACCEPTED", "There is nothing to remind you about yet.", 409);
+  const validUntil = rec.outcome?.validUntil;
+  if (!validUntil) return fail("NOT_ACCEPTED", "There is nothing to remind you about yet.", 409);
 
-  const due = new Date(rec.validUntil);
+  const due = new Date(validUntil);
   const remindAt = new Date(due);
   remindAt.setUTCMonth(remindAt.getUTCMonth() - 1); // one month before it lapses
 
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     store.reminders.push({
       id: rec.id,
       mobile: rec.mobile,
-      ppo: rec.ppo,
+      ppo: rec.values.ppo ?? rec.id,
       at: remindAt.toISOString(),
     });
     queueSms(rec, "reminder");

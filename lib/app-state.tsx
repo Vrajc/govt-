@@ -5,12 +5,12 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import type { Application, ErrorCode, Lang, Mode } from "./types";
-import { dictFor, fill, isLang, SPEECH_TAGS, type Dict } from "./i18n";
+import { fill, isLang, SPEECH_TAGS } from "./i18n/util";
+import type { Dict } from "./i18n";
 import { APP_KEY, DEMO_KEY, LANG_COOKIE } from "./constants";
 
 /* ------------------------------------------------------------------ *
@@ -57,11 +57,13 @@ export function emptyApplication(lang: Lang): Application {
     requestId: newRequestId(),
     lang,
     mode: "self",
-    name: "",
+    serviceId: null,
+    // The form is a bag of values keyed by field id, because the fields
+    // themselves come from whichever service is being filled in.
+    eligibility: {},
+    values: {},
+    docs: {},
     helperName: "",
-    ppo: "",
-    aadhaar: "",
-    mobile: "",
     otpVerified: false,
     photo: null,
     photoQuality: null,
@@ -75,6 +77,8 @@ export function emptyApplication(lang: Lang): Application {
 interface AppContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
+  /** Screen 1 only: set the language and reload into it. */
+  chooseLang: (l: Lang, to: string) => void;
   d: Dict;
   /** `t("who.title")`, with optional `{name}` interpolation. */
   t: (path: string, vars?: Record<string, string | number>) => string;
@@ -95,9 +99,16 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({
   initialLang,
+  dict,
   children,
 }: {
   initialLang: Lang;
+  /**
+   * Resolved on the server from the language cookie. Passing it down rather
+   * than importing all three keeps two scripts the reader cannot use out of
+   * their bundle entirely.
+   */
+  dict: Dict;
   children: React.ReactNode;
 }) {
   const [lang, setLangState] = useState<Lang>(initialLang);
@@ -159,6 +170,19 @@ export function AppProvider({
     setApp((cur) => ({ ...cur, lang: l }));
   }, []);
 
+  /**
+   * Choosing a language on screen 1. The cookie has to be written before the
+   * navigation, and the navigation has to reach the server, so this is a
+   * full page load rather than a client route change. One reload, on the
+   * very first screen, in exchange for never shipping an unread script.
+   */
+  const chooseLang = useCallback((l: Lang, to: string) => {
+    document.cookie = `${LANG_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
+    setLangState(l);
+    setApp((cur) => ({ ...cur, lang: l }));
+    window.location.assign(to);
+  }, []);
+
   const patch = useCallback((p: Partial<Application>) => {
     setApp((cur) => ({ ...cur, ...p }));
   }, []);
@@ -184,7 +208,9 @@ export function AppProvider({
     });
   }, []);
 
-  const d = useMemo(() => dictFor(lang), [lang]);
+  // One language per page load. Switching does a full navigation so the
+  // server can send the right dictionary, fonts and <html lang> together.
+  const d = dict;
 
   const t = useCallback(
     (path: string, vars?: Record<string, string | number>) => {
@@ -201,6 +227,7 @@ export function AppProvider({
   const value: AppContextValue = {
     lang,
     setLang,
+    chooseLang,
     d,
     t,
     speechTag: SPEECH_TAGS[lang],

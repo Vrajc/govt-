@@ -9,8 +9,10 @@ import { ProgressBeads } from "./ProgressBeads";
 import { SpeakButton } from "./SpeakButton";
 
 interface Props {
-  /** 1-6, or null on the pages outside the journey (/about, /help, /outbox). */
+  /** 1-based position, or null on pages outside a journey (/about, /help). */
   step?: number | null;
+  /** How many steps this particular service has. */
+  totalSteps?: number;
   title: string;
   guide?: string;
   /** Where Back goes. Omit for screen 1, which has no Back. */
@@ -26,6 +28,7 @@ interface Props {
 
 export function ScreenShell({
   step = null,
+  totalSteps,
   title,
   guide,
   back,
@@ -63,7 +66,7 @@ export function ScreenShell({
       </div>
 
       <main className="shell-main" id="main">
-        {step !== null && <ProgressBeads step={step} />}
+        {step !== null && <ProgressBeads step={step} total={totalSteps} />}
 
         <h1 className="screen-title">{title}</h1>
         {guide && <p className="screen-guide">{guide}</p>}

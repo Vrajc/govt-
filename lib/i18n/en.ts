@@ -28,7 +28,7 @@ export const en = {
     needHelp: "Need help? Call",
     helpNumber: "1800 180 1947",
     aboutLink: "What is real here, and what is pretend",
-    stepOf: "Step {n} of 6",
+    stepOf: "Step {n} of {total}",
     loading: "One moment",
     yes: "Yes",
     no: "No",

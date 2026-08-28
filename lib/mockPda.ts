@@ -1,14 +1,23 @@
 import { dictFor, fill } from "./i18n";
 import { pushSms, store } from "./store";
 import { transition } from "./stateMachine";
-import type { ErrorCode, Lang, Record_, SmsMessage } from "./types";
+import { serviceById } from "./services/catalogue";
+import type { ServiceDef, ServiceId } from "./services/types";
+import type {
+  ErrorCode,
+  Lang,
+  Mode,
+  OutcomeData,
+  Record_,
+  SmsMessage,
+} from "./types";
 
 /* ==================================================================
  * Knobs. Turn these on camera to demonstrate degraded-network
  * behaviour without touching any other file.
  * ================================================================== */
 
-/** Base processing time of the pretend pension office, in milliseconds. */
+/** Total processing time of the pretend offices, in milliseconds. */
 export const LATENCY_MS = {
   instant: 0,
   demo: 8_000,
@@ -16,26 +25,26 @@ export const LATENCY_MS = {
 } as const;
 
 /**
- * Chance that a submission comes back needing a fix, when our own pre-check
- * saw nothing wrong with the photo. Real-world DLC first-attempt failure for
- * elderly users is far worse than this; 0.30 keeps the demo watchable while
- * still exercising the recovery path often enough to be honest.
+ * Chance a submission comes back needing a fix when nothing looked wrong.
+ * Real first-attempt failure for elderly users is far worse than this; 0.30
+ * keeps the demo watchable while still exercising the recovery path often
+ * enough to be honest.
  */
 export const FAILURE_RATE = 0.3;
 
-/** Chance the photo is the culprit once the pre-check has already flagged it. */
+/** Chance the photo is the culprit once our own pre-check flagged it. */
 const FLAGGED_PHOTO_WEIGHT = 0.85;
 
-/** Simulated transport failure, so the "try again" path is reachable. Off by default. */
+/** Simulated transport failure, so "try again" is reachable. Off by default. */
 export const TRANSPORT_FAILURE_RATE = 0;
 
 /* ==================================================================
  * Mock PPO registry — stands in for the pension-office lookup
  * ================================================================== */
-const PPO_REGISTRY: Record<string, { name: string }> = {
-  "PPO-2024-000123": { name: "Ramanbhai Patel" },
-  "PPO-2024-000456": { name: "Savitri Devi Sharma" },
-  "PPO-2023-009871": { name: "Abdul Karim Shaikh" },
+const PPO_REGISTRY: Record<string, { name: string; monthly: number }> = {
+  "PPO-2024-000123": { name: "Ramanbhai Patel", monthly: 18400 },
+  "PPO-2024-000456": { name: "Savitri Devi Sharma", monthly: 12750 },
+  "PPO-2023-009871": { name: "Abdul Karim Shaikh", monthly: 21200 },
 };
 
 export const DEMO_PENSIONER = {
@@ -43,9 +52,12 @@ export const DEMO_PENSIONER = {
   ppo: "PPO-2024-000123",
   aadhaar: "998812344821",
   mobile: "9825012345",
+  // Turned 80 in November 2024, so the 80+ arrears have almost two years to
+  // count. The whole point of that service is the money already owed.
+  dob: "1944-11-12",
 };
 
-export function lookupPpo(ppo: string): { name: string } | null {
+export function lookupPpo(ppo: string): { name: string; monthly: number } | null {
   return PPO_REGISTRY[ppo.trim().toUpperCase()] ?? null;
 }
 
@@ -54,12 +66,16 @@ export function lookupPpo(ppo: string): { name: string } | null {
  * ================================================================== */
 const ID_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1 — read aloud on the phone
 
-export function newDlcId(now = new Date()): string {
-  let tail = "";
-  for (let i = 0; i < 8; i++) {
-    tail += ID_ALPHABET[Math.floor(Math.random() * ID_ALPHABET.length)];
+function tail(n = 8): string {
+  let out = "";
+  for (let i = 0; i < n; i++) {
+    out += ID_ALPHABET[Math.floor(Math.random() * ID_ALPHABET.length)];
   }
-  return `DLC-${now.getFullYear()}-${tail}`;
+  return out;
+}
+
+export function newDlcId(now = new Date()): string {
+  return `DLC-${now.getFullYear()}-${tail(8)}`;
 }
 
 /**
@@ -67,21 +83,27 @@ export function newDlcId(now = new Date()): string {
  * closes — 30 November of the following year.
  */
 export function validUntilFor(now = new Date()): Date {
-  // Whatever month you send it in, the next window closes on 30 November
-  // of the following year. Month index 10 is November.
   return new Date(Date.UTC(now.getFullYear() + 1, 10, 30));
+}
+
+/* ==================================================================
+ * Stage timing
+ * ==================================================================
+ * There is no timer. Nothing in a serverless function may outlive the
+ * request, so each record carries `nextStageAt` and the status route walks
+ * it forward on read. From the client that is indistinguishable from a real
+ * worker queue, and it survives a cold start.
+ */
+function stageDurations(svc: ServiceDef, totalMs: number): number[] {
+  const weights = svc.stages.map((s) => s.weight);
+  const sum = weights.reduce((a, b) => a + b, 0) || 1;
+  return weights.map((w) => Math.round((w / sum) * totalMs));
 }
 
 /* ==================================================================
  * Resolution — honest, not random
  * ================================================================== */
-const OTHER_CODES: ErrorCode[] = [
-  "ERR_LIVENESS_FAIL",
-  "ERR_FACE_NOT_CENTERED",
-  "ERR_AADHAAR_NAME_MISMATCH",
-];
-
-export function decideOutcome(rec: Record_): {
+export function decideOutcome(rec: Record_, svc: ServiceDef): {
   state: "ACCEPTED" | "NEEDS_FIX";
   code: ErrorCode | null;
 } {
@@ -89,61 +111,202 @@ export function decideOutcome(rec: Record_): {
   if (rec.forced) {
     return rec.forced.outcome === "ACCEPTED"
       ? { state: "ACCEPTED", code: null }
-      : { state: "NEEDS_FIX", code: rec.forced.code ?? "ERR_FACE_QUALITY_LOW" };
+      : {
+          state: "NEEDS_FIX",
+          code: rec.forced.code ?? (svc.codes[0] as ErrorCode),
+        };
   }
 
-  // An unknown PPO could never match a real pension record.
-  if (!lookupPpo(rec.ppo)) {
-    // Only on the first attempt: a reviewer who retries the same made-up PPO
-    // would otherwise be stuck in a loop with no way out of the demo.
-    if (rec.attempts <= 1) return { state: "NEEDS_FIX", code: "ERR_PPO_NOT_FOUND" };
+  // A PPO that is not in the registry could never match a real record.
+  // Only on the first attempt: a reviewer retrying the same made-up number
+  // would otherwise be stuck with no way out of the demo.
+  const ppo = rec.values.ppo ?? rec.values.deceasedPpo;
+  if (ppo && !lookupPpo(ppo) && rec.attempts <= 1 && svc.codes.includes("ERR_PPO_NOT_FOUND")) {
+    return { state: "NEEDS_FIX", code: "ERR_PPO_NOT_FOUND" };
   }
 
-  // If our own pre-check disliked the photo, the pension office is very
-  // likely to dislike it for the same reason. This is what makes the
+  // If our own pre-check disliked the photo, the office is very likely to
+  // dislike it for the same reason. This coupling is what makes the
   // pre-check feel truthful rather than decorative.
-  if (rec.precheckFlagged) {
+  if (rec.precheckFlagged && svc.needsPhoto) {
+    const photoCode = svc.codes.includes("ERR_FACE_QUALITY_LOW")
+      ? "ERR_FACE_QUALITY_LOW"
+      : "ERR_DOC_UNREADABLE";
     if (Math.random() < FLAGGED_PHOTO_WEIGHT) {
-      return { state: "NEEDS_FIX", code: "ERR_FACE_QUALITY_LOW" };
+      return { state: "NEEDS_FIX", code: photoCode as ErrorCode };
     }
     return { state: "ACCEPTED", code: null };
   }
 
   if (Math.random() < FAILURE_RATE) {
-    const code = OTHER_CODES[Math.floor(Math.random() * OTHER_CODES.length)];
+    // Never the PPO code here — that one is decided above, on evidence.
+    const pool = svc.codes.filter((c) => c !== "ERR_PPO_NOT_FOUND");
+    const code = (pool[Math.floor(Math.random() * pool.length)] ??
+      svc.codes[0]) as ErrorCode;
     return { state: "NEEDS_FIX", code };
   }
   return { state: "ACCEPTED", code: null };
 }
 
 /* ==================================================================
- * The async queue, simulated
- * ==================================================================
- * There is no timer. Nothing in a serverless function may outlive the
- * request. Instead each record carries `resolveAt`, and the status route
- * settles it lazily on the next read — which is exactly how a real worker
- * queue looks from the client's point of view, and survives a cold start.
- */
+ * What a settled service hands back
+ * ================================================================== */
+const num = (v: string | undefined, fallback = 0): number => {
+  const n = Number(String(v ?? "").replace(/[^\d]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+
+function addDays(d: Date, days: number): Date {
+  const out = new Date(d);
+  out.setUTCDate(out.getUTCDate() + days);
+  return out;
+}
+
+/** The 80+ increase runs from the FIRST DAY OF THE MONTH, not the birthday. */
+export function age80EffectiveFrom(dob: string): Date | null {
+  const born = new Date(dob);
+  if (Number.isNaN(born.getTime())) return null;
+  return new Date(Date.UTC(born.getUTCFullYear() + 80, born.getUTCMonth(), 1));
+}
+
+function monthsBetween(from: Date, to: Date): number {
+  return Math.max(
+    0,
+    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
+      (to.getUTCMonth() - from.getUTCMonth())
+  );
+}
+
+export function computeOutcome(rec: Record_, svc: ServiceDef): OutcomeData {
+  const now = new Date();
+
+  switch (svc.outcome) {
+    case "lifecert":
+      return {
+        kind: "lifecert",
+        validUntil: validUntilFor(new Date(rec.createdAt)).toISOString(),
+      };
+
+    case "sanction": {
+      const monthly = monthlyFor(rec, svc);
+      return {
+        kind: "sanction",
+        orderNo: `PPO-${now.getFullYear()}-${tail(6)}`,
+        monthly,
+        firstPaymentDate: addDays(now, svc.typicalDays).toISOString(),
+      };
+    }
+
+    case "change":
+      return {
+        kind: "change",
+        effectiveFrom: addDays(now, svc.typicalDays).toISOString(),
+      };
+
+    case "increase": {
+      const current = num(rec.values.currentPension, 12000);
+      const from = age80EffectiveFrom(rec.values.dob ?? "");
+      const months = from ? monthsBetween(from, now) : 0;
+      const uplift = Math.round(current * 0.2);
+      return {
+        kind: "increase",
+        newMonthly: current + uplift,
+        // Every rupee since the first of the month they turned 80.
+        arrears: uplift * months,
+        owedFrom: from ? from.toISOString() : undefined,
+      };
+    }
+
+    case "grievance":
+      return {
+        kind: "grievance",
+        docket: `CPG-${now.getFullYear()}-${tail(7)}`,
+        answerBy: addDays(now, svc.typicalDays).toISOString(),
+      };
+  }
+}
+
+/** Plausible monthly amounts. Mocked, but not arbitrary. */
+function monthlyFor(rec: Record_, svc: ServiceDef): number {
+  const age = num(rec.values.age, 0);
+  switch (svc.id) {
+    case "oldage":
+      return age >= 80 ? 1250 : 1000;
+    case "widow":
+      return age >= 80 ? 1250 : 1050;
+    case "disability":
+      return age >= 80 ? 1250 : 1000;
+    case "epfpension": {
+      // The EPS-95 formula, roughly: pensionable salary x service / 70.
+      const years = num(rec.values.serviceYears, 10);
+      return Math.max(1000, Math.round((15000 * Math.min(years, 35)) / 70));
+    }
+    case "govtretire": {
+      const years = num(rec.values.serviceYears, 20);
+      return Math.round(22500 * Math.min(years / 33, 1));
+    }
+    case "familypension": {
+      const rec2 = lookupPpo(rec.values.deceasedPpo ?? "");
+      // Thirty per cent of their last pay, floored at the statutory minimum.
+      return Math.max(9000, Math.round((rec2?.monthly ?? 20000) * 0.3));
+    }
+    case "apy":
+      return num(rec.values.apyAmount, 1000);
+    default:
+      return 1000;
+  }
+}
+
+/* ==================================================================
+ * Advancing a record
+ * ================================================================== */
 export function settleIfDue(rec: Record_, now = Date.now()): Record_ {
+  const svc = serviceById(rec.serviceId);
+  if (!svc) return rec;
+
   if (rec.state === "SUBMITTED") {
-    transition(rec, "VERIFYING", "mock-pda", "Picked up from the queue");
+    transition(rec, "VERIFYING", "mock-pda", `Picked up: ${stageName(svc, 1)}`);
   }
   if (rec.state !== "VERIFYING") return rec;
-  if (rec.resolveAt === null || now < rec.resolveAt) return rec;
+  if (rec.nextStageAt === null) return rec;
 
-  const { state, code } = decideOutcome(rec);
+  const durations = stageDurations(svc, rec.totalMs);
+  const last = svc.stages.length - 1;
+
+  // Walk forward as many stages as the clock allows. A page left open for
+  // ten minutes must catch up in one read, not one stage per poll.
+  while (rec.stageIndex < last && now >= rec.nextStageAt) {
+    rec.stageIndex += 1;
+    rec.audit.push({
+      at: new Date().toISOString(),
+      from: "VERIFYING",
+      to: "VERIFYING",
+      actor: "mock-pda",
+      note: `Reached: ${stageName(svc, rec.stageIndex)}`,
+    });
+    rec.nextStageAt = rec.nextStageAt + (durations[rec.stageIndex] || 0);
+  }
+
+  if (rec.stageIndex < last || now < rec.nextStageAt) return rec;
+
+  const { state, code } = decideOutcome(rec, svc);
   rec.errorCode = code;
-  rec.resolveAt = null;
+  rec.nextStageAt = null;
 
   if (state === "ACCEPTED") {
-    rec.validUntil = validUntilFor(new Date(rec.createdAt)).toISOString();
-    transition(rec, "ACCEPTED", "mock-pda", "Face match succeeded");
+    rec.outcome = computeOutcome(rec, svc);
+    transition(rec, "ACCEPTED", "mock-pda", `Approved (${svc.realPortal})`);
     queueSms(rec, "accepted");
   } else {
+    rec.outcome = null;
     transition(rec, "NEEDS_FIX", "mock-pda", `Returned ${code}`);
     queueSms(rec, "needs-fix");
   }
   return rec;
+}
+
+function stageName(svc: ServiceDef, i: number): string {
+  return svc.stages[Math.min(i, svc.stages.length - 1)]?.id ?? "unknown";
 }
 
 /* ==================================================================
@@ -166,7 +329,12 @@ export function formatDate(iso: string, lang: Lang): string {
 export function queueSms(rec: Record_, kind: SmsMessage["kind"]): void {
   const d = dictFor(rec.lang);
   const vars: Record<string, string> = { id: rec.id };
-  if (rec.validUntil) vars.date = formatDate(rec.validUntil, rec.lang);
+  const dateish =
+    rec.outcome?.validUntil ??
+    rec.outcome?.firstPaymentDate ??
+    rec.outcome?.effectiveFrom ??
+    rec.outcome?.answerBy;
+  if (dateish) vars.date = formatDate(dateish, rec.lang);
 
   const template =
     kind === "accepted"
@@ -192,33 +360,38 @@ export function queueSms(rec: Record_, kind: SmsMessage["kind"]): void {
  * ================================================================== */
 export function createRecord(input: {
   requestId: string;
+  serviceId: ServiceId;
   lang: Lang;
-  mode: Record_["mode"];
+  mode: Mode;
   name: string;
-  helperName: string;
-  ppo: string;
-  aadhaarLast4: string;
   mobile: string;
+  helperName: string;
+  values: Record<string, string>;
+  docCount: number;
   precheckFlagged: boolean;
   resolveInMs: number;
   forced: Record_["forced"];
 }): Record_ {
+  const svc = serviceById(input.serviceId);
   const now = new Date();
+
   const rec: Record_ = {
     id: newDlcId(now),
     requestId: input.requestId,
+    serviceId: input.serviceId,
     createdAt: now.toISOString(),
     state: "DRAFT",
+    stageIndex: 0,
     lang: input.lang,
     mode: input.mode,
     name: input.name,
-    helperName: input.helperName,
-    ppo: input.ppo,
-    aadhaarLast4: input.aadhaarLast4,
     mobile: input.mobile,
+    helperName: input.helperName,
+    values: input.values,
+    docCount: input.docCount,
     precheckFlagged: input.precheckFlagged,
     errorCode: null,
-    validUntil: null,
+    outcome: null,
     attempts: 1,
     audit: [
       {
@@ -229,12 +402,16 @@ export function createRecord(input: {
         note: "Details filled in on the phone",
       },
     ],
-    resolveAt: null,
+    nextStageAt: null,
+    totalMs: input.resolveInMs,
     forced: input.forced,
   };
 
   transition(rec, "SUBMITTED", "citizen", "Sent from the phone");
-  rec.resolveAt = Date.now() + input.resolveInMs;
+
+  const durations = svc ? stageDurations(svc, input.resolveInMs) : [input.resolveInMs];
+  rec.nextStageAt = Date.now() + (durations[1] ?? durations[0] ?? 0);
+
   queueSms(rec, "received");
 
   store.records.set(rec.id, rec);

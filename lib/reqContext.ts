@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { LATENCY_MS } from "./mockPda";
 import { apiErr, isErrorCode, type ApiErr, type ErrorCode, type Lang, type Record_ } from "./types";
-import { isLang } from "./i18n";
+import { isLang } from "./i18n/util";
 
 /** Presenter settings, read off the request headers set by lib/api.ts. */
 export interface DemoContext {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useApp } from "@/lib/app-state";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Message } from "@/components/Icons";
+import { ALL_SERVICES } from "@/lib/services/catalogue";
 
 /**
  * /about — what is real and what is pretend.
@@ -57,6 +58,35 @@ export default function AboutScreen() {
           <span style={{ marginLeft: 8 }}>{t("about.outboxLink")}</span>
         </Link>
       </p>
+
+      {/* Which real government system each service stands for. Generated
+          from the catalogue, so a new scheme cannot be added without its
+          real-world counterpart being named here too. */}
+      <h2 className="section-title">{t("svc.realSystem")}</h2>
+      <div className="tbl-wrap">
+        <table className="plain">
+          <thead>
+            <tr>
+              <th scope="col">{t("hub.title")}</th>
+              <th scope="col">{t("svc.realSystem")}</th>
+              <th scope="col">{t("svc.realFormIs")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ALL_SERVICES.map((s) => (
+              <tr key={s.id}>
+                <td style={{ color: "var(--ink)", fontWeight: 600 }}>
+                  {(d.svc as Record<string, string>)[`${s.id}Name`]}
+                </td>
+                <td>
+                  <code>{s.realPortal}</code>
+                </td>
+                <td>{s.realForm ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2 className="section-title">{t("about.scaleTitle")}</h2>
       {scale.map(([head, body]) => (

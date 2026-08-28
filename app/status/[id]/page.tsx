@@ -5,23 +5,29 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/app-state";
 import { apiFetch } from "@/lib/api";
 import { ScreenShell } from "@/components/ScreenShell";
-import { BigButton } from "@/components/BigButton";
+import { BigButton, BigLink } from "@/components/BigButton";
 import { Alert, Check, Clock, Info } from "@/components/Icons";
+import { serviceById } from "@/lib/services/catalogue";
+import { stepsFor } from "@/lib/services/engine";
 import type { PublicRecord } from "@/lib/publicRecord";
 
 const POLL_MS = 3_000;
 
 /**
- * Screen 6 — we are checking this.
+ * We are checking this.
  *
  * The id is in the URL and the state is on the server, so a hard refresh, a
- * closed tab, or an SMS link opened three hours later all land on the same
- * truthful page. That is the whole reason the mock backend is a real
- * backend.
+ * closed tab, or a link opened three hours later all land on the same
+ * truthful page.
+ *
+ * And it is not one opaque wait: the timeline walks the service's real
+ * approval chain, naming who is holding the file right now. A citizen who
+ * can see that their application is sitting at the Taluka office knows who
+ * to ring. That is the silence this whole app exists to end.
  */
 export default function StatusScreen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, demoMode } = useApp();
+  const { t, d, demoMode } = useApp();
   const router = useRouter();
 
   const [record, setRecord] = useState<PublicRecord | null>(null);
@@ -31,13 +37,11 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
 
   const poll = useCallback(async () => {
     const res = await apiFetch<{ record: PublicRecord }>(`/api/status/${id}`, { method: "GET" });
-
     if (!res.ok) {
       // A network blip must not wipe a status we already have.
       if (res.error.code === "NOT_FOUND") setGone(true);
       return null;
     }
-
     setRecord(res.data.record);
     return res.data.record;
   }, [id]);
@@ -61,7 +65,6 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
     }
 
     void loop();
-
     return () => {
       stopped = true;
       if (timer.current) clearTimeout(timer.current);
@@ -70,83 +73,65 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
 
   if (gone) {
     return (
-      <ScreenShell step={6} title={t("status.notFound")} guide={t("status.notFoundBody")}>
-        <BigButton variant="secondary" onClick={() => router.push("/")}>
+      <ScreenShell title={t("status.notFound")} guide={t("status.notFoundBody")}>
+        <BigLink href="/start" variant="secondary">
           {t("common.startOver")}
-        </BigButton>
+        </BigLink>
       </ScreenShell>
     );
   }
 
-  const state = record?.state ?? "SUBMITTED";
-  const settled = state === "ACCEPTED" || state === "NEEDS_FIX";
+  const STAGES = d.stages as Record<string, string>;
+  const SVC = d.svc as Record<string, string>;
+
+  const svc = record ? serviceById(record.serviceId) : null;
+  const total = svc ? stepsFor(svc).length : 6;
+  const stages = record?.stages ?? [];
+  const at = record?.stageIndex ?? 0;
+  const settled = record?.state === "ACCEPTED" || record?.state === "NEEDS_FIX";
+
+  const waitLine = demoMode
+    ? `${t("status.waitDemo")} ${t("status.closeOk", { mobile: record?.mobile ?? "" })}`
+    : svc && svc.typicalDays > 1
+      ? `${t("svc.daysAbout", { n: svc.typicalDays })}. ${t("status.closeOk", { mobile: record?.mobile ?? "" })}`
+      : t("status.wait", { mobile: record?.mobile ?? "" });
 
   return (
     <ScreenShell
-      step={6}
+      step={total}
+      totalSteps={total}
       title={t("status.title")}
-      guide={t("status.lead")}
-      speakExtra={`${demoMode ? t("status.waitDemo") : t("status.wait", { mobile: record?.mobile ?? "" })} ${demoMode ? t("status.closeOk", { mobile: record?.mobile ?? "" }) : ""}`}
+      guide={record ? SVC[`${record.serviceId}Name`] : t("status.lead")}
+      speakExtra={waitLine}
     >
+      <p className="body" style={{ color: "var(--ink)", fontWeight: 500 }}>
+        {t("status.lead")}
+      </p>
+
       <ol className="timeline" aria-live="polite" aria-atomic="false">
-        <li className="done">
-          <span className="tl-dot done">
-            <Check size={18} />
-          </span>
-          <span>
-            <span className="tl-text">{t("status.tlReceived")}</span>
-            {record && (
-              <span className="tl-sub tabular">
-                {new Date(record.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+        {stages.map((stage, i) => {
+          const done = i < at || (settled && record?.state === "ACCEPTED");
+          const now = !settled && i === at;
+          return (
+            <li key={stage.id} className={done ? "done" : ""}>
+              <span className={`tl-dot ${done ? "done" : now ? "now" : ""}`}>
+                {done ? <Check size={18} /> : now ? <Clock size={18} /> : <Info size={18} />}
               </span>
-            )}
-          </span>
-        </li>
-
-        <li className={settled ? "done" : ""}>
-          <span className={`tl-dot ${settled ? "done" : "now"}`}>
-            {settled ? <Check size={18} /> : <Clock size={18} />}
-          </span>
-          <span>
-            <span className={`tl-text ${settled ? "" : "pulsing"}`}>
-              {t("status.tlChecking")}
-            </span>
-            <span className="tl-sub">{t("status.tlWaiting")}</span>
-          </span>
-        </li>
-
-        <li className={settled ? "done" : ""}>
-          <span className={`tl-dot ${settled ? "done" : ""}`}>
-            {settled ? <Check size={18} /> : <Info size={18} />}
-          </span>
-          <span>
-            <span className="tl-text">{t("status.tlResult")}</span>
-            {settled && (
-              <span className="tl-sub">
-                {state === "ACCEPTED" ? t("status.tlDoneGood") : t("status.tlDoneFix")}
+              <span>
+                <span className={`tl-text ${now ? "pulsing" : ""}`}>{STAGES[stage.id]}</span>
+                <span className="tl-sub">
+                  {STAGES[`actor${cap(stage.actor)}`] ?? STAGES.actorSystem}
+                  {now ? ` · ${STAGES.waitingHere}` : ""}
+                </span>
               </span>
-            )}
-          </span>
-        </li>
+            </li>
+          );
+        })}
       </ol>
 
       <div className="note note-info" style={{ marginTop: 28 }}>
         <Clock size={22} />
-        <span>
-          {/* The duration changes in demo mode; the promise that you can walk
-              away and still hear back does not. That promise is the point. */}
-          {demoMode ? (
-            <>
-              {t("status.waitDemo")}{" "}
-              {t("status.closeOk", { mobile: record?.mobile ?? "" })}
-            </>
-          ) : (
-            t("status.wait", { mobile: record?.mobile ?? "" })
-          )}
-        </span>
+        <span>{waitLine}</span>
       </div>
 
       <div className="panel" style={{ marginTop: 8 }}>
@@ -172,4 +157,8 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
       )}
     </ScreenShell>
   );
+}
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
