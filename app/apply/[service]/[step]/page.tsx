@@ -133,7 +133,7 @@ function Engine({ svc, step }: { svc: ServiceDef; step: Step }) {
         guide={SVC[`${svc.id}Name`]}
         speakExtra={`${t("who.self")}. ${t("who.assisted")}. ${t("who.note")}`}
       >
-        <div role="group" aria-label={t("who.title")}>
+        <div role="group" aria-label={t("who.title")} className="grid-list">
           <button type="button" className="card" onClick={() => choose("self")}>
             <span className="card-title">
               <Person size={26} />
@@ -328,7 +328,7 @@ function EligibilityStep({
               {label}
             </legend>
             {help && <p className="helper" style={{ marginBottom: 10 }}>{help}</p>}
-            <div className={q.type === "yesno" ? "btn-row" : ""}>
+            <div className={q.type === "yesno" ? "btn-row" : "grid-list"}>
               {options.map((o) => {
                 const on = value === o.value;
                 const text =
@@ -520,6 +520,22 @@ function DetailsStep({
 
   const wantsOtp = needsOtp(svc);
   const fields = visibleFields(svc, app.values);
+  const assisted = app.mode === "assisted";
+
+  /* Keep the catalogue's field order, but collect consecutive fields that
+     share a heading. Order stays the service's business, not this file's. */
+  const groups: { key: string; items: FieldDef[] }[] = [];
+  for (const f of fields) {
+    const key = f.group ?? "";
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) last.items.push(f);
+    else groups.push({ key, items: [f] });
+  }
+
+  /* Assisted mode has its own wording for the headings that name a person. */
+  const GROUPS = d.groups as Record<string, string>;
+  const groupLabel = (key: string) =>
+    (assisted ? GROUPS[`${key}Assisted`] : undefined) ?? GROUPS[key] ?? "";
 
   function setValue(f: FieldDef, raw: string) {
     patch({ values: { ...app.values, [f.id]: normalise(f, raw) } });
@@ -584,8 +600,6 @@ function DetailsStep({
     onNext();
   }
 
-  const assisted = app.mode === "assisted";
-
   return (
     <ScreenShell
       {...shell}
@@ -615,8 +629,13 @@ function DetailsStep({
         </div>
       )}
 
-      <div className="fields-grid">
-      {fields.map((f) => {
+      {/* Grouped under quiet headings. Thirteen fields in a row is a wall;
+          the same thirteen under four headings is four small asks. */}
+      {groups.map(({ key, items }) => (
+        <section key={key} className="form-group">
+          {key && <h2 className="form-group-title">{groupLabel(key)}</h2>}
+          <div className="fields-grid">
+      {items.map((f) => {
         const label = FIELDS[f.labelKey ?? f.id] ?? f.id;
         const help = FIELDS[`${f.helpKey ?? f.id}Help`] || undefined;
         const value = app.values[f.id] ?? "";
@@ -682,7 +701,9 @@ function DetailsStep({
         );
       })}
 
-      </div>
+          </div>
+        </section>
+      ))}
 
       {/* The code appears in place. Navigating away and back is where an
           elderly user loses the thread, and it costs a page load on a

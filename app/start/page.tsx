@@ -38,6 +38,8 @@ export default function StartScreen() {
     router.push(`/status/${id}`);
   }
 
+  const SVC = d.svc as Record<string, string>;
+
   const cards: { c: Category; icon: React.ReactNode; title: string; sub: string }[] = [
     { c: "start", icon: <Person size={26} />, title: d.hub.catStart, sub: d.hub.catStartSub },
     { c: "have", icon: <Clock size={26} />, title: d.hub.catHave, sub: d.hub.catHaveSub },
@@ -61,13 +63,16 @@ export default function StartScreen() {
             className="card"
             onClick={() => openCategory(card.c)}
           >
-            <span className="card-title">
-              {card.icon}
-              {card.title}
-            </span>
-            <span className="card-sub">
-              {card.sub} · {servicesIn(card.c).length}
-            </span>
+            <span className="card-icon">{card.icon}</span>
+            <span className="card-title">{card.title}</span>
+            <span className="card-sub">{card.sub}</span>
+            {/* Naming what is inside saves a click, and teaches the words
+                someone needs before they have to choose between them. */}
+            <ul className="card-peek">
+              {servicesIn(card.c).map((s) => (
+                <li key={s.id}>{SVC[`${s.id}Name`]}</li>
+              ))}
+            </ul>
           </button>
         ))}
       </div>

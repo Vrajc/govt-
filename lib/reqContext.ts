@@ -20,7 +20,10 @@ export function demoContext(req: Request): DemoContext {
     outcome === "ACCEPTED"
       ? { outcome: "ACCEPTED", code: null }
       : outcome === "NEEDS_FIX"
-        ? { outcome: "NEEDS_FIX", code: code ?? "ERR_FACE_QUALITY_LOW" }
+        ? // Null, not a default: a photo-quality code on a service with no
+          // photo step is nonsense. decideOutcome falls back to the first
+          // code the service actually declares.
+          { outcome: "NEEDS_FIX", code }
         : null;
 
   const resolveInMs =

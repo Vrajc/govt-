@@ -173,6 +173,26 @@ export const svcGu: SvcDict = {
     steps: "મોકલ્યા પછી શું થશે",
   },
 
+  groups: {
+    you: "તમારા વિશે",
+    youAssisted: "એમના વિશે",
+    home: "તમે ક્યાં રહો છો",
+    homeAssisted: "એ ક્યાં રહે છે",
+    pension: "પેન્શન",
+    bank: "પૈસા ક્યાં આવવા જોઈએ",
+    newbank: "નવી બૅન્ક",
+    household: "તમારું ઘર",
+    householdAssisted: "એમનું ઘર",
+    husband: "તમારા પતિ વિશે",
+    husbandAssisted: "એમના પતિ વિશે",
+    disability: "દિવ્યાંગતા વિશે",
+    work: "તમારું કામ",
+    workAssisted: "એમનું કામ",
+    deceased: "જેમનું અવસાન થયું એમના વિશે",
+    apy: "60 ની ઉંમરે તમને શું જોઈએ",
+    complaint: "શું ગડબડ થઈ",
+  },
+
   fields: {
     fullName: "પૂરું નામ",
     fullNameHelp: "આધાર કાર્ડ પર જેમ લખ્યું છે એમ જ.",

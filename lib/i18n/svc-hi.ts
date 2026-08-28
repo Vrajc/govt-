@@ -173,6 +173,26 @@ export const svcHi: SvcDict = {
     steps: "भेजने के बाद क्या होगा",
   },
 
+  groups: {
+    you: "आपके बारे में",
+    youAssisted: "उनके बारे में",
+    home: "आप कहाँ रहते हैं",
+    homeAssisted: "वे कहाँ रहते हैं",
+    pension: "पेंशन",
+    bank: "पैसा कहाँ आना चाहिए",
+    newbank: "नया बैंक",
+    household: "आपका घर",
+    householdAssisted: "उनका घर",
+    husband: "आपके पति के बारे में",
+    husbandAssisted: "उनके पति के बारे में",
+    disability: "दिव्यांगता के बारे में",
+    work: "आपका काम",
+    workAssisted: "उनका काम",
+    deceased: "जिनका देहांत हुआ, उनके बारे में",
+    apy: "60 की उम्र पर आपको क्या चाहिए",
+    complaint: "क्या गड़बड़ हुई",
+  },
+
   fields: {
     fullName: "पूरा नाम",
     fullNameHelp: "जैसा आधार कार्ड पर लिखा है, बिल्कुल वैसा.",

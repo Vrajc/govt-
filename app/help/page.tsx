@@ -26,6 +26,7 @@ export default function HelpScreen() {
 
   return (
     <ScreenShell wide step={null} back="/" title={t("help.title")} guide={t("help.guide")} hideHelpline>
+      <div className="grid-cards">
       <a href={`tel:${tel}`} className="card">
         <span className="card-title">
           <Phone size={26} />
@@ -49,6 +50,20 @@ export default function HelpScreen() {
         <span className="card-sub">{t("help.centresSub")}</span>
       </button>
 
+      <button
+        type="button"
+        className="card"
+        onClick={() => setOpen(open === "steps" ? null : "steps")}
+        aria-expanded={open === "steps"}
+      >
+        <span className="card-title">
+          <Book size={26} />
+          {t("help.steps")}
+        </span>
+        <span className="card-sub">{t("help.stepsSub")}</span>
+      </button>
+      </div>
+
       {open === "centres" && (
         <div className="panel" style={{ marginTop: 16 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>
@@ -70,19 +85,6 @@ export default function HelpScreen() {
           <p className="helper">{t("help.centresNote")}</p>
         </div>
       )}
-
-      <button
-        type="button"
-        className="card"
-        onClick={() => setOpen(open === "steps" ? null : "steps")}
-        aria-expanded={open === "steps"}
-      >
-        <span className="card-title">
-          <Book size={26} />
-          {t("help.steps")}
-        </span>
-        <span className="card-sub">{t("help.stepsSub")}</span>
-      </button>
 
       {open === "steps" && (
         <div className="panel" style={{ marginTop: 16 }}>

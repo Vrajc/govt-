@@ -20,57 +20,80 @@ const f = (
   extra: Partial<FieldDef> = {}
 ): FieldDef => ({ id, type, required, ...extra });
 
+/** Same, with the heading this field belongs under. */
+const g =
+  (group: string) =>
+  (
+    id: string,
+    type: FieldDef["type"],
+    required = true,
+    extra: Partial<FieldDef> = {}
+  ): FieldDef => ({ id, type, required, group, ...extra });
+
+const you = g("you");
+const home = g("home");
+const pension = g("pension");
+const bank = g("bank");
+const newbank = g("newbank");
+const household = g("household");
+const husband = g("husband");
+const disability = g("disability");
+const work = g("work");
+const deceased = g("deceased");
+const apy = g("apy");
+const complaint = g("complaint");
+
 export const F = {
-  fullName: f("fullName", "name"),
-  dob: f("dob", "date"),
-  gender: f("gender", "choice", true, {
+  fullName: you("fullName", "name"),
+  dob: you("dob", "date"),
+  gender: you("gender", "choice", true, {
     options: [
       { value: "f", labelKey: "genderF" },
       { value: "m", labelKey: "genderM" },
       { value: "o", labelKey: "genderO" },
     ],
   }),
-  aadhaar: f("aadhaar", "aadhaar"),
-  mobile: f("mobile", "mobile"),
-  address: f("address", "address"),
-  district: f("district", "text"),
+  aadhaar: you("aadhaar", "aadhaar"),
+  mobile: you("mobile", "mobile"),
+  address: home("address", "address"),
+  district: home("district", "text"),
 
   /* pension identifiers */
-  ppo: f("ppo", "ppo"),
-  uan: f("uan", "uan"),
+  ppo: pension("ppo", "ppo"),
+  uan: pension("uan", "uan"),
 
   /* bank */
-  bankName: f("bankName", "text"),
-  accountNumber: f("accountNumber", "account"),
-  ifsc: f("ifsc", "ifsc"),
-  newBankName: f("newBankName", "text"),
-  newAccountNumber: f("newAccountNumber", "account"),
-  newIfsc: f("newIfsc", "ifsc"),
+  bankName: bank("bankName", "text"),
+  accountNumber: bank("accountNumber", "account"),
+  ifsc: bank("ifsc", "ifsc"),
+  newBankName: newbank("newBankName", "text"),
+  newAccountNumber: newbank("newAccountNumber", "account"),
+  newIfsc: newbank("newIfsc", "ifsc"),
 
   /* means-tested schemes */
-  rationCard: f("rationCard", "text"),
-  annualIncome: f("annualIncome", "money", false),
+  rationCard: household("rationCard", "text"),
+  annualIncome: household("annualIncome", "money", false),
 
   /* widow */
-  husbandName: f("husbandName", "name"),
-  husbandDeathDate: f("husbandDeathDate", "date"),
+  husbandName: husband("husbandName", "name"),
+  husbandDeathDate: husband("husbandDeathDate", "date"),
 
   /* disability */
-  disabilityPercent: f("disabilityPercent", "digits", true, { digits: 2 }),
-  udid: f("udid", "text", false),
+  disabilityPercent: disability("disabilityPercent", "digits", true, { digits: 2 }),
+  udid: disability("udid", "text", false),
 
   /* employment */
-  employerName: f("employerName", "text"),
-  retireDate: f("retireDate", "date"),
-  officeName: f("officeName", "text"),
-  employeeCode: f("employeeCode", "text", false),
-  serviceYears: f("serviceYears", "digits", true, { digits: 2 }),
+  employerName: work("employerName", "text"),
+  retireDate: work("retireDate", "date"),
+  officeName: work("officeName", "text"),
+  employeeCode: work("employeeCode", "text", false),
+  serviceYears: work("serviceYears", "digits", true, { digits: 2 }),
 
   /* family pension */
-  deceasedName: f("deceasedName", "name"),
-  deceasedPpo: f("deceasedPpo", "ppo"),
-  deathDate: f("deathDate", "date"),
-  relationship: f("relationship", "choice", true, {
+  deceasedName: deceased("deceasedName", "name"),
+  deceasedPpo: deceased("deceasedPpo", "ppo"),
+  deathDate: deceased("deathDate", "date"),
+  relationship: deceased("relationship", "choice", true, {
     options: [
       { value: "spouse", labelKey: "relSpouse" },
       { value: "son", labelKey: "relSon" },
@@ -79,7 +102,7 @@ export const F = {
       { value: "father", labelKey: "relFather" },
     ],
   }),
-  nameInPpo: f("nameInPpo", "choice", true, {
+  nameInPpo: deceased("nameInPpo", "choice", true, {
     options: [
       { value: "yes", labelKey: "yes" },
       { value: "no", labelKey: "no" },
@@ -88,7 +111,7 @@ export const F = {
   }),
 
   /* Atal Pension Yojana */
-  apyAmount: f("apyAmount", "choice", true, {
+  apyAmount: apy("apyAmount", "choice", true, {
     options: [
       { value: "1000", labelKey: "apy1000" },
       { value: "2000", labelKey: "apy2000" },
@@ -97,10 +120,10 @@ export const F = {
       { value: "5000", labelKey: "apy5000" },
     ],
   }),
-  nomineeName: f("nomineeName", "name"),
+  nomineeName: apy("nomineeName", "name"),
 
   /* grievance */
-  complaintAbout: f("complaintAbout", "choice", true, {
+  complaintAbout: complaint("complaintAbout", "choice", true, {
     options: [
       { value: "notcredited", labelKey: "cmpNotCredited" },
       { value: "less", labelKey: "cmpLess" },
@@ -109,11 +132,11 @@ export const F = {
       { value: "other", labelKey: "cmpOther" },
     ],
   }),
-  monthsMissing: f("monthsMissing", "digits", true, { digits: 2 }),
-  lastReceived: f("lastReceived", "date", false),
+  monthsMissing: complaint("monthsMissing", "digits", true, { digits: 2 }),
+  lastReceived: complaint("lastReceived", "date", false),
 
   /* turning 80 */
-  currentPension: f("currentPension", "money"),
+  currentPension: pension("currentPension", "money"),
 } satisfies Record<string, FieldDef>;
 
 /* ==================================================================

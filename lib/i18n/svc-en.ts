@@ -196,6 +196,27 @@ export const svcEn = {
   /* ================================================================
    * Shared field labels
    * ================================================================ */
+  /** Headings that break a long form into a few short ones. */
+  groups: {
+    you: "About you",
+    youAssisted: "About them",
+    home: "Where you live",
+    homeAssisted: "Where they live",
+    pension: "The pension",
+    bank: "Where the money should go",
+    newbank: "The new bank",
+    household: "Your household",
+    householdAssisted: "Their household",
+    husband: "About your husband",
+    husbandAssisted: "About her husband",
+    disability: "About the disability",
+    work: "Your work",
+    workAssisted: "Their work",
+    deceased: "About the person who died",
+    apy: "What you want at 60",
+    complaint: "What went wrong",
+  },
+
   fields: {
     fullName: "Full name",
     fullNameHelp: "Exactly as it is written on the Aadhaar card.",

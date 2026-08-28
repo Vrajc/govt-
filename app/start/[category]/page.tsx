@@ -59,6 +59,9 @@ export default function CategoryScreen({
             <span className="card-sub">
               {(d.svc as Record<string, string>)[`${s.id}Short`]}
             </span>
+            <span className="card-amount">
+              {(d.svc as Record<string, string>)[`${s.id}Amount`]}
+            </span>
           </Link>
         ))}
       </div>

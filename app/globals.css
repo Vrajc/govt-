@@ -822,3 +822,104 @@ img, svg, video { max-width: 100%; }
   padding: 16px 18px;
 }
 .doc-row > *:first-child { min-width: 0; }
+
+/* ==================================================================
+   Form groups
+   ==================================================================
+   Thirteen fields in a row is a wall. The same thirteen under four
+   quiet headings is four small asks, and that is most of the
+   difference between a form someone finishes and one they abandon.
+   ================================================================== */
+.form-group + .form-group {
+  margin-top: 8px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.form-group-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+}
+
+/* ==================================================================
+   Cards, given a little more presence
+   ================================================================== */
+
+/* The icon gets a ground, so a card reads as a thing to press rather
+   than a paragraph with a glyph in front of it. */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  flex-shrink: 0;
+  margin-bottom: 14px;
+  transition: background-color 150ms, color 150ms;
+}
+.card:hover .card-icon { background: var(--primary); color: #FFFFFF; }
+
+/* A hint of lift on hover. Two pixels, 150ms, and gone under
+   prefers-reduced-motion like everything else. */
+.card {
+  transition:
+    border-color 150ms,
+    background-color 150ms,
+    transform 150ms,
+    box-shadow 150ms;
+}
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(31, 28, 26, 0.07);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:hover { transform: none; box-shadow: none; }
+}
+
+/* What is inside a category, listed on the card itself — one less click,
+   and it teaches the vocabulary before you have to choose. */
+.card-peek {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.card-peek li { display: flex; gap: 8px; align-items: baseline; }
+.card-peek li::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  opacity: 0.55;
+  transform: translateY(-3px);
+}
+
+/* The one-line amount on a service card, so a list can be scanned. */
+.card-amount {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--success);
+  background: var(--success-tint);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+/* Push the chevron on a service card to the bottom, so cards of
+   different text lengths still line up. */
+.grid-list > .card > .card-sub { flex: 1; }

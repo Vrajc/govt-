@@ -50,6 +50,13 @@ export interface FieldDef {
   id: string;
   type: FieldType;
   required: boolean;
+  /**
+   * Which heading this field sits under. A thirteen-field form reads as
+   * four short ones when it is grouped, and that is most of the
+   * difference between a form someone finishes and one they abandon.
+   * Key into the `groups` dictionary.
+   */
+  group?: string;
   /** Key into the shared `fields` dictionary. Defaults to `id`. */
   labelKey?: string;
   helpKey?: string;
