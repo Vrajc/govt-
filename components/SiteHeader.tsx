@@ -57,24 +57,29 @@ export function SiteHeader() {
             </Link>
           ))}
 
-          {/* Changing language reloads, because the server sends only the
-              chosen dictionary. One reload beats shipping three scripts. */}
-          <label className="lang-switch">
-            <Globe size={20} />
-            <span className="sr-only">{NAV.language}</span>
-            <select
-              value={lang}
-              aria-label={NAV.language}
-              onChange={(e) => chooseLang(e.target.value as Lang, pathname)}
-            >
-              {LANGS.map((l) => (
-                <option key={l} value={l}>
-                  {LANG_NAMES[l]}
-                </option>
-              ))}
-            </select>
-          </label>
         </nav>
+
+        {/* Outside the nav, not inside it: it is a control, not a
+            destination, and on a phone it pairs with the brand on the
+            first row so the three real links keep a row of their own.
+
+            Changing language reloads, because the server sends only the
+            chosen dictionary. One reload beats shipping three scripts. */}
+        <label className="lang-switch">
+          <Globe size={20} />
+          <span className="sr-only">{NAV.language}</span>
+          <select
+            value={lang}
+            aria-label={NAV.language}
+            onChange={(e) => chooseLang(e.target.value as Lang, pathname)}
+          >
+            {LANGS.map((l) => (
+              <option key={l} value={l}>
+                {LANG_NAMES[l]}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
     </header>
   );

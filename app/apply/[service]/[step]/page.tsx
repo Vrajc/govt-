@@ -306,16 +306,16 @@ function EligibilityStep({
       >
         <div className="note note-warn">
           <Alert size={22} />
-          <span style={{ fontSize: 20 }}>{ELIG[q.failKey]}</span>
+          <span style={{ fontSize: "var(--fs-md)" }}>{ELIG[q.failKey]}</span>
         </div>
 
         {q.suggest && (
           <div className="panel panel-good">
             <p className="review-key">{t("elig.tryOther")}</p>
-            <p style={{ fontSize: 22, fontWeight: 700, margin: "2px 0 6px" }}>
+            <p style={{ fontSize: "var(--fs-lg)", fontWeight: 700, margin: "2px 0 6px" }}>
               {SVC[`${q.suggest}Name`]}
             </p>
-            <p className="helper" style={{ fontSize: 18 }}>
+            <p className="helper">
               {SVC[`${q.suggest}Short`]}
             </p>
           </div>
@@ -523,7 +523,7 @@ function DocumentsStep({
                   </span>
                 )}
                 <span>
-                  <p className="review-val" style={{ fontSize: 19 }}>
+                  <p className="review-val">
                     {DOCS[doc.id]}
                   </p>
                   <p className="helper" style={{ margin: 0 }}>
@@ -856,7 +856,7 @@ function PhotoStep({
           {items.map((item, i) => (
             <div className="checklist-item" key={i}>
               <span className="checklist-art">{item.art}</span>
-              <span style={{ fontSize: 20, fontWeight: 600 }}>{item.text}</span>
+              <span style={{ fontSize: "var(--fs-md)", fontWeight: 600 }}>{item.text}</span>
             </div>
           ))}
         </div>

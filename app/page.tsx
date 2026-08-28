@@ -28,7 +28,7 @@ export default function LanguageScreen() {
       <header style={{ marginBottom: 36 }}>
         <p
           style={{
-            fontSize: 26,
+            fontSize: 22,
             fontWeight: 700,
             lineHeight: 1.35,
             margin: "0 0 14px",
@@ -55,7 +55,7 @@ export default function LanguageScreen() {
 
       <h1
         className="screen-title"
-        style={{ fontSize: 24, marginBottom: 20 }}
+        style={{ fontSize: 20, marginBottom: 18 }}
         id="lang-heading"
       >
         Choose your language <span lang="hi">· अपनी भाषा चुनिए</span>{" "}
@@ -70,7 +70,7 @@ export default function LanguageScreen() {
             className="btn btn-secondary"
             lang={l}
             onClick={() => choose(l)}
-            style={{ justifyContent: "space-between", fontSize: 26, minHeight: 76 }}
+            style={{ justifyContent: "space-between", fontSize: 22, minHeight: 66 }}
           >
             <span>{LANG_NAMES[l]}</span>
             <Chevron size={24} />

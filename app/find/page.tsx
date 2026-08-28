@@ -81,7 +81,7 @@ export default function FinderScreen() {
         <div role="group" aria-label={F[node.questionKey]} className="grid-list">
           {node.options.map((o) => (
             <button key={o.labelKey} type="button" className="card" onClick={() => go(o.to)}>
-              <span className="card-title" style={{ justifyContent: "space-between" }}>
+              <span className="card-title card-title-row">
                 <span>{F[o.labelKey]}</span>
                 <Chevron size={22} />
               </span>
@@ -119,11 +119,11 @@ export default function FinderScreen() {
         }
       >
         <div className="panel panel-good">
-          <h2 style={{ fontSize: 26, fontWeight: 700, margin: "0 0 10px" }}>
+          <h2 style={{ fontSize: "var(--fs-xl)", fontWeight: 700, margin: "0 0 8px" }}>
             {SVC[`${id}Name`]}
           </h2>
-          <p style={{ fontSize: 20, margin: "0 0 12px" }}>{SVC[`${id}Who`]}</p>
-          <p className="helper" style={{ fontSize: 18 }}>
+          <p style={{ fontSize: "var(--fs-md)", margin: "0 0 10px" }}>{SVC[`${id}Who`]}</p>
+          <p className="helper">
             {SVC[`${id}Amount`]}
           </p>
         </div>

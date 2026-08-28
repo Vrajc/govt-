@@ -62,7 +62,7 @@ export default function OutboxScreen() {
                 {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </span>
             </p>
-            <p style={{ fontSize: 18, margin: "6px 0 0", lineHeight: 1.5 }} lang={m.lang}>
+            <p style={{ fontSize: "var(--fs-sm)", margin: "6px 0 0", lineHeight: 1.5 }} lang={m.lang}>
               {m.body}
             </p>
           </li>
@@ -77,7 +77,7 @@ export default function OutboxScreen() {
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {reminders.map((r) => (
               <li key={r.id} className="panel" style={{ marginBottom: 12 }}>
-                <p className="review-val tabular" style={{ fontSize: 18 }}>
+                <p className="review-val tabular">
                   {r.ppo} · {r.mobile}
                 </p>
                 <p className="helper" style={{ marginTop: 2 }}>

@@ -91,7 +91,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
           facts move alongside and stay put while the rest scrolls. */}
       <div className="split-main">
         <div>
-          <p className="body" style={{ fontSize: 20, color: "var(--ink)" }}>
+          <p className="body" style={{ color: "var(--ink)" }}>
             {SVC[`${svc.id}What`]}
           </p>
 
@@ -112,7 +112,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
               >
                 <Check size={22} className="text-soft" />
                 <span>
-                  <span style={{ fontSize: 19, fontWeight: 600, display: "block" }}>
+                  <span style={{ fontSize: "var(--fs-md)", fontWeight: 600, display: "block" }}>
                     {DOCS[doc.id]}
                     {!doc.required && (
                       <span className="helper" style={{ display: "inline", marginLeft: 8 }}>
@@ -133,7 +133,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
             {svc.stages.map((stage, i) => (
               <li key={stage.id}>
                 <span className="tl-dot">
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{i + 1}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>{i + 1}</span>
                 </span>
                 <span>
                   <span className="tl-text">{STAGES[stage.id]}</span>

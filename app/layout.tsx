@@ -74,8 +74,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {d.nav.skip}
           </a>
           <div className="app-frame">
-            <PrototypeBanner text={d.common.protoBanner} />
-            <SiteHeader />
+            {/* One sticky block, not two. The header used to pin itself
+                at the banner's one-line height, which is not its height on a
+                phone, where the sentence wraps. */}
+            <div className="topbars">
+              <PrototypeBanner text={d.common.protoBanner} />
+              <SiteHeader />
+            </div>
             {children}
           </div>
           <DemoShortcut />

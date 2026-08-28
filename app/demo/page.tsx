@@ -198,7 +198,7 @@ export default function DemoScreen() {
             style={{ width: 28, height: 28, marginTop: 4, accentColor: "var(--primary)" }}
           />
           <span>
-            <span style={{ fontSize: 20, fontWeight: 600, display: "block" }}>
+            <span style={{ fontSize: "var(--fs-md)", fontWeight: 600, display: "block" }}>
               Pretend the network is slow
             </span>
             <span className="helper">Adds about 1.6 seconds to every request, both ways</span>
@@ -217,7 +217,7 @@ export default function DemoScreen() {
 
       <div className="panel" style={{ marginTop: 24 }}>
         <p className="review-key">Current settings</p>
-        <p className="mono" style={{ fontSize: 15, display: "block", padding: "8px 10px" }}>
+        <p className="mono" style={{ fontSize: "var(--fs-xs)", display: "block", padding: "8px 10px" }}>
           outcome={demo.outcome} · code={demo.code} · speed={demo.speed} · slow3g=
           {String(demo.slow3g)}
         </p>
@@ -277,7 +277,7 @@ function Choice({
         style={{ width: 26, height: 26, marginTop: 2, accentColor: "var(--primary)" }}
       />
       <span>
-        <span style={{ fontSize: 20, fontWeight: 600, display: "block" }}>{label}</span>
+        <span style={{ fontSize: "var(--fs-md)", fontWeight: 600, display: "block" }}>{label}</span>
         {sub && <span className="helper">{sub}</span>}
       </span>
     </label>

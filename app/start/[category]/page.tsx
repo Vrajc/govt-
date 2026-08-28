@@ -53,7 +53,7 @@ export default function CategoryScreen({
       <div role="list" className="grid-list">
         {services.map((s) => (
           <Link key={s.id} href={`/service/${s.id}`} className="card" role="listitem">
-            <span className="card-title" style={{ justifyContent: "space-between" }}>
+            <span className="card-title card-title-row">
               <span>{(d.svc as Record<string, string>)[`${s.id}Name`]}</span>
               <Chevron size={22} />
             </span>

@@ -83,7 +83,7 @@ export default function HelpScreen() {
                 key={c.name}
                 style={{ padding: "14px 0", borderBottom: "1px solid var(--line)" }}
               >
-                <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{c.name}</p>
+                <p style={{ fontSize: "var(--fs-md)", fontWeight: 600, margin: 0 }}>{c.name}</p>
                 <p className="helper" style={{ margin: "2px 0 0" }}>
                   {c.area} · {c.km} {t("help.km")} · {t("help.open")} {c.open}
                 </p>
@@ -101,7 +101,7 @@ export default function HelpScreen() {
           </h2>
           <ol style={{ paddingLeft: 24, margin: 0 }}>
             {steps.map((s, i) => (
-              <li key={i} style={{ marginBottom: 14, fontSize: 20 }}>
+              <li key={i} style={{ marginBottom: 12, fontSize: "var(--fs-md)" }}>
                 {s}
               </li>
             ))}

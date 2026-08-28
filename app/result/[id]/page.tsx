@@ -328,10 +328,10 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
     >
       {/* Exactly two sentences: what happened, and what to do. */}
       <div className="panel panel-warn">
-        <p style={{ fontSize: 22, fontWeight: 600, margin: "0 0 12px", color: "#7C3018" }}>
+        <p style={{ fontSize: "var(--fs-lg)", fontWeight: 600, margin: "0 0 10px", color: "#7C3018" }}>
           {explain?.reason ?? <span className="pulsing">…</span>}
         </p>
-        <p style={{ fontSize: 20, margin: 0, color: "var(--ink)" }}>{explain?.action ?? ""}</p>
+        <p style={{ fontSize: "var(--fs-md)", margin: 0, color: "var(--ink)" }}>{explain?.action ?? ""}</p>
       </div>
 
       <details className="tech">

@@ -153,7 +153,7 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
 
           <div className="panel">
             <p className="review-key">{t("status.refLabel")}</p>
-            <p className="review-val tabular" style={{ fontSize: 22 }}>
+            <p className="review-val tabular" style={{ fontSize: "var(--fs-lg)" }}>
               {id}
             </p>
             <p className="helper">{t("status.refHelp")}</p>

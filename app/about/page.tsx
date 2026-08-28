@@ -36,7 +36,10 @@ export default function AboutScreen() {
       title={t("about.title")}
       guide={t("about.guide")}
     >
-      <div className="tbl-wrap">
+      {/* Focusable and named: on a phone this table is wider than the
+          screen, so it is a scrollable region, and a scrollable region has
+          to be reachable and announced. */}
+      <div className="tbl-wrap" tabIndex={0} role="region" aria-label={t("about.title")}>
         <table className="plain">
           <thead>
             <tr>
@@ -70,7 +73,7 @@ export default function AboutScreen() {
           from the catalogue, so a new scheme cannot be added without its
           real-world counterpart being named here too. */}
       <h2 className="section-title">{t("svc.realSystem")}</h2>
-      <div className="tbl-wrap">
+      <div className="tbl-wrap" tabIndex={0} role="region" aria-label={t("svc.realSystem")}>
         <table className="plain">
           <thead>
             <tr>
