@@ -42,6 +42,12 @@ export const svcEn = {
     ctaFind: "I do not know which one I need",
     ctaTrack: "Check something I already sent",
 
+    stat1n: "1 crore+",
+    stat1: "pensioners must prove they are alive every year",
+    stat2n: "14",
+    stat2: "schemes, spread across the centre and the states",
+    stat3n: "1",
+    stat3: "place to find the one that is yours",
     whyTitle: "Why this exists",
     why1:
       "More than one crore pensioners have to prove they are alive every year, or the money stops.",

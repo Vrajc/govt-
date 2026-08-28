@@ -13,6 +13,7 @@ import {
   Person,
   Search,
 } from "@/components/Icons";
+import { PassbookArt } from "@/components/LandingArt";
 import { servicesIn } from "@/lib/services/catalogue";
 import type { Category } from "@/lib/services/types";
 
@@ -54,7 +55,8 @@ export default function LandingScreen() {
     <div className="sheet sheet-wide">
       <main className="shell-main" id="main">
         {/* ---------------- hero ---------------- */}
-        <section className="hero">
+        <section className="hero hero-grid">
+          <div>
           <h1 className="hero-title">{L.heroTitle}</h1>
           <p className="hero-sub">{L.heroSub}</p>
 
@@ -70,6 +72,13 @@ export default function LandingScreen() {
           <p className="hero-track">
             <Link href="/start">{L.ctaTrack}</Link>
           </p>
+          </div>
+
+          {/* The two objects this product sits between: the passbook the
+              family already keeps, and the phone that replaced the trip. */}
+          <div className="hero-art">
+            <PassbookArt />
+          </div>
         </section>
 
         {/* ---------------- what you can do ---------------- */}
@@ -94,12 +103,29 @@ export default function LandingScreen() {
         </section>
 
         {/* ---------------- why ---------------- */}
-        <section className="lp-section">
-          <h2 className="lp-h2">{L.whyTitle}</h2>
-          {/* The first line is the one that should stop someone scrolling. */}
-          <p className="lp-standfirst">{L.why1}</p>
-          <p className="body">{L.why2}</p>
-          <p className="body">{L.why3}</p>
+        <section className="lp-section why-grid">
+          <div>
+            <h2 className="lp-h2">{L.whyTitle}</h2>
+            {/* The first line is the one that should stop someone scrolling. */}
+            <p className="lp-standfirst">{L.why1}</p>
+            <p className="body">{L.why2}</p>
+            <p className="body">{L.why3}</p>
+          </div>
+
+          {/* The scale of the problem, as three figures. Numbers carry this
+              better than a drawing would, and they are all true. */}
+          <aside className="lp-figures" aria-label={L.whyTitle}>
+            {[
+              [L.stat1n, L.stat1],
+              [L.stat2n, L.stat2],
+              [L.stat3n, L.stat3],
+            ].map(([n, label]) => (
+              <div className="lp-figure" key={label}>
+                <span className="lp-figure-n">{n}</span>
+                <span className="lp-figure-l">{label}</span>
+              </div>
+            ))}
+          </aside>
         </section>
 
         {/* ---------------- how it works ---------------- */}
