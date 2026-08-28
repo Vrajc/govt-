@@ -134,6 +134,9 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
     } else if (o?.kind === "increase") {
       title = t("outcome.increaseTitle");
       sub = t("outcome.increaseSub");
+    } else if (o?.kind === "grant") {
+      title = t("outcome.grantTitle");
+      sub = t("outcome.grantSub", { date: o.grantFrom ? fmt(o.grantFrom) : "" });
     } else if (o?.kind === "grievance") {
       title = t("outcome.grievanceTitle");
       sub = t("outcome.grievanceSub", { date: o.answerBy ? fmt(o.answerBy) : "" });
@@ -152,6 +155,11 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
           label: t("outcome.changeEffective"),
           value: o.effectiveFrom ? fmt(o.effectiveFrom) : "—",
         };
+      }
+      if (o?.kind === "grant") {
+        return o.grantAmount
+          ? { label: t("outcome.grantOneTime"), value: money(o.grantAmount) }
+          : { label: t("outcome.grantEveryMonth"), value: o.grantInKind ?? "—" };
       }
       if (o?.kind === "grievance") {
         return { label: t("outcome.grievanceDocket"), value: o.docket ?? "—" };
@@ -187,7 +195,7 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
           ppo: record.values.ppo ?? record.values.deceasedPpo ?? record.id,
         }
       );
-      if (canvas && downloadCanvas(canvas, `pramaan-saral-${record.id}.png`)) {
+      if (canvas && downloadCanvas(canvas, `pension-saral-${record.id}.png`)) {
         setSaveMsg(t("accepted.saved"));
       } else {
         window.print();

@@ -1,4 +1,4 @@
-# Pramaan Saral · प्रमाण सरल · પ્રમાણ સરળ
+# Pension Saral · पेंशन सरल · પેન્શન સરળ
 
 **Prove you are here. Keep your pension.**
 
@@ -22,7 +22,7 @@ alone that she qualifies for it and not for the three schemes listed beside
 it. The people who need these schemes most are the people least able to
 navigate them.
 
-So this is not a form. It is **eleven government processes behind one door**,
+So this is not a form. It is **fourteen government processes behind one door**,
 with a finder that answers the question nobody's portal answers: *which
 pension am I even entitled to?*
 
@@ -34,14 +34,17 @@ pension am I even entitled to?*
 | | Pension from your PF | EPS-95, **Form 10D**, EPFO member portal |
 | | Government service pension | **Bhavishya**, Form 6-A, Head of Office → PAO → e-PPO |
 | | Save now for a pension at 60 | Atal Pension Yojana |
+| | Free grain every month | Annapurna (NSAP) — for 65+ getting no old-age pension |
 | **After a death** | Take over a pension | **Form 14** family pension |
+| | Money after a death | NFBS (NSAP) — ₹20,000 once, when the earner dies |
 | **Already have one** | Prove you are alive | Jeevan Pramaan, the annual DLC |
 | | Move it to another bank | CPAO transfer |
 | | Extra pension after 80 | The 20% at 80 that banks routinely miss |
+| | Get back what you commuted | Restoration 15 years on |
 | | My pension has not come | CPENGRAMS grievance |
 
 Every one of them is a **data definition**, not a hand-built set of screens.
-One engine renders all eleven. Adding the twelfth — or a state scheme, or the
+One engine renders all fourteen. Adding the fifteenth — or a state scheme, or the
 22nd scheduled language — is a data file, not a rebuild.
 
 ---
@@ -74,13 +77,15 @@ explanations instead of live ones.
 
 ```bash
 npm run check           # types + copy rules + contrast
+npm run check:keys      # every key the catalogue asks for exists
 npm run build
 npm run verify:no-key   # proves no key or SDK reaches the browser
+npm run check:services  # all 14 services end to end, against a running server
 ```
 
-- `check:copy` — 634 strings × 3 languages: no banned jargon, no exclamation
+- `check:copy` — 739 strings × 3 languages: no banned jargon, no exclamation
   marks, no emoji, nothing left untranslated.
-- `check:contrast` — all 22 text/background pairs against WCAG AAA (7:1).
+- `check:contrast` — all 24 text/background pairs against WCAG AAA (7:1).
 - `verify:no-key` — greps the built client bundle for the key, the SDK and the
   API host.
 
@@ -125,7 +130,7 @@ Leave the result on *Decide honestly*, speed on *8 seconds*.
 
 | Real in this prototype | Mocked |
 |---|---|
-| All eleven journeys, start to finish | Aadhaar, the OTP, the PPO lookup |
+| All fourteen journeys, start to finish | Aadhaar, the OTP, the PPO lookup |
 | Photo capture and on-device quality analysis | Face matching against UIDAI |
 | Photographing documents | The offices that actually decide |
 | The plain-language explainer (live OpenAI call) | SMS delivery — written to a visible outbox at `/outbox` |

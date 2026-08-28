@@ -39,7 +39,7 @@ const notoGuj = Noto_Sans_Gujarati({
 });
 
 export const metadata: Metadata = {
-  title: "Pramaan Saral — prove you are here, keep your pension",
+  title: "Pension Saral — prove you are here, keep your pension",
   description:
     "A student prototype of a simpler citizen journey for India's Digital Life Certificate. Not an official government service.",
   robots: { index: false, follow: false },

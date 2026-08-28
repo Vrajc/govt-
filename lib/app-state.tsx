@@ -125,8 +125,15 @@ export function AppProvider({
       const raw = sessionStorage.getItem(APP_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<Application>;
-        setApp((cur) => ({ ...cur, ...parsed }));
-        if (isLang(parsed.lang)) setLangState(parsed.lang);
+        /* The draft never gets to choose the language. The server already
+           picked one from the cookie and sent the matching dictionary down
+           with this page, so a stale `lang` in storage would leave the screen
+           reading English while <html lang> and the voice both claimed
+           Gujarati — and the sync effect below would then write the stale
+           value back to the cookie, carrying the mismatch to the next page.
+           Every real language change goes through `chooseLang`, which sets
+           the cookie and reloads, so the server is always the authority. */
+        setApp((cur) => ({ ...cur, ...parsed, lang: initialLang }));
       }
     } catch {
       /* corrupt storage is not worth crashing over — start fresh */

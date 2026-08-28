@@ -1,5 +1,5 @@
 {
-  "name": "pramaan-saral",
+  "name": "pension-saral",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,8 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "check": "npm run typecheck && npm run check:copy && npm run check:contrast",
     "verify:no-key": "node scripts/check-no-key.mjs",
-    "check:services": "node scripts/check-services.mjs"
+    "check:services": "node scripts/check-services.mjs",
+    "check:keys": "node scripts/check-keys.mjs"
   },
   "dependencies": {
     "next": "^15.5.24",

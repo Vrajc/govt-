@@ -16,7 +16,7 @@ export const en = {
   },
 
   common: {
-    appName: "Pramaan Saral",
+    appName: "Pension Saral",
     tagline: "Prove you are here. Keep your pension.",
     protoBanner: "A student prototype. Not an official government service.",
     back: "Back",
@@ -182,7 +182,7 @@ export const en = {
     receiptOn: "Received on",
     safeUntil: "Your pension is safe until",
     stampTop: "RECEIVED",
-    stampBottom: "PRAMAAN SARAL",
+    stampBottom: "PENSION SARAL",
     stampMiddle: "PROOF OF LIFE",
     save: "Save this",
     saving: "Saving",
@@ -269,7 +269,7 @@ export const en = {
     techBody:
       "Next.js 15 App Router, TypeScript, Tailwind v4. The mock pension office is a state machine with an audit log, behind real HTTP route handlers, backed by an in-memory Map — in production a Postgres table and a job queue. The OpenAI model gpt-4o-mini is called only from the server, only for the two jobs above, and every call has a hardcoded fallback so the app works with the key removed.",
     notAffiliated:
-      "Pramaan Saral is not affiliated with, endorsed by, or connected to the Government of India, MeitY, UIDAI or Jeevan Pramaan. No government emblem, logo or flag is used anywhere in this prototype.",
+      "Pension Saral is not affiliated with, endorsed by, or connected to the Government of India, MeitY, UIDAI or Jeevan Pramaan. No government emblem, logo or flag is used anywhere in this prototype.",
   },
 
   outbox: {
@@ -309,13 +309,13 @@ export const en = {
   /** Outbound messages. Every one carries the prototype disclosure. */
   sms: {
     received:
-      "We have your proof of life. Reference {id}. We will send the result shortly. - Pramaan Saral",
+      "We have your proof of life. Reference {id}. We will send the result shortly. - Pension Saral",
     accepted:
-      "Your pension is safe until {date}. Nothing more to do. Reference {id}. - Pramaan Saral",
+      "Your pension is safe until {date}. Nothing more to do. Reference {id}. - Pension Saral",
     needsFix:
-      "One small thing to fix with your proof of life. Open the page again to fix it. Reference {id}. - Pramaan Saral",
+      "One small thing to fix with your proof of life. Open the page again to fix it. Reference {id}. - Pension Saral",
     reminder:
-      "It is time to prove you are here so your pension keeps coming. It takes about three minutes. Reference {id}. - Pramaan Saral",
+      "It is time to prove you are here so your pension keeps coming. It takes about three minutes. Reference {id}. - Pension Saral",
   },
 
   errors: {

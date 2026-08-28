@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api";
 import { ScreenShell } from "@/components/ScreenShell";
 import { BigButton, BigLink } from "@/components/BigButton";
 import { Field } from "@/components/Field";
+import { DateField } from "@/components/DateField";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import {
   Alert,
@@ -44,8 +45,11 @@ import type { PublicRecord } from "@/lib/publicRecord";
 import type { FieldDef, ServiceDef } from "@/lib/services/types";
 import type { Mode } from "@/lib/types";
 
+/** Month names live in the `fields` dictionary, one key each. */
+const MONTH_KEYS = Array.from({ length: 12 }, (_, i) => `month${i + 1}`);
+
 /**
- * One engine, eleven services.
+ * One engine, fourteen services.
  *
  * The step order, the questions, the documents and the fields all come from
  * the service definition. Nothing in this file knows what a widow pension is.
@@ -244,12 +248,34 @@ function EligibilityStep({
   const result = evaluateEligibility(svc, answers);
   const [touched, setTouched] = useState(false);
 
+  /**
+   * Nothing is judged until the person presses Next.
+   *
+   * This used to evaluate on every keystroke, which meant that typing the
+   * "1" of "18" into an age box tripped a `min: 18` rule and replaced the
+   * whole form with a rejection screen, mid-word. Answering a question
+   * cannot be allowed to fail you before you have finished answering it.
+   */
+  const [checked, setChecked] = useState(false);
+
   function answer(id: string, value: string) {
     patch({ eligibility: { ...answers, [id]: value } });
   }
 
+  function tryNext() {
+    if (!result.complete) {
+      setTouched(true);
+      return;
+    }
+    if (result.failed) {
+      setChecked(true);
+      return;
+    }
+    onNext();
+  }
+
   /* ---- disqualified: say why, and point somewhere real ---- */
-  if (result.failed) {
+  if (checked && result.failed) {
     const q = result.failed;
     return (
       <ScreenShell
@@ -264,7 +290,11 @@ function EligibilityStep({
                 {t("elig.tryOther")}
               </BigLink>
             )}
-            <BigLink href="/start" variant="secondary">
+            {/* Getting here on a typo must not be a dead end. */}
+            <BigButton variant="secondary" onClick={() => setChecked(false)}>
+              {t("elig.changeAnswer")}
+            </BigButton>
+            <BigLink href="/start" variant="quiet">
               {t("elig.goHome")}
             </BigLink>
             {/* Never a hard block: a rule can be wrong about a real person. */}
@@ -307,16 +337,12 @@ function EligibilityStep({
       guide={t("elig.guide")}
       speakExtra={svc.eligibility.map((q) => ELIG[`q${cap(q.id)}`] ?? "").join(". ")}
       action={
-        <BigButton
-          onClick={() => (allAnswered ? onNext() : setTouched(true))}
-          disabled={!allAnswered}
-          icon={<Chevron size={22} />}
-        >
+        <BigButton onClick={tryNext} disabled={!allAnswered} icon={<Chevron size={22} />}>
           {t("apply.nextStep")}
         </BigButton>
       }
     >
-      {allAnswered && (
+      {allAnswered && !result.failed && (
         <div className="note note-good">
           <Check size={22} />
           <span>{t("elig.passTitle")}</span>
@@ -709,10 +735,29 @@ function DetailsStep({
           );
         }
 
+        if (f.type === "date") {
+          return (
+            <DateField
+              key={f.id}
+              label={label}
+              help={help}
+              error={err}
+              value={value}
+              monthNames={MONTH_KEYS.map((k) => FIELDS[k] ?? k)}
+              partLabels={{
+                day: FIELDS.dateDay,
+                month: FIELDS.dateMonth,
+                year: FIELDS.dateYear,
+              }}
+              onChange={(iso) => setValue(f, iso)}
+            />
+          );
+        }
+
         return (
           <Field
             key={f.id}
-            /* A name or an address needs the whole row; a date does not. */
+            /* A name or an address needs the whole row. */
             wrapClassName={
               ["name", "address"].includes(f.type) ? "field-wide" : undefined
             }

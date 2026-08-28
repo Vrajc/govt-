@@ -5,8 +5,20 @@ import { useApp } from "@/lib/app-state";
 import { InkStamp } from "./CameraArt";
 import type { PublicRecord } from "@/lib/publicRecord";
 
+/** Completed years, for the sentence that explains the age slab. */
+function ageOn(dob: string | undefined, now = new Date()): number {
+  const born = new Date(dob ?? "");
+  if (Number.isNaN(born.getTime())) return 0;
+  let years = now.getUTCFullYear() - born.getUTCFullYear();
+  const beforeBirthday =
+    now.getUTCMonth() < born.getUTCMonth() ||
+    (now.getUTCMonth() === born.getUTCMonth() && now.getUTCDate() < born.getUTCDate());
+  if (beforeBirthday) years -= 1;
+  return Math.max(0, years);
+}
+
 /**
- * The signature element, now for five kinds of outcome rather than one.
+ * The signature element, now for six kinds of outcome rather than one.
  *
  * The shape stays the same in every case: a stamped passbook page with a
  * name, a couple of small rows, one very large number or date, and a
@@ -70,6 +82,18 @@ export const Receipt = forwardRef<HTMLDivElement, { record: PublicRecord }>(
     } else if (o?.kind === "increase") {
       bigLabel = t("outcome.increaseNow");
       bigValue = money(o.newMonthly ?? 0);
+      /* Naming the rate and the reason is what turns a large arrears figure
+         from a suspicious number into a claim someone can repeat at a bank
+         counter: "forty per cent, because I am ninety-one". */
+      if (o.ratePercent) {
+        rows.push([
+          t("outcome.increaseRate"),
+          t("outcome.increaseRateValue", {
+            pct: o.ratePercent,
+            age: ageOn(record.values.dob),
+          }),
+        ]);
+      }
       if (o.arrears) rows.push([t("outcome.increaseArrears"), money(o.arrears)]);
       if (o.owedFrom) rows.push([t("outcome.increaseFrom"), fmt(o.owedFrom)]);
     } else if (o?.kind === "grievance") {

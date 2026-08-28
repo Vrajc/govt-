@@ -289,3 +289,29 @@ and this version catches a ten-minute-old page up in a single poll.
 - **Amounts are plausible, not authoritative.** EPS-95 uses the real
   pensionable-salary formula; the NSAP figures are the central rate plus a
   typical state top-up. A real version would read the state's current rates.
+
+---
+
+## The name
+
+The brief named the product **Pramaan Saral** — "proof, made simple". That was
+the right name when the app did one thing: prove you are alive once a year.
+
+It stopped being right when the app grew to fourteen services. Most of them
+have nothing to do with proof. Somebody claiming a widow pension, chasing
+money that never arrived, or asking for the grain they are owed is not
+proving anything, and a product called "proof, made simple" tells them they
+are in the wrong place.
+
+**Pension Saral** — "pension, made simple" — names what the whole thing is
+actually for. It is also the one word every person arriving here already has
+in their head.
+
+Renamed everywhere it is user-facing, in all three languages
+(पेंशन सरल · પેન્શન સરળ), plus the package name, the receipt stamp, the
+outbound messages and the docs. The reference-number prefix `PS-` did not
+have to change, which is a small piece of luck.
+
+`MASTER_PROMPT.md` and the original dossier keep the old name deliberately.
+They are dated inputs, not product surfaces, and rewriting a brief after the
+fact to match what you built is the wrong kind of tidy.

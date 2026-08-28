@@ -130,8 +130,15 @@ export interface OutcomeData {
   effectiveFrom?: string;
   /** increase */
   newMonthly?: number;
+  /** The age slab applied, as a percentage: 20, 30, 40, 50 or 100. */
+  ratePercent?: number;
   arrears?: number;
   owedFrom?: string;
+  /** grant */
+  grantAmount?: number;
+  /** Help that is not money — already in the reader's language. */
+  grantInKind?: string;
+  grantFrom?: string;
   /** grievance */
   docket?: string;
   answerBy?: string;

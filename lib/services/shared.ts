@@ -137,6 +137,7 @@ export const F = {
 
   /* turning 80 */
   currentPension: pension("currentPension", "money"),
+  commutedOn: pension("commutedOn", "date"),
 } satisfies Record<string, FieldDef>;
 
 /* ==================================================================

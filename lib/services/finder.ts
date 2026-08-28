@@ -45,7 +45,7 @@ export const FINDER: Record<string, FinderNode> = {
     options: [
       { labelKey: "oRootStart", subKey: "oRootStartSub", to: node("startWork") },
       { labelKey: "oRootHave", subKey: "oRootHaveSub", to: node("haveWhat") },
-      { labelKey: "oRootDied", subKey: "oRootDiedSub", to: svc("familypension") },
+      { labelKey: "oRootDied", subKey: "oRootDiedSub", to: node("diedWhat") },
     ],
   },
 
@@ -57,6 +57,19 @@ export const FINDER: Record<string, FinderNode> = {
       { labelKey: "oWorkGovt", subKey: "oWorkGovtSub", to: svc("govtretire") },
       { labelKey: "oWorkPf", subKey: "oWorkPfSub", to: svc("epfpension") },
       { labelKey: "oWorkNone", subKey: "oWorkNoneSub", to: node("noJobAge") },
+    ],
+  },
+
+  /* A death splits two ways, and the split matters: the family pension is
+     for the survivor of someone who was already a pensioner, while the
+     family benefit is for a household whose earner never was. Sending
+     everybody to the family pension left the second family with nothing. */
+  diedWhat: {
+    id: "diedWhat",
+    questionKey: "qDiedPension",
+    options: [
+      { labelKey: "oDiedPensioner", subKey: "oDiedPensionerSub", to: svc("familypension") },
+      { labelKey: "oDiedEarner", subKey: "oDiedEarnerSub", to: svc("nfbs") },
     ],
   },
 
@@ -77,6 +90,11 @@ export const FINDER: Record<string, FinderNode> = {
       { labelKey: "oTrueWidow", to: svc("widow") },
       { labelKey: "oTrueDisability", to: svc("disability") },
       { labelKey: "oTrueNone", to: svc("oldage") },
+      {
+        labelKey: "oTrueNotGettingPension",
+        subKey: "oTrueNotGettingPensionSub",
+        to: svc("annapurna"),
+      },
     ],
   },
 
@@ -105,6 +123,7 @@ export const FINDER: Record<string, FinderNode> = {
       { labelKey: "oHaveMissing", subKey: "oHaveMissingSub", to: svc("notarrived") },
       { labelKey: "oHaveBank", subKey: "oHaveBankSub", to: svc("changebank") },
       { labelKey: "oHave80", subKey: "oHave80Sub", to: svc("age80") },
+      { labelKey: "oHaveCommuted", subKey: "oHaveCommutedSub", to: svc("restorecommuted") },
     ],
   },
 };

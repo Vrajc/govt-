@@ -35,11 +35,11 @@ export default function LanguageScreen() {
             letterSpacing: "-0.01em",
           }}
         >
-          Pramaan Saral
+          Pension Saral
           <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
-          प्रमाण सरल
+          पेंशन सरल
           <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
-          પ્રમાણ સરળ
+          પેન્શન સરળ
         </p>
 
         <p className="micro" style={{ margin: 0 }}>

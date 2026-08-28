@@ -7,6 +7,7 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { BigButton, BigLink } from "@/components/BigButton";
 import { Check, Chevron, Clock, Info } from "@/components/Icons";
 import { serviceById } from "@/lib/services/catalogue";
+import { dlcWindow } from "@/lib/dlcWindow";
 
 /**
  * The service page. Everything a person needs to decide whether to start,
@@ -19,7 +20,7 @@ import { serviceById } from "@/lib/services/catalogue";
  */
 export default function ServiceScreen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, d, patch, resetApp } = useApp();
+  const { t, d, lang, patch, resetApp } = useApp();
   const router = useRouter();
 
   const svc = serviceById(id);
@@ -39,6 +40,17 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
 
   const name = SVC[`${svc.id}Name`];
   const first = svc.eligibility.length > 0 ? "eligibility" : svc.documents.length > 0 ? "documents" : "details";
+
+  /* Shown for the life certificate only. Dated from the ordinary window; the
+     note itself carries the sentence about the 80+ head start, because we do
+     not know the reader's age on this screen. */
+  const dlc = dlcWindow();
+  const windowDate = (dt: Date) =>
+    new Intl.DateTimeFormat(lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN", {
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    }).format(dt);
 
   function begin() {
     resetApp();
@@ -150,6 +162,27 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
           </div>
         </aside>
       </div>
+
+      {/* The life certificate is the one service with a deadline, and missing
+          it is the commonest way a pension stops. It belongs here, before the
+          journey — not in the receipt at the end, which is where every real
+          portal mentions it. */}
+      {svc.id === "lifecert" && (
+        <div
+          className={`note ${dlc.state === "open" ? "note-good" : "note-warn"}`}
+          style={{ marginTop: 28 }}
+        >
+          <Clock size={22} />
+          <span>
+            {dlc.state === "open"
+              ? t("svc.dlcWindowOpen", { date: windowDate(dlc.closesOn), n: dlc.days })
+              : dlc.state === "opensSoon"
+                ? t("svc.dlcWindowSoon", { date: windowDate(dlc.opensOn), n: dlc.days })
+                : t("svc.dlcWindowClosed", { date: windowDate(dlc.opensOn) })}{" "}
+            {t("svc.dlcWindowEarly")}
+          </span>
+        </div>
+      )}
 
       {/* Honesty, on every service page and not only on /about. */}
       <div className="note note-info" style={{ marginTop: 28 }}>

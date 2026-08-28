@@ -2,7 +2,7 @@ import { D, F, S } from "./shared";
 import type { Category, ServiceDef, ServiceId } from "./types";
 
 /**
- * The eleven services, each mapped to the government process it stands for.
+ * The fourteen services, each mapped to the government process it stands for.
  *
  * `realPortal` and `realForm` are not decoration: they are printed on every
  * service page and on /about, so nobody can mistake this prototype for the
@@ -318,8 +318,35 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
       F.ifsc,
     ],
     stages: [S.received, S.bankVerify, S.recordUpdated],
-    outcome: "change",
+    outcome: "sanction",
     codes: ["ERR_BANK_MISMATCH", "ERR_AGE_PROOF_UNCLEAR", "ERR_DOC_UNREADABLE"],
+  },
+
+
+  /**
+   * Annapurna. The quiet fifth component of NSAP, and the answer to the
+   * cruellest gap in the whole programme: you qualify for the old-age
+   * pension, the state has not given it to you, and meanwhile you eat. Ten
+   * kilos of grain a month, free, from the ration shop.
+   */
+  annapurna: {
+    id: "annapurna",
+    category: "start",
+    realPortal: "nsap.nic.in",
+    realForm: "NSAP application form",
+    authorityKey: "authVillage",
+    typicalDays: 45,
+    needsPhoto: false,
+    eligibility: [
+      { id: "age", type: "age", range: { min: 65 }, failKey: "eligAge65", suggest: "oldage" },
+      { id: "getOldAgePension", type: "yesno", pass: ["no"], failKey: "eligAnnapurnaHasPension" },
+      { id: "bpl", type: "yesno", pass: ["yes"], failKey: "eligBpl" },
+    ],
+    documents: [D.aadhaarCard, D.ageProof, D.bplCard, D.residenceProof],
+    fields: [F.fullName, F.dob, F.aadhaar, F.mobile, F.address, F.district, F.rationCard],
+    stages: [S.received, S.villageCheck, S.blockCheck, S.districtSanction],
+    outcome: "grant",
+    codes: ["ERR_DOC_UNREADABLE", "ERR_NEED_MORE_INFO", "ERR_AADHAAR_NAME_MISMATCH"],
   },
 
   /* ================================================================
@@ -383,6 +410,63 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     stages: [S.received, S.officeCheck, S.ppoIssued, S.bankSetup, S.firstPayment],
     outcome: "sanction",
     codes: ["ERR_DEATH_CERT_UNCLEAR", "ERR_NOT_IN_PPO", "ERR_BANK_MISMATCH", "ERR_DOC_UNREADABLE"],
+  },
+
+
+  /**
+   * The National Family Benefit Scheme. Twenty thousand rupees, once, to a
+   * BPL family whose earning member has died between 18 and 59.
+   *
+   * It sits beside the family pension and is claimed in the same week, from
+   * the same office, with the same death certificate — but it is for the
+   * family whose person was never a pensioner at all, which is most of them.
+   * It is the money that pays for the funeral.
+   */
+  nfbs: {
+    id: "nfbs",
+    category: "family",
+    realPortal: "nsap.nic.in",
+    realForm: "NSAP application form",
+    authorityKey: "authVillage",
+    typicalDays: 45,
+    needsPhoto: false,
+    eligibility: [
+      { id: "breadwinner", type: "yesno", pass: ["yes"], failKey: "eligNfbsBreadwinner" },
+      {
+        id: "deceasedAge",
+        type: "age",
+        range: { min: 18, max: 59 },
+        failKey: "eligNfbsAge",
+        suggest: "familypension",
+      },
+      { id: "bpl", type: "yesno", pass: ["yes"], failKey: "eligBpl" },
+      { id: "withinThreeYears", type: "yesno", pass: ["yes"], failKey: "eligNfbsTime" },
+      { id: "haveDeathCert", type: "yesno", pass: ["yes"], failKey: "eligDeathCert" },
+    ],
+    documents: [
+      D.deathCertificate,
+      D.aadhaarCard,
+      D.bplCard,
+      D.bankPassbook,
+      D.residenceProof,
+    ],
+    fields: [
+      F.fullName,
+      F.relationship,
+      F.aadhaar,
+      F.mobile,
+      F.address,
+      F.district,
+      F.deceasedName,
+      F.deathDate,
+      F.rationCard,
+      F.bankName,
+      F.accountNumber,
+      F.ifsc,
+    ],
+    stages: [S.received, S.villageCheck, S.blockCheck, S.districtSanction, S.firstPayment],
+    outcome: "grant",
+    codes: ["ERR_DEATH_CERT_UNCLEAR", "ERR_DOC_UNREADABLE", "ERR_NEED_MORE_INFO"],
   },
 
   /* ================================================================
@@ -473,6 +557,45 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     stages: [S.received, S.bankVerify, S.arrearsCalc, S.bankUpdate],
     outcome: "increase",
     codes: ["ERR_AGE_PROOF_UNCLEAR", "ERR_PPO_NOT_FOUND", "ERR_ALREADY_APPLIED", "ERR_DOC_UNREADABLE"],
+  },
+
+
+  /**
+   * Restoration of the commuted portion, fifteen years on.
+   *
+   * Someone who took a lump sum at retirement had their monthly pension cut
+   * for fifteen years to pay for it. On the fifteenth anniversary the full
+   * amount is supposed to come back on its own — and banks miss it exactly
+   * as they miss the 80+ increase. Same shape as `age80`: a date decides it,
+   * and the arrears are the point.
+   */
+  restorecommuted: {
+    id: "restorecommuted",
+    category: "have",
+    realPortal: "cpao.nic.in",
+    realForm: "Restoration request",
+    authorityKey: "authBank",
+    typicalDays: 30,
+    needsPhoto: false,
+    eligibility: [
+      { id: "havePpo", type: "yesno", pass: ["yes"], failKey: "eligNoPpo" },
+      { id: "commuted", type: "yesno", pass: ["yes"], failKey: "eligNotCommuted" },
+      { id: "fifteenYears", type: "yesno", pass: ["yes"], failKey: "eligNotFifteen" },
+      { id: "alreadyRestored", type: "yesno", pass: ["no"], failKey: "eligAlreadyRestored" },
+    ],
+    documents: [D.ppoCopy, D.aadhaarCard, D.pensionSlip],
+    fields: [
+      F.fullName,
+      F.ppo,
+      F.aadhaar,
+      F.mobile,
+      F.commutedOn,
+      F.currentPension,
+      F.bankName,
+    ],
+    stages: [S.received, S.bankVerify, S.arrearsCalc, S.bankUpdate],
+    outcome: "increase",
+    codes: ["ERR_PPO_NOT_FOUND", "ERR_ALREADY_APPLIED", "ERR_NEED_MORE_INFO", "ERR_DOC_UNREADABLE"],
   },
 
   /**

@@ -75,10 +75,10 @@ function tail(n = 8): string {
 }
 
 /**
- * One reference format for all eleven services. It used to read `DLC-`, from
+ * One reference format for all fourteen services. It used to read `DLC-`, from
  * when this app was only the life certificate — which meant someone chasing a
  * pension that never arrived got a receipt stamped "Digital Life Certificate".
- * `PS-` says Pramaan Saral and nothing more, which is the honest thing for a
+ * `PS-` says Pension Saral and nothing more, which is the honest thing for a
  * number that has to cover a grievance and an enrolment alike.
  */
 export function newDlcId(now = new Date()): string {
@@ -190,6 +190,31 @@ function slabStart(born: Date, age: number): Date {
   return new Date(Date.UTC(born.getUTCFullYear() + age, born.getUTCMonth(), 1));
 }
 
+/**
+ * The commuted portion, as a share of what is being paid now.
+ *
+ * Up to 40 per cent of the pension could be commuted, so someone on the full
+ * allowance is receiving 60 per cent of what they earned. Restoring it adds
+ * back two thirds of the reduced amount.
+ */
+function commutedPortion(currentMonthly: number): number {
+  return Math.round(currentMonthly * (0.4 / 0.6));
+}
+
+/** Fifteen years after the month the pension was first reduced. */
+function restorationDueOn(commutedOn: string): Date | null {
+  const started = new Date(commutedOn);
+  if (Number.isNaN(started.getTime())) return null;
+  return new Date(Date.UTC(started.getUTCFullYear() + 15, started.getUTCMonth(), 1));
+}
+
+/** When an Atal Pension Yojana subscriber starts drawing: their sixtieth. */
+function apySixtiethBirthday(dob: string, now: Date): Date {
+  const born = new Date(dob);
+  if (Number.isNaN(born.getTime())) return new Date(Date.UTC(now.getUTCFullYear() + 25, 0, 1));
+  return new Date(Date.UTC(born.getUTCFullYear() + 60, born.getUTCMonth(), born.getUTCDate()));
+}
+
 /** The 80+ increase runs from the FIRST DAY OF THE MONTH, not the birthday. */
 export function age80EffectiveFrom(dob: string): Date | null {
   const born = new Date(dob);
@@ -249,6 +274,18 @@ export function computeOutcome(rec: Record_, svc: ServiceDef): OutcomeData {
 
     case "sanction": {
       const monthly = monthlyFor(rec, svc);
+      /* Atal Pension Yojana is an enrolment, not a sanction: the number is a
+         PRAN rather than a PPO, and the first payment is the sixtieth
+         birthday, which for most applicants is decades away. Saying "first
+         money in 30 days" would be a straightforward lie. */
+      if (svc.id === "apy") {
+        return {
+          kind: "sanction",
+          orderNo: `PRAN-${now.getFullYear()}-${tail(6)}`,
+          monthly,
+          firstPaymentDate: apySixtiethBirthday(rec.values.dob ?? "", now).toISOString(),
+        };
+      }
       return {
         kind: "sanction",
         orderNo: `PPO-${now.getFullYear()}-${tail(6)}`,
@@ -265,15 +302,51 @@ export function computeOutcome(rec: Record_, svc: ServiceDef): OutcomeData {
 
     case "increase": {
       const current = num(rec.values.currentPension, 12000);
+
+      /* Restoring a commuted pension is the same shape as the 80+ increase —
+         a date decides it and the arrears are the point — but the sum is
+         different. The monthly amount was cut to repay a lump sum; putting it
+         back means adding that cut portion again, owed from the fifteenth
+         anniversary of the day it started. */
+      if (svc.id === "restorecommuted") {
+        const from = restorationDueOn(rec.values.commutedOn ?? "");
+        const uplift = commutedPortion(current);
+        const months = from ? monthsBetween(from, now) : 0;
+        return {
+          kind: "increase",
+          newMonthly: current + uplift,
+          arrears: uplift * months,
+          owedFrom: from ? from.toISOString() : undefined,
+        };
+      }
+
       const from = age80EffectiveFrom(rec.values.dob ?? "");
       // Every rupee since the first of the month they turned 80, at whatever
       // rate applied along the way.
-      const { uplift, arrears } = additionalPension(rec.values.dob ?? "", current, now);
+      const { rate, uplift, arrears } = additionalPension(rec.values.dob ?? "", current, now);
       return {
         kind: "increase",
         newMonthly: current + uplift,
+        ratePercent: Math.round(rate * 100),
         arrears,
         owedFrom: from ? from.toISOString() : undefined,
+      };
+    }
+
+    /* A one-time payment, or help that is not money at all. */
+    case "grant": {
+      if (svc.id === "annapurna") {
+        const d = dictFor(rec.lang);
+        return {
+          kind: "grant",
+          grantInKind: (d.outcome as Record<string, string>).annapurnaGrain,
+          grantFrom: addDays(now, svc.typicalDays).toISOString(),
+        };
+      }
+      return {
+        kind: "grant",
+        grantAmount: 20000,
+        grantFrom: addDays(now, svc.typicalDays).toISOString(),
       };
     }
 

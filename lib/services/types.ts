@@ -16,12 +16,15 @@ export type ServiceId =
   | "epfpension" // EPS-95 — Form 10D, EPFO
   | "govtretire" // Central civil service — Form 6-A, Bhavishya
   | "apy" // Atal Pension Yojana
+  | "annapurna" // Annapurna — foodgrain for the elderly with no pension
   // ---- after a death in the family ----
   | "familypension" // Form 14
+  | "nfbs" // National Family Benefit Scheme — one-time grant
   // ---- when you already get a pension ----
   | "lifecert" // annual Digital Life Certificate
   | "changebank" // move the pension to another bank
   | "age80" // additional pension on turning 80
+  | "restorecommuted" // commuted portion restored after 15 years
   | "notarrived"; // the pension has not come — grievance
 
 /** The three doors on the hub screen. */
@@ -130,6 +133,7 @@ export type OutcomeKind =
   | "sanction" // a new pension: PPO number, monthly amount, first payment
   | "change" // effective from a date
   | "increase" // a new amount plus arrears
+  | "grant" // a one-time payment, or help given in kind rather than money
   | "grievance"; // a docket number and who is looking at it
 
 export interface ServiceDef {

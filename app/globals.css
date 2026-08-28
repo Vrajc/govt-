@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Pramaan Saral — design tokens
+   Pension Saral — design tokens
    Visual world: an Indian bank passbook. Cream paper stock, deep ink
    blue ruling, a stamped receipt at the end.
    ------------------------------------------------------------------ */
@@ -454,8 +454,10 @@ p.body strong { color: var(--ink); font-weight: 700; }
 }
 .tl-dot.done { border-color: var(--success); background: var(--success); color: #FFF; }
 .tl-dot.now { border-color: var(--primary); background: var(--primary-tint); color: var(--primary-dark); }
-.tl-text { font-size: 20px; font-weight: 600; padding-top: 2px; }
-.tl-sub { font-size: 17px; color: var(--ink-soft); font-weight: 400; margin: 2px 0 0; }
+/* Both are spans, so without this the stage name and the office that holds
+   it run together as one word: "ReceivedAutomatic". */
+.tl-text { display: block; font-size: 20px; font-weight: 600; padding-top: 2px; }
+.tl-sub { display: block; font-size: 17px; color: var(--ink-soft); font-weight: 400; margin: 2px 0 0; }
 
 /* A slow, calm pulse — nothing spins. Disabled under reduced motion. */
 @keyframes calm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
@@ -696,7 +698,10 @@ img, svg, video { max-width: 100%; }
 :root {
   /* The surface the paper sits on, once there is room to see one. */
   --desk: #EDE6DA;
-  --shell-wide: 64rem;
+  /* One width for the header bar and the sheet below it, so their edges
+     line up instead of missing each other by a few pixels. */
+  --page-max: 76rem;
+  --shell-wide: var(--page-max);
 }
 
 .sheet {
@@ -777,7 +782,7 @@ img, svg, video { max-width: 100%; }
   body { background: var(--desk); }
 
   .sheet {
-    max-width: 42rem;
+    max-width: 46rem;
     margin-top: 24px;
     margin-bottom: 40px;
     background: var(--paper);
@@ -801,11 +806,15 @@ img, svg, video { max-width: 100%; }
 
   /* Sticky made sense when the button was below the fold. Here it is not,
      and a button as wide as a desk reads as a banner. */
+  /* The dock is capped so a primary button is not as wide as a desk — but
+     it was capped without centring, which left a wide gap on the right and
+     none on the left. */
   .action-dock {
     position: static;
     background: none;
     padding: 26px 0 0;
-    max-width: 32rem;
+    max-width: 34rem;
+    margin-inline: auto;
   }
 
   .grid-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
@@ -830,8 +839,10 @@ img, svg, video { max-width: 100%; }
    From 1440px — stop growing the measure, grow the margins
    ------------------------------------------------------------------ */
 @media (min-width: 1440px) {
-  .sheet-wide { max-width: 72rem; }
-  .sheet { margin-top: 36px; }
+  /* A very wide monitor should not mean very wide margins. Prose still
+     stops at its reading measure; only the grid screens grow. */
+  :root { --page-max: 86rem; }
+  .sheet { margin-top: 32px; }
 }
 
 /* A short landscape window must not lose the shutter button off-screen. */
@@ -974,7 +985,7 @@ img, svg, video { max-width: 100%; }
   z-index: 30;
 }
 .site-header-inner {
-  max-width: 72rem;
+  max-width: var(--page-max);
   margin: 0 auto;
   padding: 8px 16px;
   display: flex;
@@ -1120,3 +1131,101 @@ img, svg, video { max-width: 100%; }
   min-width: 0;
   flex-wrap: wrap;
 }
+
+/* ------------------------------------------------------------------
+   Date, in three boxes
+   The native picker's written format follows the browser's locale, not
+   ours, so it could contradict its own helper text; and its calendar
+   opens on this month, which is a long way from 1942.
+   ------------------------------------------------------------------ */
+.date-field { border: none; padding: 0; margin: 0 0 28px; }
+
+.date-parts {
+  /* Stacked on a narrow phone. Three boxes across 288px of content left the
+     month select about sixty pixels of room for the word "September", which
+     is unreadable — and a `select` clips rather than wraps, so it failed
+     silently. Three full-width boxes are taller and completely legible,
+     which is the right trade for this audience. */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: end;
+  max-width: 26rem;
+}
+
+@media (min-width: 400px) {
+  .date-parts { grid-template-columns: 5rem minmax(0, 1fr) 6.5rem; }
+}
+
+.date-part { min-width: 0; }
+
+.date-part-label {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+/* The month list is the one control here that is not typed into. */
+.date-field select.field-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+                    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 40px;
+}
+
+/* Narrow phones: the month name needs the whole row to stay readable. */
+@media (max-width: 380px) {
+  .date-parts { grid-template-columns: 1fr 1fr; }
+  .date-part-month { grid-column: 1 / -1; order: -1; }
+}
+
+/* ==================================================================
+   Overflow safety at 320px
+   ==================================================================
+   A flex or grid child defaults to min-width:auto, which means it
+   refuses to shrink below its content and pushes the row wider than
+   the screen. Long words, long numbers and select boxes all hit this.
+   These are the containers where that actually happens.
+   ================================================================== */
+.review-row > *,
+.doc-row > *,
+.note > *,
+.card > *,
+.timeline li > *,
+.shell-top-left > *,
+.site-header-inner > * {
+  min-width: 0;
+}
+
+/* A reference number or an IFSC code has no spaces to break at. */
+.review-val,
+.crumbs span,
+.crumbs a {
+  overflow-wrap: anywhere;
+}
+
+/* Tabular figures with letter-spacing were the widest thing in a field. */
+.field-input.tabular { letter-spacing: 0.04em; }
+
+/* A select must be allowed to shrink; its content clips rather than wraps. */
+select.field-input { max-width: 100%; }
+
+/* The audit log in Technical details is the one place raw codes appear. */
+details.tech code { overflow-wrap: anywhere; }
+details.tech ul { padding-left: 18px; }
+
+/* Two buttons side by side need to stack before they squeeze. */
+@media (max-width: 420px) {
+  .btn-row { grid-template-columns: 1fr; }
+}
+
+/* Receipt figures are large by design; they still must not push the page. */
+.receipt-date,
+.receipt-name { overflow-wrap: anywhere; }
+.receipt-meta { overflow-wrap: anywhere; }

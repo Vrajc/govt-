@@ -4,7 +4,7 @@
  *
  *   node scripts/check-services.mjs [baseUrl]
  *
- * For each of the eleven services it:
+ * For each of the fourteen services it:
  *   1. builds a payload from the service's own field definitions
  *   2. sends it, forcing an accept so the outcome is deterministic
  *   3. checks the record settled, walked its real stages, and produced
@@ -13,7 +13,7 @@
  *   5. forces a rejection, then checks the explainer answers in all
  *      three languages, and that resubmission recovers
  *
- * This exists because "eleven services" is only true if all eleven work.
+ * This exists because "fourteen services" is only true if all fourteen work.
  */
 const BASE = process.argv[2] ?? "http://localhost:3000";
 
@@ -58,6 +58,7 @@ const SAMPLE = {
   complaintAbout: "notcredited",
   monthsMissing: "3",
   lastReceived: "2026-05-01",
+  commutedOn: "2009-06-30",
 };
 
 /** service id -> [expected outcome kind, expected number of stages] */
@@ -77,6 +78,9 @@ const CODES = {
   changebank: ["ERR_PPO_NOT_FOUND", "ERR_BANK_MISMATCH", "ERR_ACCOUNT_CLOSED", "ERR_DOC_UNREADABLE"],
   age80: ["ERR_AGE_PROOF_UNCLEAR", "ERR_PPO_NOT_FOUND", "ERR_ALREADY_APPLIED", "ERR_DOC_UNREADABLE"],
   notarrived: ["ERR_PPO_NOT_FOUND", "ERR_NEED_MORE_INFO"],
+  annapurna: ["ERR_DOC_UNREADABLE", "ERR_NEED_MORE_INFO", "ERR_AADHAAR_NAME_MISMATCH"],
+  nfbs: ["ERR_DEATH_CERT_UNCLEAR", "ERR_DOC_UNREADABLE", "ERR_NEED_MORE_INFO"],
+  restorecommuted: ["ERR_PPO_NOT_FOUND", "ERR_ALREADY_APPLIED", "ERR_DOC_UNREADABLE", "ERR_NEED_MORE_INFO"],
 };
 
 const SERVICES = [
@@ -85,11 +89,14 @@ const SERVICES = [
   ["disability", "sanction", 5],
   ["epfpension", "sanction", 6],
   ["govtretire", "sanction", 6],
-  ["apy", "change", 3],
+  ["apy", "sanction", 3],
+  ["annapurna", "grant", 4],
   ["familypension", "sanction", 5],
+  ["nfbs", "grant", 5],
   ["lifecert", "lifecert", 3],
   ["changebank", "change", 4],
   ["age80", "increase", 4],
+  ["restorecommuted", "increase", 4],
   ["notarrived", "grievance", 4],
 ];
 
@@ -160,6 +167,8 @@ async function checkService(id, wantKind, wantStages) {
           ? `${o.newMonthly}/month, arrears ${o.arrears}`
           : wantKind === "grievance"
             ? o.docket
+            : wantKind === "grant"
+              ? (o.grantInKind ?? o.grantAmount)
             : wantKind === "change"
               ? o.effectiveFrom?.slice(0, 10)
               : o.validUntil?.slice(0, 10);

@@ -42,7 +42,7 @@ export const svcEn = {
     catHave: "I already get a pension",
     catHaveSub: "Something needs doing",
     catFamily: "Someone in my family has died",
-    catFamilySub: "They were getting a pension",
+    catFamilySub: "There may be money owed to the family",
 
     notSure: "I am not sure which one",
     notSureSub: "Answer four questions and we will tell you",
@@ -59,6 +59,15 @@ export const svcEn = {
    * The finder
    * ================================================================ */
   finder: {
+    qDiedPension: "Was the person who died getting a pension?",
+    oDiedPensioner: "Yes, they got a pension",
+    oDiedPensionerSub: "You may be able to have it continued in your name",
+    oDiedEarner: "No, but they earned for the house",
+    oDiedEarnerSub: "There is a one-time payment for the family",
+    oTrueNotGettingPension: "I should get the old-age pension but it never came",
+    oTrueNotGettingPensionSub: "There is free grain you can ask for meanwhile",
+    oHaveCommuted: "I took a lump sum when I retired",
+    oHaveCommutedSub: "After 15 years the full pension should come back",
     title: "Let us find the right one",
     guide: "A few questions. Nothing is sent anywhere.",
 
@@ -67,8 +76,8 @@ export const svcEn = {
     oRootStartSub: "I do not get one yet",
     oRootHave: "I already get a pension",
     oRootHaveSub: "Something needs doing",
-    oRootDied: "Someone who got a pension has died",
-    oRootDiedSub: "You may be able to take it over",
+    oRootDied: "Someone in my family has died",
+    oRootDiedSub: "There may be help for the family",
 
     qStartWork: "What kind of work did you do?",
     oWorkGovt: "A government job",
@@ -119,6 +128,12 @@ export const svcEn = {
     authPda: "The office that pays your pension",
     authBankOrOffice: "Your bank, or the office they worked in",
     authGrievance: "The pension complaints cell",
+
+    /* The annual life-certificate window, shown before the journey starts. */
+    dlcWindowSoon: "Sending opens on {date}. That is {n} days from today.",
+    dlcWindowOpen: "You can send it now. The last day is {date}, {n} days away.",
+    dlcWindowClosed: "This year is finished. The next chance opens on {date}.",
+    dlcWindowEarly: "If you are 80 or more you may send from 1 October, a month before everyone else.",
 
     oldageName: "Old-age pension",
     oldageShort: "Monthly money for people aged 60 and over from a poor household",
@@ -198,6 +213,27 @@ export const svcEn = {
       "This goes to the pension complaints cell with a docket number you can quote on the phone. Most of these turn out to be one of three things: the yearly proof-of-life was missed, the bank account was closed or dormant, or the branch never applied an increase.",
 
     /* the service page chrome */
+    annapurnaName: "Free grain every month",
+    annapurnaShort: "Ten kilos of grain a month for people over 65 who get no old-age pension",
+    annapurnaWho: "You are 65 or more, your household is on the BPL list, and you do not get the old-age pension",
+    annapurnaAmount: "Ten kilos of grain a month, free, from the ration shop",
+    annapurnaWhat:
+      "This is for the people who fall through the gap: old enough for the old-age pension, on the BPL list, but not receiving it. Instead of money you get ten kilos of grain a month from your ration shop. Same route as the pension — the village or ward office, then the Collector.",
+
+    nfbsName: "Money after a death in the family",
+    nfbsShort: "Twenty thousand rupees, once, when the earning member of a poor household dies",
+    nfbsWho: "The person who earned for your household has died between the ages of 18 and 59, and your household is on the BPL list",
+    nfbsAmount: "Twenty thousand rupees, paid once",
+    nfbsWhat:
+      "This is not a pension. It is one payment to a family that has lost the person who earned, and in practice it is the money that pays for the funeral. Claim it within three years. It is separate from the family pension, and a family can be owed both — the family pension is for the wife or husband of someone who was already a pensioner, this one is for a household whose earner never was.",
+
+    restorecommutedName: "Get back the part of your pension you sold",
+    restorecommutedShort: "Fifteen years after taking a lump sum, the full pension comes back",
+    restorecommutedWho: "You took a lump sum when you retired, fifteen years have passed, and your pension has not gone back up",
+    restorecommutedAmount: "Your pension returns to its full amount, plus everything owed since the fifteenth year",
+    restorecommutedWhat:
+      "If you took a lump sum at retirement, your monthly pension was cut for fifteen years to pay for it. On the fifteenth anniversary the full amount is supposed to come back on its own. Banks miss this exactly as they miss the increase at 80. If yours did, you are owed every rupee since that date, and we will work out how much.",
+
     whoFor: "Who this is for",
     howMuch: "How much",
     whoDecides: "Who decides",
@@ -237,10 +273,28 @@ export const svcEn = {
   },
 
   fields: {
+    commutedOn: "When did you take the lump sum?",
+    commutedOnHelp: "The month your pension became smaller. Near enough is fine.",
     fullName: "Full name",
     fullNameHelp: "Exactly as it is written on the Aadhaar card.",
     dob: "Date of birth",
     dobHelp: "Day, month and year.",
+    /* The three boxes the date is typed into. */
+    dateDay: "Day",
+    dateMonth: "Month",
+    dateYear: "Year",
+    month1: "January",
+    month2: "February",
+    month3: "March",
+    month4: "April",
+    month5: "May",
+    month6: "June",
+    month7: "July",
+    month8: "August",
+    month9: "September",
+    month10: "October",
+    month11: "November",
+    month12: "December",
     gender: "Are you a woman or a man?",
     genderF: "Woman",
     genderM: "Man",
@@ -422,6 +476,27 @@ export const svcEn = {
    * Eligibility questions and their honest answers
    * ================================================================ */
   elig: {
+    qBreadwinner: "Did the person who died earn for the house?",
+    qBreadwinnerHelp: "The one whose earnings the family lived on. A woman or a man, either way.",
+    qDeceasedAge: "How old were they when they died?",
+    qDeceasedAgeHelp: "In years.",
+    qWithinThreeYears: "Did the death happen in the last three years?",
+    qGetOldAgePension: "Are you getting the old-age pension now?",
+    qCommuted: "When you retired, did you take part of the pension as one large payment?",
+    qCommutedHelp: "This is called commuting. Your monthly pension would have been smaller ever since.",
+    qFifteenYears: "Has it been 15 years or more since then?",
+    qAlreadyRestored: "Has your pension already gone back up to the full amount?",
+
+    eligNfbsBreadwinner:
+      "This one is for the family of the person who earned. If they were getting a pension, ask for the family pension instead.",
+    eligNfbsAge: "This one is for a death between the ages of 18 and 59.",
+    eligNfbsTime: "This has to be asked for within three years of the death.",
+    eligAge65: "This one starts at 65. The old-age pension starts at 60, so look at that one first.",
+    eligAnnapurnaHasPension:
+      "Then you already have the pension, and this is only for people who do not. That is good news.",
+    eligNotCommuted: "Then nothing was taken off your pension, and there is nothing to bring back.",
+    eligNotFifteen: "The full pension comes back after 15 years. Come back then, and it is yours.",
+    eligAlreadyRestored: "Then the bank has already done it. There is nothing more to ask for.",
     title: "First, a few checks",
     guide: "So that you do not fill in a long form for nothing.",
     passTitle: "You can apply for this.",
@@ -429,6 +504,7 @@ export const svcEn = {
     failTitle: "This one is not for you",
     failGuide: "Here is why, and what to do instead.",
     tryOther: "See the right one instead",
+    changeAnswer: "Change my answers",
     carryOn: "Carry on anyway",
     carryOnNote:
       "You can still send it. Someone will look at it — it may just come back.",
@@ -458,7 +534,9 @@ export const svcEn = {
     qHavePpo: "Do you have the PPO number?",
     qHavePpoHelp: "It is on any pension slip. Your bank can also tell you.",
     qNewAccountOpen: "Have you already opened the new account?",
-    qAlreadyIncreased: "Has your pension already gone up since you turned 80?",
+    qAlreadyIncreased: "Has your pension gone up since your last big birthday?",
+    qAlreadyIncreasedHelp:
+      "It goes up at 80, 85, 90, 95 and 100. We mean the most recent one you have had.",
 
     eligAge60: "The old-age pension starts at 60.",
     eligAge40: "The widow pension starts at 40.",
@@ -487,7 +565,8 @@ export const svcEn = {
       "You need the death certificate first. The municipality or the panchayat gives it.",
     eligNoPpo: "You need the PPO number. It is on any pension slip, or ask your bank.",
     eligOpenAccount: "Open the new account first, then come back here.",
-    eligAlreadyIncreased: "Then there is nothing left to claim.",
+    eligAlreadyIncreased:
+      "Then you are already on the right amount for your age. Come back at your next big birthday.",
   },
 
   /* ================================================================
@@ -528,6 +607,12 @@ export const svcEn = {
    * Outcomes — one shape per kind of service
    * ================================================================ */
   outcome: {
+    grantTitle: "It is approved.",
+    grantSub: "It starts from {date}.",
+    grantOneTime: "One payment of",
+    grantEveryMonth: "Every month you get",
+    grantFrom: "You can collect it from",
+    annapurnaGrain: "10 kg of grain",
     sanctionTitle: "Your pension is approved.",
     sanctionSub: "The first money will reach your bank by {date}.",
     sanctionAmount: "Every month you will get",
@@ -546,6 +631,8 @@ export const svcEn = {
     increaseNow: "From now you will get",
     increaseArrears: "Back money owed to you",
     increaseFrom: "Owed since",
+    increaseRate: "Extra for your age",
+    increaseRateValue: "{pct} per cent, because you are {age}",
 
     grievanceTitle: "Your complaint is logged.",
     grievanceSub: "An officer has to answer you by {date}.",

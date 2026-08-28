@@ -177,8 +177,10 @@ export function inputPropsFor(f: FieldDef): {
       return { inputMode: "numeric", maxLength: f.digits ?? 4, autoComplete: "off" };
     case "money":
       return { inputMode: "numeric", autoComplete: "off" };
-    case "date":
-      return { type: "date", autoComplete: "off" };
+    /* Dates never reach a plain <input>: `DateField` renders them as three
+       boxes. Handing back `type: "date"` here would quietly restore the
+       native picker, whose written format follows the browser's locale
+       rather than the reader's language. */
     case "name":
       return { autoComplete: "name" };
     case "ifsc":
