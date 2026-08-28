@@ -14,8 +14,8 @@ export function PrototypeBanner({ text }: { text: string }) {
   const { d } = useApp();
   return (
     <div className="proto-banner" role="note">
-      <Alert size={16} />{" "}
-      <span style={{ verticalAlign: "middle" }}>{d.common.protoBanner || text}</span>
+      <Alert size={16} />
+      <span>{d.common.protoBanner || text}</span>
     </div>
   );
 }

@@ -84,10 +84,7 @@ export default function LanguageScreen() {
             What is real here, and what is pretend
           </Link>
         </p>
-        <p className="micro" style={{ marginTop: 8 }}>
-          A student prototype. Not an official government service. Not affiliated with
-          the Government of India, MeitY, UIDAI or Jeevan Pramaan.
-        </p>
+
         </footer>
       </main>
     </div>

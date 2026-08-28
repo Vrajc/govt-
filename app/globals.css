@@ -98,17 +98,25 @@ input:focus-visible, select:focus-visible, summary:focus-visible {
 }
 
 .proto-banner {
+  /* A flex row, because an inline SVG sits on the text baseline and hangs
+     below it — very visible against the taller Devanagari and Gujarati
+     glyphs, where it read as a separate line. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--attention);
   color: #FFF6F1;
   font-size: 15px;
   line-height: 1.45;
-  padding: 8px 16px;
+  padding: 10px 16px;
   text-align: center;
   font-weight: 500;
   position: sticky;
   top: 0;
   z-index: 40;
 }
+.proto-banner svg { flex-shrink: 0; }
 .proto-banner a { color: #FFF6F1; text-decoration: underline; }
 
 .shell-top {
@@ -620,21 +628,46 @@ code, .mono {
 .text-soft { color: var(--ink-soft); }
 .tabular { font-variant-numeric: tabular-nums; }
 
+/* The tap target still has to be 40px tall, but an inline-block with a
+   min-height baselines from the bottom of that box, which floated the
+   phone icon a whole line above its own label. A flex row instead. */
 .helpline {
-  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 8px;
+  margin-top: 24px;
   font-size: 17px;
   color: var(--ink-soft);
   text-align: center;
 }
 .helpline a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 2px;
   color: var(--primary-dark);
   font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 3px;
-  display: inline-block;
-  padding: 6px 2px;
-  min-height: 40px;
+  text-underline-offset: 4px;
+  white-space: nowrap;
 }
+.helpline a svg { flex-shrink: 0; }
+
+/* Any icon that ends up inline beside text centres on it rather than
+   sitting on the baseline. Positioned art (the oval, the stamp) is
+   unaffected — vertical-align does nothing to an absolutely placed box. */
+svg { vertical-align: middle; }
+
+/* Headings that carry an icon. */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title svg { flex-shrink: 0; }
 
 /* 200% zoom / 320px width: nothing may scroll sideways */
 html, body { overflow-x: hidden; }

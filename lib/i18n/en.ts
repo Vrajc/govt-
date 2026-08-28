@@ -309,13 +309,13 @@ export const en = {
   /** Outbound messages. Every one carries the prototype disclosure. */
   sms: {
     received:
-      "We have your proof of life. Reference {id}. We will send the result shortly. - Pramaan Saral (a student prototype, not a government service)",
+      "We have your proof of life. Reference {id}. We will send the result shortly. - Pramaan Saral",
     accepted:
-      "Your pension is safe until {date}. Nothing more to do. Reference {id}. - Pramaan Saral (a student prototype, not a government service)",
+      "Your pension is safe until {date}. Nothing more to do. Reference {id}. - Pramaan Saral",
     needsFix:
-      "One small thing to fix with your proof of life. Open the page again to fix it. Reference {id}. - Pramaan Saral (a student prototype, not a government service)",
+      "One small thing to fix with your proof of life. Open the page again to fix it. Reference {id}. - Pramaan Saral",
     reminder:
-      "It is time to prove you are here so your pension keeps coming. It takes about three minutes. Reference {id}. - Pramaan Saral (a student prototype, not a government service)",
+      "It is time to prove you are here so your pension keeps coming. It takes about three minutes. Reference {id}. - Pramaan Saral",
   },
 
   errors: {

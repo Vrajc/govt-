@@ -98,14 +98,15 @@ export function ScreenShell({
         )}
       </main>
 
+      {/* The disclosure lives in the banner at the top of every screen and
+          nowhere else in the journey. Repeating it in the footer of all
+          eighteen screens made it wallpaper, which is the one thing a
+          disclosure must never become. */}
       <footer className="shell-foot">
         <p className="micro">
           <Link href="/about" style={{ color: "var(--primary-dark)", fontWeight: 600 }}>
             {t("common.aboutLink")}
           </Link>
-        </p>
-        <p className="micro" style={{ marginTop: 8 }}>
-          {t("common.protoBanner")}
         </p>
       </footer>
     </div>

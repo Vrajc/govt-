@@ -152,8 +152,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
               {t("svc.realFormIs")} <strong>{svc.realForm}</strong>
             </>
           ) : null}
-          {". "}
-          {t("common.protoBanner")}
+          .
         </span>
       </div>
 
