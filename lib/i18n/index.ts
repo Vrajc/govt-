@@ -1,13 +1,28 @@
 import type { Lang } from "@/lib/types";
 import { LANGS } from "@/lib/types";
-import { en, type Dict, type Section } from "./en";
+import { en, type Dict as BaseDict, type Section as BaseSection } from "./en";
 import { hi } from "./hi";
 import { gu } from "./gu";
+import { svcEn, type SvcDict } from "./svc-en";
+import { svcHi } from "./svc-hi";
+import { svcGu } from "./svc-gu";
 
-export type { Dict, Section };
 export { LANGS };
 
-export const dicts: Record<Lang, Dict> = { en, hi, gu };
+/**
+ * The dictionary is assembled from two halves: the original journey's strings
+ * (en.ts) and the service catalogue's (svc-en.ts). Both halves are typed off
+ * their English source, so a key missing from Hindi or Gujarati is a compile
+ * error rather than a blank line in front of a pensioner.
+ */
+export type Dict = BaseDict & SvcDict;
+export type Section = BaseSection | keyof SvcDict;
+
+export const dicts: Record<Lang, Dict> = {
+  en: { ...en, ...svcEn },
+  hi: { ...hi, ...svcHi },
+  gu: { ...gu, ...svcGu },
+};
 
 export const DEFAULT_LANG: Lang = "en";
 

@@ -61,7 +61,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const raw = jar.get(LANG_COOKIE)?.value;
   const lang: Lang = isLang(raw) ? raw : "en";
   const d = dictFor(lang);
-  console.log("[LAYOUT DEBUG] raw=", JSON.stringify(raw), "lang=", lang);
 
   return (
     <html

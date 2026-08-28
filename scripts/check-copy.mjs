@@ -38,6 +38,11 @@ const ALLOWED = new Map([
   // "Digital Life Certificate" never appears in the UI; this is the /about
   // technical note naming the real system, which judges need to see.
   ["pension life certificate", "names the real government artefact on /about"],
+  // The ban on "certificate" exists so we never say "your certificate was
+  // rejected". It must not stop us naming the physical paper a citizen has
+  // to walk to an office and collect, by the name printed on it.
+  ["death certificate", "the name on the paper in the widow's folder"],
+  ["disability certificate", "the name on the paper from the hospital"],
 ]);
 
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
@@ -52,9 +57,10 @@ function readDict(file) {
   return out;
 }
 
-const en = readDict("en.ts");
-const hi = readDict("hi.ts");
-const gu = readDict("gu.ts");
+// Both halves of each dictionary: the original journey and the catalogue.
+const en = [...readDict("en.ts"), ...readDict("svc-en.ts")];
+const hi = [...readDict("hi.ts"), ...readDict("svc-hi.ts")];
+const gu = [...readDict("gu.ts"), ...readDict("svc-gu.ts")];
 
 let failures = 0;
 const warn = (msg) => {
@@ -142,7 +148,12 @@ console.log("\n4. Sentence case (no Title Case On Buttons)");
 for (const { key, value } of en) {
   // The receipt stamp is a rubber stamp. Rubber stamps are all-caps.
   if (key.startsWith("stamp")) continue;
-  const words = value.split(" ").filter((w) => /^[A-Za-z]+$/.test(w));
+  const words = value
+    .split(" ")
+    .filter((w) => /^[A-Za-z]+$/.test(w))
+    // PF, PPO, IFSC, UAN, BPL are acronyms, not capitalised words. Counting
+    // them as Title Case flags perfectly good sentences like "The PF office".
+    .filter((w) => !/^[A-Z]{2,5}$/.test(w));
   if (words.length < 3) continue;
   const capped = words.filter((w) => /^[A-Z]/.test(w)).length;
   if (capped >= words.length - 1 && words.length >= 3) {
