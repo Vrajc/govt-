@@ -158,7 +158,7 @@ The budget was "justify anything you reach for". The full list:
 Nothing else. No animation, chart, icon, UI or state library. Every icon and
 illustration in `components/Icons.tsx` is hand-written SVG; the whole set
 costs less than the import statement for a library would. First-load JS is
-~127 KB gzipped against a 150 KB budget.
+110-123 KB gzipped against a 150 KB budget.
 
 ---
 
@@ -178,3 +178,114 @@ costs less than the import statement for a library would. First-load JS is
 - **No tests.** With the deadline where it is, the budget went into three
   audits that run in a second (`npm run check`) and cover the things most
   likely to rot: banned copy, contrast, and the key leaking into the bundle.
+
+---
+
+# Decisions — the pension lifecycle
+
+The first version did one thing: the annual proof-of-life. That is the last
+step of a pension, not the pension. This round covers the whole lifecycle.
+
+## Why a catalogue instead of more screens
+
+Eleven services hand-built would be eleven sets of screens to keep honest,
+and the twelfth would be a rebuild. India runs at least a dozen pension
+schemes across the centre and the states; any version of this that could
+ship for real needs adding a scheme to be a data file.
+
+So each service is a `ServiceDef` — eligibility questions, documents, form
+fields, real approval stages, outcome kind — and one engine renders all of
+them. `app/apply/[service]/[step]/page.tsx` contains no knowledge of what a
+widow pension is.
+
+The bet paid twice: the twelfth service is a data file, and the whole
+catalogue arrived for **less** bundle than the single service used to cost.
+
+## The finder is a decision tree, not a search box
+
+You cannot search for the name of a thing you have never heard of. A widow
+who has never encountered "IGNWPS" will not type it. Four questions in plain
+words, ending in one named service.
+
+It includes an honest dead end: someone aged 40–59 with no job history and no
+widow or disability status genuinely falls between the old-age pension (60+)
+and Atal Pension Yojana (18–40). The finder says so, and gives a phone
+number, rather than inventing something.
+
+## Eligibility is asked before the form, and never blocks
+
+The cruellest thing the real system does is let someone complete twenty
+fields and then tell them they were never eligible. So the questions come
+first — and a failure names the reason, suggests the scheme they probably
+wanted, and *still* offers "carry on anyway". A rule can be wrong about a
+real person, and a prototype should not be the thing that stops them.
+
+## Documents are photographed, not uploaded
+
+Every document step is the camera, back-facing, at higher resolution than the
+face photo. "Scan and upload a PDF" is where these journeys die in a village.
+The layer-1 quality analysis is reused, with the "no face in frame" verdict
+suppressed — a ration card does not have one.
+
+## "Certificate" stays banned, except on paper you can hold
+
+§9 bans "certificate" so we never say "your certificate was rejected". But a
+death certificate and a disability certificate are physical papers a widow
+has in a folder and must go and collect, and calling them anything else is
+worse than the jargon. The linter allows exactly those two, with the reason
+written next to the exception.
+
+## Only one language is ever sent to the browser
+
+Adding the catalogue pushed first-load JS to 161 KB, over the 150 KB budget.
+The cause was not the catalogue: every visitor had always been downloading
+all three dictionaries, including two scripts they cannot read.
+
+Now the server resolves the language cookie, picks one dictionary and passes
+it to `AppProvider`. Client code imports helpers from `lib/i18n/util.ts`,
+which has no dictionary imports; `lib/i18n/index.ts` is server-only. Result:
+110–123 KB, below where it started.
+
+The cost is that choosing a language on screen 1 is a full page load rather
+than a client navigation — the cookie has to reach the server for it to send
+the right dictionary, fonts and `<html lang>` together. One reload, on the
+first screen, in exchange for never shipping an unread script.
+
+## The receipt shows what the person came for
+
+Five outcome kinds, one layout. What changes is which number is the large
+one: a monthly amount for a new pension, a date for a bank change, a lump sum
+for arrears, a docket for a grievance, a validity date for the annual
+renewal. Getting that hierarchy right per service is the difference between a
+receipt and a form.
+
+## Details that are the actual product
+
+- **The 80+ increase runs from the first day of the month** of the 80th
+  birthday, not the birthday. Banks miss it constantly, so the service is
+  really "claim the money you are already owed" — and it computes the
+  arrears. The demo pensioner was aged to Nov 1944 so the number is not zero.
+- **Family pension asks first whether your name is in their PPO**, because if
+  it is, the bank can start paying with no office visit. Six weeks becomes
+  one, and almost nobody is told.
+- **Moving banks warns you** that the new branch will ask for proof of life
+  again. That is the one that catches everybody out.
+- **The status timeline names who is holding the file.** "Sitting at the
+  taluka office" tells a citizen who to ring. "Checking..." does not.
+
+## Stage timing
+
+Each record carries `nextStageAt` and a total; durations are weight-split
+across the service's stages and walked forward on read. Nothing in a
+serverless function may outlive its request, so a timer was never an option —
+and this version catches a ten-minute-old page up in a single poll.
+
+## Left undone
+
+- **No state schemes.** Gujarat's own top-ups and Vay Vandana are real and
+  would matter; the catalogue is shaped to take them, but eleven central
+  services was the honest limit for the time.
+- **`/demo` is still English-only**, for the same reason as before.
+- **Amounts are plausible, not authoritative.** EPS-95 uses the real
+  pensionable-salary formula; the NSAP figures are the central rate plus a
+  typical state top-up. A real version would read the state's current rates.
