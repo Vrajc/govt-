@@ -6,6 +6,8 @@ import { Alert } from "./Icons";
 interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "id"> {
   label: string;
   help?: string;
+  /** Layout hint for the two-up form grid on wider screens. */
+  wrapClassName?: string;
   /** A sentence, never "Invalid input". Rendered under the field, in words. */
   error?: string | null;
 }
@@ -15,7 +17,7 @@ interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "id"> 
  * a label, because the label disappears exactly when an elderly user looks
  * away and back.
  */
-export function Field({ label, help, error, className = "", ...input }: Props) {
+export function Field({ label, help, error, className = "", wrapClassName, ...input }: Props) {
   const id = useId();
   const helpId = `${id}-help`;
   const errId = `${id}-err`;
@@ -25,7 +27,7 @@ export function Field({ label, help, error, className = "", ...input }: Props) {
     .join(" ");
 
   return (
-    <div className="field">
+    <div className={`field ${wrapClassName ?? ""}`}>
       <label className="field-label" htmlFor={id}>
         {label}
       </label>

@@ -34,7 +34,7 @@ export default function OutboxScreen() {
   const reminders = data?.reminders ?? [];
 
   return (
-    <ScreenShell step={null} back="/about" title={t("outbox.title")} guide={t("outbox.guide")}>
+    <ScreenShell wide step={null} back="/about" title={t("outbox.title")} guide={t("outbox.guide")}>
       {messages.length === 0 && (
         <p className="note note-info">
           <Message size={22} />

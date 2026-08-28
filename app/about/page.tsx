@@ -28,7 +28,7 @@ export default function AboutScreen() {
   ];
 
   return (
-    <ScreenShell step={null} back="/" title={t("about.title")} guide={t("about.guide")}>
+    <ScreenShell wide step={null} back="/" title={t("about.title")} guide={t("about.guide")}>
       <div className="tbl-wrap">
         <table className="plain">
           <thead>

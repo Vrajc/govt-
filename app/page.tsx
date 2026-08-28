@@ -23,7 +23,8 @@ export default function LanguageScreen() {
   }
 
   return (
-    <main className="shell-main" id="main" style={{ paddingTop: 32 }}>
+    <div className="sheet">
+      <main className="shell-main" id="main" style={{ paddingTop: 32 }}>
       <header style={{ marginBottom: 36 }}>
         <p
           style={{
@@ -87,7 +88,8 @@ export default function LanguageScreen() {
           A student prototype. Not an official government service. Not affiliated with
           the Government of India, MeitY, UIDAI or Jeevan Pramaan.
         </p>
-      </footer>
-    </main>
+        </footer>
+      </main>
+    </div>
   );
 }

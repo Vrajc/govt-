@@ -74,7 +74,7 @@ export default function FinderScreen() {
           </button>
         )}
 
-        <div role="group" aria-label={F[node.questionKey]}>
+        <div role="group" aria-label={F[node.questionKey]} className="grid-list">
           {node.options.map((o) => (
             <button key={o.labelKey} type="button" className="card" onClick={() => go(o.to)}>
               <span className="card-title" style={{ justifyContent: "space-between" }}>

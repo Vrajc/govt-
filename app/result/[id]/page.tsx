@@ -202,6 +202,7 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
 
     return (
       <ScreenShell
+        wide
         step={total}
         totalSteps={total}
         title={title}
@@ -224,39 +225,41 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
           </>
         }
       >
-        <Receipt record={record} />
+        <div className="split-main">
+          <Receipt record={record} />
 
-        {extraNote && (
-          <div className="note note-info" style={{ marginTop: 20 }}>
-            <Info size={22} />
-            <span>{extraNote}</span>
-          </div>
-        )}
-
-        <div aria-live="polite">
+          <aside className="split-aside">
+            {extraNote && (
+              <div className="note note-info">
+                <Info size={22} />
+                <span>{extraNote}</span>
+              </div>
+            )}
+            <div aria-live="polite">
           {saveMsg && (
             <p className="note note-good">
               <Check size={22} />
               <span>{saveMsg}</span>
             </p>
           )}
-          {remindMsg && (
-            <p className="note note-good">
-              <Bell size={22} />
-              <span>{remindMsg}</span>
-            </p>
-          )}
-        </div>
+              {remindMsg && (
+                <p className="note note-good">
+                  <Bell size={22} />
+                  <span>{remindMsg}</span>
+                </p>
+              )}
+            </div>
 
-        <button
-          type="button"
-          className="review-edit no-print"
-          onClick={() => window.print()}
-          style={{ marginTop: 4 }}
-        >
-          <Printer size={18} />
-          <span style={{ marginLeft: 8 }}>{t("accepted.savePrint")}</span>
-        </button>
+            <button
+              type="button"
+              className="review-edit no-print"
+              onClick={() => window.print()}
+            >
+              <Printer size={18} />
+              <span style={{ marginLeft: 8 }}>{t("accepted.savePrint")}</span>
+            </button>
+          </aside>
+        </div>
 
         <details className="tech no-print">
           <summary>{t("needsFix.tech")}</summary>

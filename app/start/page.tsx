@@ -48,11 +48,12 @@ export default function StartScreen() {
     <ScreenShell
       step={null}
       back="/"
+      wide
       title={t("hub.title")}
       guide={t("hub.guide")}
       speakExtra={cards.map((c) => c.title).join(". ")}
     >
-      <div role="group" aria-label={t("hub.title")}>
+      <div role="group" aria-label={t("hub.title")} className="grid-cards">
         {cards.map((card) => (
           <button
             key={card.c}

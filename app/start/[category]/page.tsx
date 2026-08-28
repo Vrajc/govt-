@@ -41,6 +41,7 @@ export default function CategoryScreen({
   return (
     <ScreenShell
       step={null}
+      wide
       back="/start"
       title={title}
       guide={t("hub.guide")}
@@ -48,7 +49,7 @@ export default function CategoryScreen({
         .map((s) => (d.svc as Record<string, string>)[`${s.id}Name`])
         .join(". ")}
     >
-      <div role="list">
+      <div role="list" className="grid-list">
         {services.map((s) => (
           <Link key={s.id} href={`/service/${s.id}`} className="card" role="listitem">
             <span className="card-title" style={{ justifyContent: "space-between" }}>

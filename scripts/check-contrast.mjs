@@ -10,6 +10,7 @@
 
 const T = {
   paper: "#FBF8F2",
+  desk: "#EDE6DA",   // the desktop page background behind the paper sheet
   surface: "#FFFFFF",
   ink: "#1F1C1A",
   inkSoft: "#534D47",
@@ -50,6 +51,8 @@ function ratio(a, b) {
 /** [description, foreground, background, required ratio] */
 const PAIRS = [
   ["body text on paper", T.ink, T.paper, 7],
+  ["paper sheet against the desk", T.paper, T.desk, 1.05],
+  ["hairline against the desk", T.line, T.desk, 1.05],
   ["body text on surface", T.ink, T.surface, 7],
   ["secondary text on paper", T.inkSoft, T.paper, 7],
   ["secondary text on surface", T.inkSoft, T.surface, 7],

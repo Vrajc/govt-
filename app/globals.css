@@ -645,3 +645,180 @@ img, svg, video { max-width: 100%; }
   body { background: #FFF; }
   .receipt { border-color: #000; }
 }
+
+/* ==================================================================
+   Responsive layout
+   ==================================================================
+   The phone layout is the real one. None of the scale comes down on a
+   bigger screen: a 78-year-old at a desktop still needs 20px type and a
+   64px button, and shrinking either "because there is room" would undo
+   the whole design.
+
+   What a large screen earns is not smaller type — it is fewer scrolls.
+   The same content laid out across the space instead of down it, on a
+   sheet of paper sitting on a desk. Which is the passbook metaphor
+   already in use, just at desk scale.
+   ================================================================== */
+
+:root {
+  /* The surface the paper sits on, once there is room to see one. */
+  --desk: #EDE6DA;
+  --shell-wide: 64rem;
+}
+
+.sheet {
+  width: 100%;
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* The children used to own the measure; the sheet owns it now. */
+.sheet > .shell-top,
+.sheet > .shell-main,
+.sheet > .shell-foot {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* The product name, shown beside Back once there is room for it. */
+.shell-brand {
+  display: none;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.shell-brand:hover { color: var(--primary-dark); }
+
+/* Grids are one column until proven otherwise — the phone case. */
+.grid-cards,
+.grid-list,
+.split-main {
+  display: grid;
+  gap: 16px;
+}
+.grid-cards > .card,
+.grid-list > .card,
+.grid-cards > .card + .card,
+.grid-list > .card + .card {
+  margin-top: 0;
+}
+/* Cards in a row should end level even when their text runs to two lines. */
+.grid-cards > .card,
+.grid-list > .card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fields-grid { display: block; }
+
+/* ------------------------------------------------------------------
+   From 640px — a tablet, or a phone turned sideways
+   ------------------------------------------------------------------ */
+@media (min-width: 640px) {
+  .sheet { max-width: 38rem; }
+  .shell-main { padding: 8px 28px 28px; }
+  .shell-top,
+  .shell-foot { padding-left: 28px; padding-right: 28px; }
+
+  .grid-cards,
+  .grid-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Short fields pair up; long ones still span. */
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .field-wide { grid-column: 1 / -1; }
+
+  .cam-stage { max-width: 24rem; margin-left: auto; margin-right: auto; }
+}
+
+/* ------------------------------------------------------------------
+   From 1024px — a real desktop. The paper goes on a desk.
+   ------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  body { background: var(--desk); }
+
+  .sheet {
+    max-width: 42rem;
+    margin-top: 24px;
+    margin-bottom: 40px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    /* Barely there. A government form is not a floating dashboard card. */
+    box-shadow:
+      0 1px 2px rgba(31, 28, 26, 0.05),
+      0 10px 28px rgba(31, 28, 26, 0.05);
+  }
+  .sheet-wide { max-width: var(--shell-wide); }
+
+  .shell-brand { display: inline-block; }
+  .shell-top {
+    padding: 16px 44px;
+    border-bottom: 1px solid var(--line);
+    min-height: 76px;
+  }
+  .shell-main { padding: 24px 44px 36px; }
+  .shell-foot { padding: 20px 44px 28px; }
+
+  /* Sticky made sense when the button was below the fold. Here it is not,
+     and a button as wide as a desk reads as a banner. */
+  .action-dock {
+    position: static;
+    background: none;
+    padding: 26px 0 0;
+    max-width: 32rem;
+  }
+
+  .grid-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .grid-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+
+  /* Content on the left, the facts that stay put on the right. */
+  .split-main {
+    grid-template-columns: minmax(0, 1.6fr) minmax(17rem, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+  .split-aside { position: sticky; top: 96px; }
+
+  .cam-stage { max-width: 25rem; }
+  .receipt { max-width: 34rem; }
+
+  /* Beads have room to be a little more legible. */
+  .bead { width: 18px; height: 18px; }
+}
+
+/* ------------------------------------------------------------------
+   From 1440px — stop growing the measure, grow the margins
+   ------------------------------------------------------------------ */
+@media (min-width: 1440px) {
+  .sheet-wide { max-width: 72rem; }
+  .sheet { margin-top: 36px; }
+}
+
+/* A short landscape window must not lose the shutter button off-screen. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .cam-stage { max-height: 46vh; aspect-ratio: 4 / 3; }
+  .action-dock { position: static; }
+}
+
+@media print {
+  .sheet { max-width: none; box-shadow: none; border: none; margin: 0; }
+  body { background: #FFF; }
+}
+
+/* A document row becomes a card in the grid: thumbnail, name, one button. */
+.doc-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+}
+.doc-row > *:first-child { min-width: 0; }

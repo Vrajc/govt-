@@ -25,7 +25,7 @@ export default function HelpScreen() {
   const steps = [d.help.step1, d.help.step2, d.help.step3, d.help.step4, d.help.step5];
 
   return (
-    <ScreenShell step={null} back="/" title={t("help.title")} guide={t("help.guide")} hideHelpline>
+    <ScreenShell wide step={null} back="/" title={t("help.title")} guide={t("help.guide")} hideHelpline>
       <a href={`tel:${tel}`} className="card">
         <span className="card-title">
           <Phone size={26} />

@@ -103,10 +103,14 @@ function Engine({ svc, step }: { svc: ServiceDef; step: Step }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [svc.id]);
 
+  /* Steps whose content is a grid or a two-column form get the wider
+     sheet on a desktop. "who", "eligibility" and "photo" ask one thing at
+     a time and stay narrow at every size. */
   const shell = {
     step: idx + 1,
     totalSteps: steps.length,
     back: backHref,
+    wide: step === "documents" || step === "details",
   };
 
   const SVC = d.svc as Record<string, string>;
@@ -187,7 +191,7 @@ function Engine({ svc, step }: { svc: ServiceDef; step: Step }) {
   return <ReviewStep svc={svc} shell={shell} />;
 }
 
-type Shell = { step: number; totalSteps: number; back: string };
+type Shell = { step: number; totalSteps: number; back: string; wide: boolean };
 
 /* ==================================================================
  * Eligibility
@@ -425,11 +429,11 @@ function DocumentsStep({
         <span>{t("apply.docsCount", { done: doneCount, total: svc.documents.length })}</span>
       </p>
 
-      <div className="panel" style={{ padding: "4px 20px" }}>
+      <div className="grid-list">
         {svc.documents.map((doc) => {
           const shot = app.docs[doc.id];
           return (
-            <div className="review-row" key={doc.id}>
+            <div className="panel doc-row" key={doc.id}>
               <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                 {shot ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -611,6 +615,7 @@ function DetailsStep({
         </div>
       )}
 
+      <div className="fields-grid">
       {fields.map((f) => {
         const label = FIELDS[f.labelKey ?? f.id] ?? f.id;
         const help = FIELDS[`${f.helpKey ?? f.id}Help`] || undefined;
@@ -619,7 +624,11 @@ function DetailsStep({
 
         if (f.type === "choice") {
           return (
-            <fieldset key={f.id} style={{ border: "none", padding: 0, margin: "0 0 28px" }}>
+            <fieldset
+              key={f.id}
+              className="field-wide"
+              style={{ border: "none", padding: 0, margin: "0 0 28px" }}
+            >
               <legend className="field-label" style={{ padding: 0 }}>
                 {label}
               </legend>
@@ -654,6 +663,10 @@ function DetailsStep({
         return (
           <Field
             key={f.id}
+            /* A name or an address needs the whole row; a date does not. */
+            wrapClassName={
+              ["name", "address"].includes(f.type) ? "field-wide" : undefined
+            }
             label={label}
             help={help}
             error={err}
@@ -668,6 +681,8 @@ function DetailsStep({
           />
         );
       })}
+
+      </div>
 
       {/* The code appears in place. Navigating away and back is where an
           elderly user loses the thread, and it costs a page load on a

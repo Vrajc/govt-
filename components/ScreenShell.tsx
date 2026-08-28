@@ -23,6 +23,12 @@ interface Props {
   action?: ReactNode;
   /** Hide the phone-number line — used only where the page IS the help page. */
   hideHelpline?: boolean;
+  /**
+   * Let the sheet grow past the reading measure on a desktop. For screens
+   * whose content is a grid or a table rather than prose — never for a
+   * screen that asks one question, which stays narrow at any size.
+   */
+  wide?: boolean;
   children: ReactNode;
 }
 
@@ -35,33 +41,40 @@ export function ScreenShell({
   speakExtra,
   action,
   hideHelpline = false,
+  wide = false,
   children,
 }: Props) {
-  const { t } = useApp();
+  const { t, d } = useApp();
   const router = useRouter();
 
   const spoken = [title, guide, speakExtra].filter(Boolean).join(". ");
 
   return (
-    <>
+    <div className={`sheet ${wide ? "sheet-wide" : ""}`}>
       <div className="shell-top">
-        {back ? (
-          <button
-            type="button"
-            className="btn-header"
-            onClick={() => {
-              // Prefer real history so the browser's own Back and ours agree;
-              // fall back to the declared route on a cold entry.
-              if (window.history.length > 1) router.back();
-              else router.push(back);
-            }}
-          >
-            <ArrowLeft size={20} />
-            <span>{t("common.back")}</span>
-          </button>
-        ) : (
-          <span />
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+          {back ? (
+            <button
+              type="button"
+              className="btn-header"
+              onClick={() => {
+                // Prefer real history so the browser's own Back and ours agree;
+                // fall back to the declared route on a cold entry.
+                if (window.history.length > 1) router.back();
+                else router.push(back);
+              }}
+            >
+              <ArrowLeft size={20} />
+              <span>{t("common.back")}</span>
+            </button>
+          ) : (
+            <span />
+          )}
+          {/* Only appears once there is room for it — see .shell-brand. */}
+          <Link href="/start" className="shell-brand">
+            {d.common.appName}
+          </Link>
+        </div>
         <SpeakButton text={spoken} />
       </div>
 
@@ -95,6 +108,6 @@ export function ScreenShell({
           {t("common.protoBanner")}
         </p>
       </footer>
-    </>
+    </div>
   );
 }

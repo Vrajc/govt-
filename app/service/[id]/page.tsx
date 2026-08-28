@@ -48,6 +48,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
 
   return (
     <ScreenShell
+      wide
       step={null}
       back={`/start/${svc.category}`}
       title={name}
@@ -64,24 +65,18 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
         </>
       }
     >
-      <p className="body" style={{ fontSize: 20, color: "var(--ink)" }}>
-        {SVC[`${svc.id}What`]}
-      </p>
+      {/* On a phone this is one column, in this order. On a desktop the
+          facts move alongside and stay put while the rest scrolls. */}
+      <div className="split-main">
+        <div>
+          <p className="body" style={{ fontSize: 20, color: "var(--ink)" }}>
+            {SVC[`${svc.id}What`]}
+          </p>
 
-      <div className="panel" style={{ padding: "4px 20px", marginTop: 8 }}>
-        <Row k={t("svc.whoFor")} v={SVC[`${svc.id}Who`]} />
-        <Row k={t("svc.howMuch")} v={SVC[`${svc.id}Amount`]} />
-        <Row k={t("svc.whoDecides")} v={SVC[svc.authorityKey]} />
-        <Row
-          k={t("svc.howLong")}
-          v={svc.typicalDays <= 1 ? t("svc.dayOne") : t("svc.daysAbout", { n: svc.typicalDays })}
-        />
-      </div>
-
-      {svc.documents.length > 0 && (
-        <>
-          <h2 className="section-title">{t("svc.whatYouNeed")}</h2>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          {svc.documents.length > 0 && (
+            <>
+              <h2 className="section-title">{t("svc.whatYouNeed")}</h2>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {svc.documents.map((doc) => (
               <li
                 key={doc.id}
@@ -111,22 +106,40 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
         </>
       )}
 
-      <h2 className="section-title">{t("svc.steps")}</h2>
-      <ol className="timeline">
-        {svc.stages.map((stage, i) => (
-          <li key={stage.id}>
-            <span className="tl-dot">
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{i + 1}</span>
-            </span>
-            <span>
-              <span className="tl-text">{STAGES[stage.id]}</span>
-              <span className="tl-sub">
-                {STAGES[`actor${cap(stage.actor)}`] ?? STAGES.actorSystem}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ol>
+          <h2 className="section-title">{t("svc.steps")}</h2>
+          <ol className="timeline">
+            {svc.stages.map((stage, i) => (
+              <li key={stage.id}>
+                <span className="tl-dot">
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{i + 1}</span>
+                </span>
+                <span>
+                  <span className="tl-text">{STAGES[stage.id]}</span>
+                  <span className="tl-sub">
+                    {STAGES[`actor${cap(stage.actor)}`] ?? STAGES.actorSystem}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <aside className="split-aside">
+          <div className="panel" style={{ padding: "4px 20px" }}>
+            <Row k={t("svc.whoFor")} v={SVC[`${svc.id}Who`]} />
+            <Row k={t("svc.howMuch")} v={SVC[`${svc.id}Amount`]} />
+            <Row k={t("svc.whoDecides")} v={SVC[svc.authorityKey]} />
+            <Row
+              k={t("svc.howLong")}
+              v={
+                svc.typicalDays <= 1
+                  ? t("svc.dayOne")
+                  : t("svc.daysAbout", { n: svc.typicalDays })
+              }
+            />
+          </div>
+        </aside>
+      </div>
 
       {/* Honesty, on every service page and not only on /about. */}
       <div className="note note-info" style={{ marginTop: 28 }}>

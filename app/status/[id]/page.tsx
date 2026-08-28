@@ -98,12 +98,15 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
 
   return (
     <ScreenShell
+      wide
       step={total}
       totalSteps={total}
       title={t("status.title")}
       guide={record ? SVC[`${record.serviceId}Name`] : t("status.lead")}
       speakExtra={waitLine}
     >
+      <div className="split-main">
+        <div>
       <p className="body" style={{ color: "var(--ink)", fontWeight: 500 }}>
         {t("status.lead")}
       </p>
@@ -129,17 +132,22 @@ export default function StatusScreen({ params }: { params: Promise<{ id: string 
         })}
       </ol>
 
-      <div className="note note-info" style={{ marginTop: 28 }}>
-        <Clock size={22} />
-        <span>{waitLine}</span>
-      </div>
+        </div>
 
-      <div className="panel" style={{ marginTop: 8 }}>
-        <p className="review-key">{t("status.refLabel")}</p>
-        <p className="review-val tabular" style={{ fontSize: 22 }}>
-          {id}
-        </p>
-        <p className="helper">{t("status.refHelp")}</p>
+        <aside className="split-aside">
+          <div className="note note-info">
+            <Clock size={22} />
+            <span>{waitLine}</span>
+          </div>
+
+          <div className="panel">
+            <p className="review-key">{t("status.refLabel")}</p>
+            <p className="review-val tabular" style={{ fontSize: 22 }}>
+              {id}
+            </p>
+            <p className="helper">{t("status.refHelp")}</p>
+          </div>
+        </aside>
       </div>
 
       {/* Announced to screen readers without moving anything on screen. */}
