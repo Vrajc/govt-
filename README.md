@@ -135,10 +135,10 @@ Leave the result on *Decide honestly*, speed on *8 seconds*.
 | Photographing documents | The offices that actually decide |
 | The plain-language explainer (live OpenAI call) | SMS delivery — written to a visible outbox at `/outbox` |
 | The pre-submission photo check (live OpenAI call) | Bank and post-office integration |
-| Spoken guidance in all three languages | |
+| Spoken guidance in all eleven languages | |
 | The state machine, staged approval chain, audit log and idempotent resubmission | |
 
-The same table is on `/about`, in all three languages, alongside a
+The same table is on `/about`, in all eleven languages, alongside a
 service-by-service map of which real government system each one stands for.
 
 ---
@@ -158,7 +158,7 @@ app/
   api/                        otp · submit · status · resubmit · precheck
                               explain · speak · outbox · reminder
 lib/services/
-  catalogue.ts                the eleven services, with their real portals
+  catalogue.ts                the fourteen services, with their real portals
   shared.ts                   fields, documents and stages, defined once
   finder.ts                   the decision tree
   engine.ts                   step order, validation, field behaviour

@@ -188,9 +188,9 @@ step of a pension, not the pension. This round covers the whole lifecycle.
 
 ## Why a catalogue instead of more screens
 
-Eleven services hand-built would be eleven sets of screens to keep honest,
-and the twelfth would be a rebuild. India runs at least a dozen pension
-schemes across the centre and the states; any version of this that could
+Fourteen services hand-built would be fourteen sets of screens to keep
+honest, and the fifteenth would be a rebuild. India runs at least a dozen
+pension schemes across the centre and the states; any version of this that could
 ship for real needs adding a scheme to be a data file.
 
 So each service is a `ServiceDef` — eligibility questions, documents, form
@@ -283,7 +283,7 @@ and this version catches a ten-minute-old page up in a single poll.
 ## Left undone
 
 - **No state schemes.** Gujarat's own top-ups and Vay Vandana are real and
-  would matter; the catalogue is shaped to take them, but eleven central
+  would matter; the catalogue is shaped to take them, but fourteen central
   services was the honest limit for the time.
 - **`/demo` is still English-only**, for the same reason as before.
 - **Amounts are plausible, not authoritative.** EPS-95 uses the real
@@ -307,10 +307,11 @@ are in the wrong place.
 actually for. It is also the one word every person arriving here already has
 in their head.
 
-Renamed everywhere it is user-facing, in all three languages
-(पेंशन सरल · પેન્શન સરળ), plus the package name, the receipt stamp, the
-outbound messages and the docs. The reference-number prefix `PS-` did not
-have to change, which is a small piece of luck.
+Renamed everywhere it is user-facing, in every language
+(पेंशन सरल · પેન્શન સરળ · পেনশন সরল · பென்ஷன் சரள் · పెన్షన్ సరళ్ ·
+ಪಿಂಚಣಿ ಸರಳ್ · പെൻഷൻ സരൾ · ਪੈਨਸ਼ਨ ਸਰਲ · ପେନସନ ସରଳ), plus the package name,
+the receipt stamp, the outbound messages and the docs. The reference-number
+prefix `PS-` did not have to change, which is a small piece of luck.
 
 `MASTER_PROMPT.md` and the original dossier keep the old name deliberately.
 They are dated inputs, not product surfaces, and rewriting a brief after the
