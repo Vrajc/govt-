@@ -1,11 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Noto_Sans, Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
+import {
+  Noto_Sans,
+  Noto_Sans_Bengali,
+  Noto_Sans_Devanagari,
+  Noto_Sans_Gujarati,
+  Noto_Sans_Gurmukhi,
+  Noto_Sans_Kannada,
+  Noto_Sans_Malayalam,
+  Noto_Sans_Oriya,
+  Noto_Sans_Tamil,
+  Noto_Sans_Telugu,
+} from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/lib/app-state";
 import { LANG_COOKIE } from "@/lib/constants";
-import { isLang } from "@/lib/i18n";
-import { dictFor } from "@/lib/i18n";
+import { coverageReport, dictFor, isLang, langMeta } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
 import { PrototypeBanner } from "@/components/PrototypeBanner";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -13,31 +23,51 @@ import { LanguageGate } from "@/components/LanguageGate";
 import { DemoShortcut } from "@/components/DemoShortcut";
 
 /**
- * Three faces, one family. Noto is the only pairing with correct, legible
- * coverage of Latin, Devanagari and Gujarati at the weights we need — mixing
+ * One family, ten scripts. Noto is the only face with correct, legible
+ * coverage of every script this app speaks at the weights we need — mixing
  * families across scripts is what makes multilingual government sites look
- * like three different websites stapled together.
+ * like ten different websites stapled together.
+ *
+ * Only the Latin face is preloaded. The other nine are declared here so the
+ * stylesheet knows about them, but a preload hint for all ten would put
+ * roughly half a megabyte of fonts on the critical path of a 3G connection
+ * for a reader who will use exactly one. `display: swap` covers the gap with
+ * the system's own Indic face, which every Android phone ships.
  */
 const notoSans = Noto_Sans({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   display: "swap",
-  variable: "--font-noto-sans",
+  variable: "--font-latn",
 });
 
-const notoDeva = Noto_Sans_Devanagari({
-  subsets: ["devanagari"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-  variable: "--font-noto-deva",
-});
+/* next/font reads these calls at build time with a static parser, so every
+   argument has to be a literal here — no shared options object, no spread.
+   The repetition is the price of the build-time subsetting. */
+const notoDeva = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-deva" });
+const notoGujr = Noto_Sans_Gujarati({ subsets: ["gujarati"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-gujr" });
+const notoBeng = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-beng" });
+const notoTelu = Noto_Sans_Telugu({ subsets: ["telugu"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-telu" });
+const notoTaml = Noto_Sans_Tamil({ subsets: ["tamil"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-taml" });
+const notoKnda = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-knda" });
+const notoMlym = Noto_Sans_Malayalam({ subsets: ["malayalam"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-mlym" });
+const notoGuru = Noto_Sans_Gurmukhi({ subsets: ["gurmukhi"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-guru" });
+const notoOrya = Noto_Sans_Oriya({ subsets: ["oriya"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-orya" });
 
-const notoGuj = Noto_Sans_Gujarati({
-  subsets: ["gujarati"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-  variable: "--font-noto-guj",
-});
+const FONT_VARS = [
+  notoSans,
+  notoDeva,
+  notoGujr,
+  notoBeng,
+  notoTelu,
+  notoTaml,
+  notoKnda,
+  notoMlym,
+  notoGuru,
+  notoOrya,
+]
+  .map((f) => f.variable)
+  .join(" ");
 
 export const metadata: Metadata = {
   title: "Pension Saral — prove you are here, keep your pension",
@@ -65,12 +95,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   /* No cookie means nobody has chosen yet, so the gate goes up over
      whatever page they landed on — including a deep link from a message. */
   const chosen = isLang(raw);
+  const meta = langMeta(lang);
   const d = dictFor(lang);
+  /* Eleven numbers, measured against English at render time rather than
+     hand-maintained in a list that would drift the day after it was written. */
+  const coverage = coverageReport();
 
   return (
     <html
       lang={lang}
-      className={`lang-${lang} ${notoSans.variable} ${notoDeva.variable} ${notoGuj.variable}`}
+      dir={meta.dir}
+      className={`lang-${lang} script-${meta.script} ${FONT_VARS}`}
     >
       <body>
         <AppProvider initialLang={lang} dict={d}>
@@ -83,11 +118,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 phone, where the sentence wraps. */}
             <div className="topbars">
               <PrototypeBanner text={d.common.protoBanner} />
-              <SiteHeader />
+              <SiteHeader coverage={coverage} />
             </div>
             {children}
           </div>
-          {!chosen && <LanguageGate />}
+          {!chosen && <LanguageGate coverage={coverage} />}
           <DemoShortcut />
         </AppProvider>
       </body>

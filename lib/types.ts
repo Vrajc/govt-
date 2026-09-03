@@ -6,8 +6,12 @@ import type { OutcomeKind, ServiceId } from "./services/types";
  * importing each other's implementation.
  */
 
-export type Lang = "en" | "hi" | "gu";
-export const LANGS: Lang[] = ["en", "hi", "gu"];
+/* The language list lives in lib/i18n/languages.ts — one row per language,
+   read by the chooser, the fonts, the voice and the dictionary loader alike.
+   Re-exported here because half the app has always asked types.ts for it. */
+import type { Lang } from "./i18n/languages";
+export type { Lang };
+export { LANGS } from "./i18n/languages";
 
 export type Mode = "self" | "assisted";
 

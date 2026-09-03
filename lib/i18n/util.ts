@@ -1,23 +1,32 @@
-import type { Lang } from "@/lib/types";
-import { LANGS } from "@/lib/types";
-
 /**
  * Language helpers with no dictionary imports.
  *
  * This separation is a performance decision, not a tidiness one. Anything a
- * client component imports from `lib/i18n/index.ts` drags all three
- * dictionaries into the browser bundle — so a pensioner in Ahmedabad
- * downloads Devanagari strings they will never read, on a connection that
- * can barely afford the ones they will. Client code imports from here; the
- * server sends down the one dictionary that was actually chosen.
+ * client component imports from `lib/i18n/index.ts` drags every language's
+ * dictionary into the browser bundle — so a pensioner in Ahmedabad downloads
+ * Devanagari, Tamil and Malayalam strings they will never read, on a
+ * connection that can barely afford the ones they will. Client code imports
+ * from here; the server sends down the one dictionary that was chosen.
+ *
+ * The facts themselves live one file further down, in `./languages`, which
+ * knows nothing about dictionaries either. This module is the seam the app
+ * has always imported, so it stays and forwards.
  */
 
-export { LANGS };
-export const DEFAULT_LANG: Lang = "en";
+export {
+  DEFAULT_LANG,
+  LANGS,
+  LANGUAGES,
+  LANG_CLASSES,
+  LANG_NAMES,
+  SCRIPT_CLASSES,
+  SPEECH_TAGS,
+  fallbackChain,
+  isLang,
+  langMeta,
+} from "./languages";
 
-export function isLang(v: unknown): v is Lang {
-  return typeof v === "string" && (LANGS as string[]).includes(v);
-}
+export type { Lang, LangMeta, Script } from "./languages";
 
 /**
  * Fills {placeholders}. Deliberately dumb — the dictionaries are ours, so
@@ -34,17 +43,3 @@ export function fill(
     key in vars ? String(vars[key]) : whole,
   );
 }
-
-/** The language names, in their own script, for screen 1. */
-export const LANG_NAMES: Record<Lang, string> = {
-  en: "English",
-  hi: "हिन्दी",
-  gu: "ગુજરાતી",
-};
-
-/** BCP-47 tags for speechSynthesis and <html lang>. */
-export const SPEECH_TAGS: Record<Lang, string> = {
-  en: "en-IN",
-  hi: "hi-IN",
-  gu: "gu-IN",
-};

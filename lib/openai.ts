@@ -1,6 +1,7 @@
 import "server-only";
 import OpenAI from "openai";
 import type { ErrorCode, Lang } from "./types";
+import { langMeta, type Script } from "./i18n/languages";
 import { fallbackExplain, toAssisted, type Explanation } from "./explainFallback";
 
 /**
@@ -39,11 +40,32 @@ function getClient(): OpenAI | null {
   return client;
 }
 
-const LANG_NAME: Record<Lang, string> = {
-  en: "English",
-  hi: "Hindi (Devanagari script)",
-  gu: "Gujarati (Gujarati script)",
+/**
+ * How to name a language to the model.
+ *
+ * Naming the script as well as the language is not decoration: asked for
+ * "Punjabi" alone a model will happily answer in Shahmukhi, which is the
+ * right script in Lahore and the wrong one in Ludhiana. The registry already
+ * knows which script each language is written in here, so the prompt says
+ * so out loud.
+ */
+const SCRIPT_NAME: Record<Script, string> = {
+  latn: "Latin",
+  deva: "Devanagari",
+  gujr: "Gujarati",
+  beng: "Bengali",
+  telu: "Telugu",
+  taml: "Tamil",
+  knda: "Kannada",
+  mlym: "Malayalam",
+  guru: "Gurmukhi",
+  orya: "Odia",
 };
+
+function langName(lang: Lang): string {
+  const m = langMeta(lang);
+  return m.script === "latn" ? m.english : `${m.english} (${SCRIPT_NAME[m.script]} script)`;
+}
 
 /** Where an explanation came from — surfaced in the /result technical details. */
 export type Source = "openai" | "fallback";
@@ -69,7 +91,7 @@ const EXPLAIN_SYSTEM = (lang: Lang, assisted: boolean) =>
     'Reply with JSON only: {"reason": string, "action": string}.',
     "`reason` explains what went wrong in ONE short sentence.",
     "`action` says what to do next in ONE short sentence.",
-    `Write in ${LANG_NAME[lang]}.`,
+    `Write in ${langName(lang)}.`,
     'Use everyday words a 78-year-old would use — no words like "biometric", "authentication", "verification", "certificate", "server".',
     "Never blame the person. Never apologise. Never add anything else.",
     assisted
@@ -151,7 +173,7 @@ const PRECHECK_PROMPT = (lang: Lang) =>
     'Reply with JSON only: {"ok": boolean, "issue": string|null}.',
     "`ok` is false only if the photo would clearly fail an automated face match:",
     "too dark, too blurry, face cut off, face turned away, eyes closed, or face covered.",
-    `\`issue\` is one short plain sentence in ${LANG_NAME[lang]} describing the single biggest problem, or null.`,
+    `\`issue\` is one short plain sentence in ${langName(lang)} describing the single biggest problem, or null.`,
     "Do not comment on appearance, age, clothing, or background.",
     "Do not identify the person.",
   ].join(" ");
@@ -211,7 +233,7 @@ export async function speak(text: string, lang: Lang): Promise<ArrayBuffer | nul
       model: "gpt-4o-mini-tts",
       voice: "alloy",
       input: text.slice(0, 800),
-      instructions: `Speak slowly and warmly in ${LANG_NAME[lang]}, as if talking to an elderly person.`,
+      instructions: `Speak slowly and warmly in ${langName(lang)}, as if talking to an elderly person.`,
       response_format: "mp3",
     });
     return await res.arrayBuffer();

@@ -9,7 +9,14 @@ import {
   useState,
 } from "react";
 import type { Application, ErrorCode, Lang, Mode } from "./types";
-import { fill, isLang, SPEECH_TAGS } from "./i18n/util";
+import {
+  LANG_CLASSES,
+  SCRIPT_CLASSES,
+  SPEECH_TAGS,
+  fill,
+  isLang,
+  langMeta,
+} from "./i18n/util";
 import type { Dict } from "./i18n";
 import { APP_KEY, DEMO_KEY, LANG_COOKIE } from "./constants";
 
@@ -163,12 +170,17 @@ export function AppProvider({
     }
   }, [app, ready]);
 
-  /* ---- keep <html lang> and the font class in sync ---- */
+  /* ---- keep <html lang>, the direction and the font class in sync ---- */
   useEffect(() => {
     const el = document.documentElement;
+    const meta = langMeta(lang);
     el.lang = lang;
-    el.classList.remove("lang-en", "lang-hi", "lang-gu");
-    el.classList.add(`lang-${lang}`);
+    el.dir = meta.dir;
+    /* Both class families come off, not just the one we know about: the
+       script class and the language class are set independently, and a
+       Marathi page and a Hindi page share a script but not a language. */
+    el.classList.remove(...LANG_CLASSES, ...SCRIPT_CLASSES);
+    el.classList.add(`lang-${lang}`, `script-${meta.script}`);
     document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`;
   }, [lang]);
 

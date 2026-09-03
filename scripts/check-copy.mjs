@@ -1,20 +1,33 @@
 #!/usr/bin/env node
 /**
- * Copy-rule linter for the three dictionaries (MASTER_PROMPT §9).
+ * Copy-rule linter for every dictionary (MASTER_PROMPT §9).
  *
  * The banned-word list is not stylistic fussiness: every word on it is a
  * word that has actually stopped an elderly user in a government form. This
  * runs in CI-shaped fashion (`npm run check:copy`) so a well-meaning edit
  * cannot quietly reintroduce "verification failed".
  *
- * It also checks that hi.ts and gu.ts have exactly the key set of en.ts —
- * TypeScript catches missing keys, but not a key left as English filler.
+ * Since the dictionaries gained a fallback chain, a *missing* key is no
+ * longer a bug — it resolves to Hindi or English and the reader gets a
+ * sentence. Three things are still bugs, and this checks all three:
+ *
+ *   1. a key that exists in a language but not in English — a typo, which
+ *      would silently keep the English string forever;
+ *   2. a value copied from English and left there — the fallback would have
+ *      done that anyway, and the copy now looks translated when it is not;
+ *   3. any gap at all in a language the demo is given in.
+ *
+ * Everything else is reported as coverage, not as a failure, so a language
+ * can ship its first hundred strings without failing the build.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+/** The languages the product is actually demonstrated in. These must be whole. */
+const MUST_BE_COMPLETE = new Set(["en", "hi", "gu"]);
 
 const BANNED = [
   "biometric",
@@ -49,7 +62,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
 
 /** Pull every `key: "value"` pair out of a dictionary file. */
 function readDict(file) {
-  const src = readFileSync(join(root, "lib/i18n", file), "utf8");
+  const path = join(root, "lib/i18n", file);
+  if (!existsSync(path)) return null;
+  const src = readFileSync(path, "utf8");
   const out = [];
   const re = /^\s{2,}([A-Za-z0-9_]+):\s*\n?\s*"((?:[^"\\]|\\.)*)"/gm;
   let m;
@@ -57,10 +72,31 @@ function readDict(file) {
   return out;
 }
 
-// Both halves of each dictionary: the original journey and the catalogue.
-const en = [...readDict("en.ts"), ...readDict("svc-en.ts")];
-const hi = [...readDict("hi.ts"), ...readDict("svc-hi.ts")];
-const gu = [...readDict("gu.ts"), ...readDict("svc-gu.ts")];
+/** The language list, read out of the registry rather than repeated here. */
+const registry = readFileSync(join(root, "lib/i18n/languages.ts"), "utf8");
+const codes = [...registry.matchAll(/\{ code: "(\w+)", native: "([^"]+)", english: "([^"]+)"/g)].map(
+  (m) => ({ code: m[1], native: m[2], english: m[3] }),
+);
+
+/** Both halves of each dictionary: the original journey and the catalogue. */
+function load(code) {
+  const base = readDict(`${code}.ts`);
+  const svc = readDict(`svc-${code}.ts`);
+  if (base === null && svc === null) return null;
+  return [...(base ?? []), ...(svc ?? [])];
+}
+
+const en = load("en");
+const enMap = new Map(en.map((e) => [e.key, e.value]));
+
+const present = [];
+const absent = [];
+for (const l of codes) {
+  if (l.code === "en") continue;
+  const dict = load(l.code);
+  if (dict === null) absent.push(l);
+  else present.push({ ...l, dict, map: new Map(dict.map((e) => [e.key, e.value])) });
+}
 
 let failures = 0;
 const warn = (msg) => {
@@ -68,7 +104,9 @@ const warn = (msg) => {
   failures++;
 };
 
-console.log(`Checking ${en.length} English strings, ${hi.length} Hindi, ${gu.length} Gujarati\n`);
+console.log(
+  `${en.length} English strings; ${present.length} other language${present.length === 1 ? "" : "s"} on disk\n`,
+);
 
 /* ---------------- 1. banned words ---------------- */
 console.log("1. Banned words");
@@ -82,14 +120,11 @@ for (const { key, value } of en) {
     }
   }
 }
-for (const [name, dict] of [
-  ["hi", hi],
-  ["gu", gu],
-]) {
+for (const { code, dict } of present) {
   for (const { key, value } of dict) {
     for (const word of BANNED) {
       if (new RegExp(`\\b${word}`, "i").test(value.toLowerCase())) {
-        warn(`${name}.${key} contains "${word}"`);
+        warn(`${code}.${key} contains "${word}"`);
       }
     }
   }
@@ -99,52 +134,51 @@ if (failures === 0) console.log("  ✓ none found");
 /* ---------------- 2. punctuation and emoji ---------------- */
 const before2 = failures;
 console.log("\n2. No exclamation marks, no emoji in body copy");
-for (const [name, dict] of [
-  ["en", en],
-  ["hi", hi],
-  ["gu", gu],
-]) {
+for (const { code, dict } of [{ code: "en", dict: en }, ...present]) {
   for (const { key, value } of dict) {
-    if (value.includes("!")) warn(`${name}.${key} has an exclamation mark`);
-    if (EMOJI.test(value)) warn(`${name}.${key} has an emoji`);
+    if (value.includes("!")) warn(`${code}.${key} has an exclamation mark`);
+    if (EMOJI.test(value)) warn(`${code}.${key} has an emoji`);
   }
 }
 if (failures === before2) console.log("  ✓ clean");
 
-/* ---------------- 3. translation completeness ---------------- */
+/* ---------------- 3. keys that do not exist in English ---------------- */
 const before3 = failures;
-console.log("\n3. Every English key is translated, and not left as English");
-const enMap = new Map(en.map((e) => [e.key, e.value]));
+console.log("\n3. No key that English does not have");
+for (const { code, dict } of present) {
+  for (const { key } of dict) {
+    if (!enMap.has(key)) warn(`${code}.${key} is not a key in English — typo, or dead copy`);
+  }
+}
+if (failures === before3) console.log("  ✓ clean");
 
-for (const [name, dict] of [
-  ["hi", hi],
-  ["gu", gu],
-]) {
-  const map = new Map(dict.map((e) => [e.key, e.value]));
+/* ---------------- 4. nothing left sitting in English ---------------- */
+const before4 = failures;
+console.log("\n4. Nothing translated into English");
+/* Some values are legitimately identical across languages: the helpline
+   number, a BCP-47 tag, the PPO placeholder, the trilingual taglines. */
+const identicalIsFine = (key, value) =>
+  /^[\d\s+-]+$/.test(value) ||
+  /^[a-z]{2}(-[A-Z]{2})?$/.test(value) ||
+  key === "ppoPlaceholder" ||
+  key.startsWith("tagline") ||
+  key === "htmlLang" ||
+  value.length <= 3;
+
+for (const { code, map } of present) {
   for (const [key, value] of enMap) {
-    if (!map.has(key)) {
-      warn(`${name} is missing "${key}"`);
-      continue;
-    }
-    const translated = map.get(key);
-    // Some values are legitimately identical across languages: the helpline
-    // number, the BCP-47 tag, the PPO placeholder, the trilingual taglines.
-    const identicalIsFine =
-      /^[\d\s+-]+$/.test(value) ||
-      /^[a-z]{2}(-[A-Z]{2})?$/.test(value) ||
-      key === "ppoPlaceholder" ||
-      key.startsWith("tagline") ||
-      key === "htmlLang";
-    if (translated === value && !identicalIsFine && value.length > 3) {
-      warn(`${name}.${key} is still the English string: "${value.slice(0, 60)}"`);
+    const mine = map.get(key);
+    if (mine === undefined) continue; // a gap is the fallback's job, not a fault
+    if (mine === value && !identicalIsFine(key, value)) {
+      warn(`${code}.${key} is still the English string: "${value.slice(0, 60)}"`);
     }
   }
 }
-if (failures === before3) console.log("  ✓ complete");
+if (failures === before4) console.log("  ✓ clean");
 
-/* ---------------- 4. sentence case on buttons ---------------- */
-const before4 = failures;
-console.log("\n4. Sentence case (no Title Case On Buttons)");
+/* ---------------- 5. sentence case on buttons ---------------- */
+const before5 = failures;
+console.log("\n5. Sentence case (no Title Case On Buttons)");
 for (const { key, value } of en) {
   // The receipt stamp is a rubber stamp. Rubber stamps are all-caps.
   if (key.startsWith("stamp")) continue;
@@ -167,11 +201,38 @@ for (const { key, value } of en) {
     }
   }
 }
-if (failures === before4) console.log("  ✓ clean");
+if (failures === before5) console.log("  ✓ clean");
+
+/* ---------------- 6. coverage ---------------- */
+console.log("\n6. Coverage against English");
+const bar = (pct) => "█".repeat(Math.round(pct / 5)).padEnd(20, "·");
+for (const l of codes) {
+  if (l.code === "en") {
+    console.log(`  ${l.code.padEnd(3)} ${bar(100)} 100%  ${l.english}`);
+    continue;
+  }
+  const row = present.find((p) => p.code === l.code);
+  if (!row) {
+    console.log(`  ${l.code.padEnd(3)} ${bar(0)}   0%  ${l.english} — not written yet, falls back`);
+    continue;
+  }
+  const have = [...enMap.keys()].filter((k) => row.map.has(k)).length;
+  const pct = Math.round((have / enMap.size) * 100);
+  const note = MUST_BE_COMPLETE.has(l.code) && pct < 100 ? "  ✗ must be complete" : "";
+  console.log(`  ${l.code.padEnd(3)} ${bar(pct)} ${String(pct).padStart(3)}%  ${l.english}${note}`);
+  if (MUST_BE_COMPLETE.has(l.code) && pct < 100) {
+    for (const [key] of enMap) {
+      if (!row.map.has(key)) warn(`${l.code} is missing "${key}"`);
+    }
+  }
+}
+for (const l of absent) {
+  if (MUST_BE_COMPLETE.has(l.code)) warn(`${l.code} has no dictionary file at all`);
+}
 
 console.log(
   failures === 0
     ? "\nAll copy rules pass."
-    : `\n${failures} problem${failures === 1 ? "" : "s"} found.`
+    : `\n${failures} problem${failures === 1 ? "" : "s"} found.`,
 );
 process.exit(failures === 0 ? 0 : 1);

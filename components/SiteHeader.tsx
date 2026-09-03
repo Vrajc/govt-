@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/app-state";
-import { LANG_NAMES } from "@/lib/i18n/util";
-import { LANGS, type Lang } from "@/lib/types";
+import { LANGUAGES } from "@/lib/i18n/util";
+import type { Lang } from "@/lib/types";
 import { Book, Home, Info, Globe } from "./Icons";
 
 /**
@@ -19,7 +19,11 @@ import { Book, Home, Info, Globe } from "./Icons";
  * Three links and a language switch. Not a mega-menu: every item here is a
  * place a citizen actually needs, and nothing else earns the space.
  */
-export function SiteHeader() {
+export function SiteHeader({
+  coverage,
+}: {
+  coverage?: Partial<Record<Lang, number>>;
+}) {
   const { d, lang, chooseLang } = useApp();
   const pathname = usePathname();
   const NAV = d.nav as Record<string, string>;
@@ -63,8 +67,14 @@ export function SiteHeader() {
             destination, and on a phone it pairs with the brand on the
             first row so the three real links keep a row of their own.
 
+            A native <select> and not a custom menu. At eleven languages a
+            hand-rolled dropdown becomes a scrolling popover that has to be
+            keyboard-trapped, sized and positioned; the platform one is
+            already all of that, opens as a full-screen wheel on Android, and
+            reads correctly to every screen reader without any help.
+
             Changing language reloads, because the server sends only the
-            chosen dictionary. One reload beats shipping three scripts. */}
+            chosen dictionary. One reload beats shipping ten scripts. */}
         <label className="lang-switch">
           <Globe size={20} />
           <span className="sr-only">{NAV.language}</span>
@@ -73,11 +83,19 @@ export function SiteHeader() {
             aria-label={NAV.language}
             onChange={(e) => chooseLang(e.target.value as Lang, pathname)}
           >
-            {LANGS.map((l) => (
-              <option key={l} value={l}>
-                {LANG_NAMES[l]}
-              </option>
-            ))}
+            {LANGUAGES.map((l) => {
+              const done = coverage?.[l.code] ?? 1;
+              return (
+                <option key={l.code} value={l.code} lang={l.code}>
+                  {l.native}
+                  {/* The English name is what makes the list scannable for
+                      someone who does not read the script they are looking
+                      at — which is exactly the person who is switching. */}
+                  {` — ${l.english}`}
+                  {done < 0.98 ? ` (${Math.round(done * 100)}%)` : ""}
+                </option>
+              );
+            })}
           </select>
         </label>
       </div>

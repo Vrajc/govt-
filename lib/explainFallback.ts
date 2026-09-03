@@ -1,4 +1,5 @@
 import type { ErrorCode, Lang } from "./types";
+import { fallbackChain } from "./i18n/languages";
 
 export interface Explanation {
   reason: string;
@@ -6,17 +7,23 @@ export interface Explanation {
 }
 
 /**
- * The whole rejection explainer, hardcoded, six codes across three languages.
+ * The whole rejection explainer, hardcoded, every code in every language
+ * that has been written yet.
  *
  * This ships FIRST and the OpenAI call is layered on top of it — so pulling
  * the API key out degrades the app to exactly this, and nothing visibly
  * breaks. It is also what gets served when the model returns something
  * malformed, slow, or off-policy.
  *
+ * A language may be absent from a code: `fallbackExplain` walks the same
+ * chain the dictionaries use, so a Marathi reader gets the Hindi sentence
+ * and everyone else gets the English one. Two short sentences the reader
+ * can act on beat two they cannot read.
+ *
  * Same copy rules as the UI: two short sentences, everyday words, never
  * blame the person, never apologise.
  */
-export const FALLBACK: Record<ErrorCode, Record<Lang, Explanation>> = {
+export const FALLBACK: Record<ErrorCode, Partial<Record<Lang, Explanation>>> = {
   ERR_FACE_QUALITY_LOW: {
     en: {
       reason: "The photo was too dark for the system to match your face.",
@@ -337,7 +344,14 @@ export const FALLBACK: Record<ErrorCode, Record<Lang, Explanation>> = {
 };
 
 export function fallbackExplain(code: ErrorCode, lang: Lang): Explanation {
-  return FALLBACK[code]?.[lang] ?? FALLBACK.ERR_FACE_QUALITY_LOW[lang];
+  const forCode = FALLBACK[code] ?? FALLBACK.ERR_FACE_QUALITY_LOW;
+  for (const step of fallbackChain(lang)) {
+    const hit = forCode[step];
+    if (hit) return hit;
+  }
+  /* English is in the chain and every code has an English entry, so this is
+     unreachable — but an explainer that throws is worse than a generic one. */
+  return FALLBACK.ERR_FACE_QUALITY_LOW.en!;
 }
 
 /**
@@ -346,7 +360,10 @@ export function fallbackExplain(code: ErrorCode, lang: Lang): Explanation {
  * read the same either way.
  */
 export function toAssisted(text: Explanation, lang: Lang): Explanation {
-  const swap: Record<Lang, [RegExp, string][]> = {
+  /* Only the languages whose photo sentences contain a second person to
+     move. A language with no entry comes back unchanged, which is correct:
+     the reason and action read the same to a helper as to the pensioner. */
+  const swap: Partial<Record<Lang, [RegExp, string][]>> = {
     en: [
       [/\byour face\b/gi, "their face"],
       [/\byour eyes\b/gi, "their eyes"],
@@ -365,7 +382,7 @@ export function toAssisted(text: Explanation, lang: Lang): Explanation {
   };
 
   const apply = (s: string) =>
-    swap[lang].reduce((acc, [re, to]) => acc.replace(re, to), s);
+    (swap[lang] ?? []).reduce((acc, [re, to]) => acc.replace(re, to), s);
 
   return { reason: apply(text.reason), action: apply(text.action) };
 }
