@@ -29,6 +29,33 @@
 
   --focus:        #B8791F;  /* focus ring, 3px, always visible */
 
+  /* The line around something you press or type into is not decoration —
+     WCAG asks for 3:1 against what is behind it, and the hairline above is
+     1.4:1. It was drawn at 2px to compensate, which reads as heavy without
+     ever actually passing. So there are two lines now: this one for
+     controls, at 3.6:1 on white and 3.1:1 on the tinted panels, and the
+     hairline for the boxes that only need to say where they stop. */
+  --line-strong:  #94866D;
+
+  /* ----------------------------------------------------------------
+     Radius and depth.
+
+     Six ad-hoc radii and no shadow anywhere is what made the product read
+     as a stack of outlined rectangles. Three steps and two very quiet
+     shadows are enough to say which surface sits above which, which is the
+     whole job — anything heavier looks like a phone app trying to be a
+     bank, and this is meant to feel like paper.
+     ---------------------------------------------------------------- */
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  18px;
+
+  --shadow-1: 0 1px 2px rgba(31, 28, 26, 0.04), 0 2px 8px rgba(31, 28, 26, 0.045);
+  --shadow-2: 0 2px 4px rgba(31, 28, 26, 0.05), 0 10px 28px rgba(31, 28, 26, 0.08);
+  /* A solid action gets its own, tinted with its own colour rather than
+     with grey, which is what stops it looking dirty. */
+  --shadow-btn: 0 1px 2px rgba(23, 57, 90, 0.16), 0 4px 12px rgba(23, 57, 90, 0.14);
+
   /* One name for "the face this page is set in". The script class on <html>
      redefines it, so every rule in the file below asks for --font-ui and
      none of them has to know how many languages there are. */
@@ -266,13 +293,17 @@ p.body strong { color: var(--ink); font-weight: 700; }
   font-weight: 600;
   font-family: inherit;
   line-height: 1.3;
-  border-radius: 16px;
+  border-radius: var(--r-md);
   border: 2px solid transparent;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  transition: background-color 150ms, border-color 150ms, color 150ms;
+  transition: background-color 150ms, border-color 150ms, color 150ms,
+              box-shadow 150ms, transform 150ms;
 }
+/* A press that moves is a press that was felt. One pixel, and the reduced
+   motion rule at the top of the file turns even that off. */
+.btn:active:not(:disabled) { transform: translateY(1px); }
 .btn + .btn { margin-top: 12px; }        /* still clear of the 8px tap-gap floor */
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -280,8 +311,10 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--primary);
   border-color: var(--primary);
   color: #FFFFFF;
+  box-shadow: var(--shadow-btn);
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-primary:active:not(:disabled) { box-shadow: 0 1px 2px rgba(23, 57, 90, 0.2); }
 
 .btn-secondary {
   background: var(--surface);
@@ -292,7 +325,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
 
 .btn-quiet {
   background: transparent;
-  border-color: var(--line);
+  border-color: var(--line-strong);
   color: var(--ink);
 }
 .btn-quiet:hover:not(:disabled) { background: var(--surface); }
@@ -301,6 +334,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--attention);
   border-color: var(--attention);
   color: #FFF6F1;
+  box-shadow: 0 1px 2px rgba(168, 69, 42, 0.18), 0 4px 12px rgba(168, 69, 42, 0.16);
 }
 .btn-attention:hover:not(:disabled) { background: #8E3821; border-color: #8E3821; }
 
@@ -324,13 +358,14 @@ p.body strong { color: var(--ink); font-weight: 700; }
   font-size: var(--fs-sm);
   font-weight: 600;
   font-family: inherit;
-  background: transparent;
-  border: 2px solid var(--line);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   color: var(--ink);
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color 150ms, border-color 150ms;
 }
 .btn-header:hover { background: var(--surface); border-color: var(--primary); }
 .btn-header[aria-pressed="true"] {
@@ -358,11 +393,16 @@ p.body strong { color: var(--ink); font-weight: 700; }
   font-family: inherit;
   color: var(--ink);
   background: var(--surface);
-  border: 2px solid var(--line);
-  border-radius: 12px;
+  /* 1px of a line that actually passes, rather than 2px of one that does
+     not. It reads lighter and is easier to see at the same time, which is
+     not the trade it sounds like — the thickness was standing in for the
+     contrast all along. */
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  transition: border-color 120ms, box-shadow 120ms;
 }
 .field-input::placeholder { color: #767068; }  /* 4.9:1 — AAA for large text */
-.field-input:hover { border-color: #C9BCA6; }
+.field-input:hover { border-color: var(--ink-soft); }
 .field-input[aria-invalid="true"] { border-color: var(--attention); }
 .field-input.tabular { font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
 
@@ -382,17 +422,28 @@ p.body strong { color: var(--ink); font-weight: 700; }
 .card {
   display: block;
   width: 100%;
-  text-align: left;
+  text-align: start;
   background: var(--surface);
-  border: 2px solid var(--line);
-  border-radius: 14px;
+  /* A card is a surface, not a control: it is identifiable by the words on
+     it, so it gets the hairline and a shadow rather than an outline. Six
+     2px boxes down one screen is what made a page read as a grid of boxes
+     rather than as a page. */
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   padding: 16px;
   font-family: inherit;
   color: var(--ink);
   cursor: pointer;
   text-decoration: none;
+  box-shadow: var(--shadow-1);
+  transition: border-color 150ms, box-shadow 150ms, transform 150ms;
 }
-.card:hover { border-color: var(--primary); background: var(--primary-tint); }
+.card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.card:active { transform: translateY(0); box-shadow: var(--shadow-1); }
 .card + .card { margin-top: 12px; }
 .card-title {
   font-size: var(--fs-lg);
@@ -425,9 +476,13 @@ p.body strong { color: var(--ink); font-weight: 700; }
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   padding: 16px;
+  box-shadow: var(--shadow-1);
 }
+/* A tinted panel is already separated by its colour; a shadow on top of
+   that is where quiet depth turns into decoration. */
+.panel-tint, .panel-good, .panel-warn { box-shadow: none; }
 .panel-tint { background: var(--primary-tint); border-color: #C3D3E4; }
 .panel-good { background: var(--success-tint); border-color: #B6D3C5; }
 .panel-warn { background: var(--attention-tint); border-color: #E2BBA9; }
@@ -467,12 +522,13 @@ p.body strong { color: var(--ink); font-weight: 700; }
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--primary-dark);
-  border: 2px solid var(--line);
-  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   background: var(--surface);
   text-decoration: none;
   font-family: inherit;
   cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
 }
 .review-edit:hover { border-color: var(--primary); background: var(--primary-tint); }
 
@@ -521,7 +577,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--line);
+  border: 2px solid var(--line-strong);
   background: var(--surface);
   display: flex;
   align-items: center;
@@ -633,7 +689,8 @@ p.body strong { color: var(--ink); font-weight: 700; }
   margin-bottom: 16px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
 }
 
 .doc-sample-art {
@@ -687,11 +744,12 @@ p.body strong { color: var(--ink); font-weight: 700; }
   min-height: var(--tap);
   padding: 12px 14px;
   margin-top: 14px;
-  border-radius: 12px;
+  border-radius: var(--r-md);
   font-size: var(--fs-md);
   font-weight: 600;
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   background: var(--surface);
+  box-shadow: var(--shadow-1);
 }
 .coach-good { background: var(--success-tint); border-color: #B6D3C5; color: #0F4B34; }
 .coach-warn { background: var(--attention-tint); border-color: #E2BBA9; color: #7C3018; }
@@ -1163,6 +1221,9 @@ img, svg, video { max-width: 100%; }
 .site-header {
   background: var(--surface);
   border-bottom: 1px solid var(--line);
+  /* The banner above it is opaque and the header sticks under it, so the
+     shadow is what separates the pair from the page as it scrolls beneath. */
+  box-shadow: 0 1px 0 rgba(31, 28, 26, 0.03), 0 4px 14px rgba(31, 28, 26, 0.05);
 }
 .site-header-inner {
   max-width: var(--page-max);
@@ -1228,9 +1289,9 @@ img, svg, video { max-width: 100%; }
   gap: 8px;
   min-height: var(--tap-sm);
   padding: 0 8px 0 10px;
-  margin-left: 4px;
-  border: 2px solid var(--line);
-  border-radius: 10px;
+  margin-inline-start: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   color: var(--ink-soft);
   cursor: pointer;
 }
@@ -1803,8 +1864,9 @@ details.tech ul { padding-left: 18px; }
   }
   .lp-figures {
     background: var(--surface);
-    border: 2px solid var(--line);
-    border-radius: 16px;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+    border-radius: var(--r-lg);
     padding: 6px 22px;
     position: sticky;
     top: 140px;

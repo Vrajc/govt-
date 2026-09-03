@@ -15,6 +15,7 @@ const T = {
   ink: "#1F1C1A",
   inkSoft: "#534D47",
   line: "#E3DACC",
+  lineStrong: "#94866D",
   primary: "#23507A",
   primaryDark: "#17395A",
   primaryTint: "#E8EEF5",
@@ -74,7 +75,13 @@ const PAIRS = [
   ["placeholder on surface", T.placeholder, T.surface, 4.5],
   ["focus ring against paper", T.focus, T.paper, 3],
   ["focus ring against surface", T.focus, T.surface, 3],
-  ["field border against surface", T.line, T.surface, 1.2],
+  /* 1.4.11 asks for 3:1 around anything you press or type into. The
+     hairline is 1.4:1 and was drawn at 2px to compensate, which is not a
+     thing the ratio cares about — hence a second, darker line for controls,
+     checked here against all three grounds it is ever drawn on. */
+  ["control border on surface", T.lineStrong, T.surface, 3],
+  ["control border on paper", T.lineStrong, T.paper, 3],
+  ["control border on tint panel", T.lineStrong, T.primaryTint, 3],
 ];
 
 let failed = 0;
