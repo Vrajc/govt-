@@ -21,6 +21,9 @@ export const en = {
     protoBanner: "A student prototype. Not an official government service.",
     back: "Back",
     listen: "Listen",
+    /* Shown only when the phone has no voice for the reader's language and
+       the words are being respelled for the Hindi one. */
+    listenAccent: "This phone has no voice for your language, so it will be read in a Hindi one.",
     stop: "Stop",
     continue: "Continue",
     edit: "Change",

@@ -3,97 +3,84 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/app-state";
-import { guToDevanagari } from "@/lib/speech";
+import { planVoice, speakAll, type Speaking, type VoicePlan } from "@/lib/speech";
 import { Speaker, StopSquare } from "./Icons";
 
 const TTS_FALLBACK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_TTS_FALLBACK === "true";
-
-/** How this device can read the current language aloud, if it can at all. */
-interface VoicePlan {
-  /** The BCP-47 tag handed to the utterance. */
-  lang: string;
-  voice: SpeechSynthesisVoice | null;
-  /** Rewrites the text into a script the chosen voice can actually read. */
-  render: (text: string) => string;
-}
 
 /**
  * §5.3 — reads the screen aloud.
  *
  * Primary path is the browser's own `speechSynthesis`: free, instant, and
- * zero bandwidth, which is the whole argument on a 3G connection. The OpenAI
- * TTS route is a flagged fallback for devices with no installed voice for
- * Hindi or Gujarati at all — it is off by default because an MP3 is the
- * heaviest thing this app could ever download.
+ * zero bandwidth, which is the whole argument on a 3G connection. Which
+ * voice to use, and whether the text has to be respelled first, is decided
+ * in `lib/speech.ts` — this component only has to know whether the device
+ * can do it at all, and get out of the way if it cannot.
+ *
+ * The OpenAI TTS route is a flagged fallback for devices with no usable
+ * voice whatsoever. It is off by default because an MP3 is the heaviest
+ * thing this app could ever download.
  */
 export function SpeakButton({ text }: { text: string }) {
-  const { t, speechTag, lang } = useApp();
+  const { t, lang } = useApp();
   const [speaking, setSpeaking] = useState(false);
   const [supported, setSupported] = useState(true);
+  const [plan, setPlan] = useState<VoicePlan | null>(null);
+  const jobRef = useRef<Speaking | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const pathname = usePathname();
 
-  /**
-   * Works out what this particular device can do, in order of preference.
-   * Returns null when it can do nothing at all.
-   */
-  const plan = useCallback((): VoicePlan | null => {
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices.length) return null;
+  /* Voices load asynchronously nearly everywhere, and the event that says so
+     is unreliable: Chrome fires `voiceschanged` once, Safari sometimes never
+     fires it at all, and Android fires it before the list is populated. So
+     this listens for the event AND polls briefly, then stops.
 
-    const find = (tag: string) => {
-      const want = tag.toLowerCase();
-      // Android reports gu_IN where the spec says gu-IN.
-      const norm = (v: SpeechSynthesisVoice) => v.lang.toLowerCase().replace("_", "-");
-      return (
-        voices.find((v) => norm(v) === want) ??
-        voices.find((v) => norm(v).startsWith(`${want.split("-")[0]}-`)) ??
-        null
-      );
-    };
-
-    const own = find(speechTag);
-    if (own) return { lang: speechTag, voice: own, render: (s) => s };
-
-    /* Chrome ships a Hindi voice and no Gujarati one, so a Gujarati reader on
-       a laptop lands here every time. Gujarati and Devanagari are the same
-       alphabet drawn twice: swap the letters and the Hindi voice says the
-       Gujarati words correctly, in a Hindi accent. Accent beats silence. */
-    if (lang === "gu") {
-      const hindi = find("hi-IN");
-      if (hindi) return { lang: "hi-IN", voice: hindi, render: guToDevanagari };
-    }
-
-    /* English is the one language we will trust an unlabelled default voice
-       with. A device with no Hindi or Gujarati voice would otherwise read an
-       Indic script aloud in an English one, which is worse than silence. */
-    if (speechTag.startsWith("en")) return { lang: speechTag, voice: null, render: (s) => s };
-
-    return null;
-  }, [speechTag, lang]);
-
-  /* Voices load asynchronously on most browsers; touching the list early is
-     what makes the first press actually speak instead of going silent. It is
-     also how we decide whether to offer the button at all — an empty list
-     means the voices have not arrived yet, not that there are none, so we
-     keep the button and settle the question once they do. Deciding here
-     rather than mid-press is what stops the control vanishing under a
-     pensioner's finger. */
+     Settling the question here rather than mid-press is what stops the
+     control vanishing from under a pensioner's finger — and an empty list
+     means the voices have not arrived yet, not that there are none, so the
+     button stays until the question is actually answered. */
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setSupported(TTS_FALLBACK_ENABLED);
       return;
     }
-    const check = () => {
-      if (!window.speechSynthesis.getVoices().length) return;
-      setSupported(plan() !== null || TTS_FALLBACK_ENABLED);
+
+    const synth = window.speechSynthesis;
+    let tries = 0;
+    let timer = 0;
+    let done = false;
+
+    const settle = () => {
+      if (done) return;
+      const voices = synth.getVoices();
+      if (!voices.length) {
+        // Give it three seconds, then accept that there really are none.
+        if (++tries > 12) {
+          done = true;
+          window.clearInterval(timer);
+          setSupported(TTS_FALLBACK_ENABLED);
+        }
+        return;
+      }
+      done = true;
+      window.clearInterval(timer);
+      const chosen = planVoice(lang, voices);
+      setPlan(chosen);
+      setSupported(chosen !== null || TTS_FALLBACK_ENABLED);
     };
-    check();
-    window.speechSynthesis.addEventListener("voiceschanged", check);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", check);
-  }, [plan]);
+
+    timer = window.setInterval(settle, 250);
+    settle();
+    synth.addEventListener("voiceschanged", settle);
+    return () => {
+      window.clearInterval(timer);
+      synth.removeEventListener("voiceschanged", settle);
+    };
+  }, [lang]);
 
   const stop = useCallback(() => {
+    jobRef.current?.cancel();
+    jobRef.current = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -104,9 +91,22 @@ export function SpeakButton({ text }: { text: string }) {
     setSpeaking(false);
   }, []);
 
-  /* Never let a voice follow the user to the next screen. */
+  /* Never let a voice follow the user to the next screen, out of the tab, or
+     into the background. A phone that keeps talking after it goes in a
+     pocket is the kind of thing that stops someone using the feature again. */
   useEffect(() => stop, [pathname, stop]);
-  useEffect(() => stop, [stop]);
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === "hidden") stop();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", stop);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", stop);
+      stop();
+    };
+  }, [stop]);
 
   const speak = useCallback(async () => {
     if (speaking) {
@@ -116,21 +116,10 @@ export function SpeakButton({ text }: { text: string }) {
     const clean = text.trim();
     if (!clean) return;
 
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const chosen = plan();
-      if (chosen) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(chosen.render(clean));
-        u.lang = chosen.lang;
-        if (chosen.voice) u.voice = chosen.voice;
-        u.rate = 0.88; // slower than default, deliberately
-        u.pitch = 1;
-        u.onend = () => setSpeaking(false);
-        u.onerror = () => setSpeaking(false);
-        setSpeaking(true);
-        window.speechSynthesis.speak(u);
-        return;
-      }
+    if (plan && typeof window !== "undefined" && "speechSynthesis" in window) {
+      setSpeaking(true);
+      jobRef.current = speakAll(clean, plan, { onEnd: () => setSpeaking(false) });
+      return;
     }
 
     if (!TTS_FALLBACK_ENABLED) {
@@ -161,6 +150,15 @@ export function SpeakButton({ text }: { text: string }) {
   // No voice and no fallback: hide the control rather than offer a dead end.
   if (!supported) return null;
 
+  /* A tooltip and nothing louder. Someone using a screen reader has their
+     own voice and never presses this button; the person who needs the note
+     is the sighted Tamil reader who hears a Hindi accent and would otherwise
+     conclude the app is broken. */
+  const note =
+    plan?.fidelity === "transliterated"
+      ? t("common.listenAccent")
+      : undefined;
+
   return (
     <button
       type="button"
@@ -168,6 +166,7 @@ export function SpeakButton({ text }: { text: string }) {
       onClick={speak}
       aria-pressed={speaking}
       aria-label={speaking ? t("common.stop") : t("common.listen")}
+      title={note}
     >
       {speaking ? <StopSquare size={18} /> : <Speaker size={20} />}
       <span>{speaking ? t("common.stop") : t("common.listen")}</span>
