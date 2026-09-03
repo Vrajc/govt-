@@ -15,6 +15,8 @@ import { te } from "./te";
 import { svcTe } from "./svc-te";
 import { kn } from "./kn";
 import { svcKn } from "./svc-kn";
+import { pa } from "./pa";
+import { svcPa } from "./svc-pa";
 import { DEFAULT_LANG, LANGS, fallbackChain, isLang } from "./languages";
 
 /**
@@ -59,6 +61,7 @@ const RAW: Partial<Record<Lang, PartialDict>> = {
   ta: { ...ta, ...svcTa },
   te: { ...te, ...svcTe },
   kn: { ...kn, ...svcKn },
+  pa: { ...pa, ...svcPa },
 };
 
 /**
