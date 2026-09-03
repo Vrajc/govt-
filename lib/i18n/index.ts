@@ -9,6 +9,8 @@ import { mr } from "./mr";
 import { svcMr } from "./svc-mr";
 import { bn } from "./bn";
 import { svcBn } from "./svc-bn";
+import { ta } from "./ta";
+import { svcTa } from "./svc-ta";
 import { DEFAULT_LANG, LANGS, fallbackChain, isLang } from "./languages";
 
 /**
@@ -50,6 +52,7 @@ const RAW: Partial<Record<Lang, PartialDict>> = {
   gu: { ...gu, ...svcGu },
   mr: { ...mr, ...svcMr },
   bn: { ...bn, ...svcBn },
+  ta: { ...ta, ...svcTa },
 };
 
 /**
