@@ -19,6 +19,8 @@ import { pa } from "./pa";
 import { svcPa } from "./svc-pa";
 import { ml } from "./ml";
 import { svcMl } from "./svc-ml";
+import { or } from "./or";
+import { svcOr } from "./svc-or";
 import { DEFAULT_LANG, LANGS, fallbackChain, isLang } from "./languages";
 
 /**
@@ -65,6 +67,7 @@ const RAW: Partial<Record<Lang, PartialDict>> = {
   kn: { ...kn, ...svcKn },
   pa: { ...pa, ...svcPa },
   ml: { ...ml, ...svcMl },
+  or: { ...or, ...svcOr },
 };
 
 /**
