@@ -606,6 +606,80 @@ p.body strong { color: var(--ink); font-weight: 700; }
 }
 .cam-stage video, .cam-stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cam-oval { position: absolute; inset: 0; pointer-events: none; }
+
+/* The same four corners the drawing has, over the live camera, so "fill the
+   frame like the picture" means something once the camera is open. */
+.cam-brackets {
+  position: absolute;
+  inset: 5%;
+  width: 90%;
+  height: 90%;
+  pointer-events: none;
+}
+
+/* ==================================================================
+   What the paper looks like
+   ==================================================================
+   Shown before the camera opens, not behind a link. Somebody who does
+   not know which paper this is will not go looking for a picture of
+   it — they will photograph the wrong one and find out in six weeks.
+   ================================================================== */
+.doc-sample {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.doc-sample-art {
+  width: 160px;
+  flex-shrink: 0;
+  height: auto;
+}
+
+.doc-sample-notes {
+  flex: 1 1 12rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.doc-sample-notes li { padding-inline-start: 14px; position: relative; }
+.doc-sample-notes li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+/* The first note says what the paper is; the second says which part of it
+   has to survive, and that one is the whole reason for the drawing. */
+.doc-sample-notes li:nth-child(2) { color: var(--attention-text); font-weight: 600; }
+.doc-sample-notes li:nth-child(2)::before { background: var(--attention); }
+
+/* The same drawing at thumbnail size, standing in for the photograph that
+   has not been taken yet. */
+.doc-thumb {
+  width: 72px;
+  height: 49px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px dashed var(--line);
+  background: var(--paper);
+}
+
 .coach-line {
   display: flex;
   align-items: center;

@@ -487,6 +487,60 @@ export const svcEn = {
   },
 
   /* ================================================================
+   * Photographing a document
+   * ================================================================
+   * Three kinds of sentence, and each answers a different question a
+   * first-time photographer has: what is this paper, what part of it
+   * matters, and what is wrong with the picture I just took.
+   */
+  docshot: {
+    example: "Show me what it looks like",
+    exampleHide: "Hide the drawing",
+    exampleAlt: "A drawing of the paper, inside a camera frame",
+
+    /* What the thing physically is. */
+    shapeCard: "A plastic card, about the size of a bank card. Lay it flat and hold the phone above it.",
+    shapeBooklet: "A small book. Open it at the first page and lay it flat.",
+    shapePaper: "A full sheet of paper. Lay it flat and get all four corners in.",
+    shapeCheque: "A cheque. Draw a line across it first, then take the photo.",
+    shapeFace: "A photo of the face, taken now, with this camera.",
+    shapePeople: "One photo with both people in it.",
+
+    /* The part the office will actually read, marked on the drawing. */
+    focusNumber: "The long number has to be readable.",
+    focusAccount: "The account number and the IFSC code have to be readable.",
+    focusSeal: "The round stamp and the signature have to be in the picture.",
+    focusName: "The name has to be readable, spelt the way the office has it.",
+    focusFace: "The face has to be clear.",
+    focusWhole: "All four corners have to be in the picture.",
+    bothSides: "The back is needed too. Take that one straight after.",
+
+    /* Live, while the camera is open. One line, the thing to fix first. */
+    starting: "Starting the camera",
+    ok: "Looks good — take the photo",
+    dark: "Too dark — move to a window, or put a light on",
+    bright: "Too much light — come out of the direct sun",
+    glare: "There is a shine on it — tilt it a little",
+    blurry: "Hold the phone still",
+    noPaper: "Put it on a table and hold the phone above it",
+    tooFar: "Come closer, until it fills the frame",
+    cutOff: "Move back a little — one edge is outside the picture",
+    wrongShape: "Turn it to line up with the frame",
+    noText: "Turn it over — this side has nothing written on it",
+
+    /* After the photo is taken. */
+    checking: "Looking at the photo",
+    checkedHere: "Checked on this phone",
+    checkedAway: "Checked with help from a computer",
+    looksRight: "This looks like the right paper",
+    looksWrong: "This does not look like {name}",
+    looksWrongBody: "Have a look before you keep it. If it is the right one, keep it anyway.",
+    keepAnyway: "Keep it anyway",
+    sawInstead: "It looks more like {what}.",
+    away: "To check it this closely the picture goes to a computer outside the phone, and is not kept.",
+  },
+
+  /* ================================================================
    * Tracking stages
    * ================================================================ */
   stages: {

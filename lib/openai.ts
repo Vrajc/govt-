@@ -223,6 +223,100 @@ export async function precheckPhoto(
 }
 
 /* ==================================================================
+ * 5.2 layer 2 — Is this the right piece of paper
+ * ================================================================== */
+
+export interface DocCheckResult {
+  /** Does this look like the document that was asked for. */
+  match: boolean;
+  /** Is the part that matters actually readable. */
+  readable: boolean;
+  /** One short sentence, in the reader's language, or null when fine. */
+  issue: string | null;
+  /** What it looks like instead, named in the reader's language. */
+  saw: string | null;
+}
+
+const DOC_PROMPT = (docName: string, focus: string, lang: Lang) =>
+  [
+    `Someone has photographed a document to attach to an Indian pension application. They were asked for: ${docName}.`,
+    'Reply with JSON only: {"match": boolean, "readable": boolean, "issue": string|null, "saw": string|null}.',
+    "`match` is false ONLY if this is clearly a different kind of document.",
+    `\`readable\` is false if this part cannot be read: ${focus}`,
+    `\`issue\` is one short plain sentence in ${langName(lang)} saying the single thing to fix, or null if there is nothing.`,
+    `\`saw\` names what the document actually is, in ${langName(lang)}, in two or three words — only when \`match\` is false, otherwise null.`,
+    "Never transcribe, repeat or return any number, name, address or date from the document.",
+    "Do not identify or describe the person. Do not comment on their appearance.",
+    "Judge only the photograph.",
+  ].join(" ");
+
+/**
+ * Layer 2 for documents, and deliberately timid.
+ *
+ * A model that wrongly rejects a genuine ration card sends a 78-year-old
+ * back to a village office for nothing, which is the exact harm this app
+ * exists to remove. So `match: false` is reserved for a clearly different
+ * kind of document, every failure path returns "fine", and the caller
+ * treats the answer as a question rather than a verdict — the citizen can
+ * always keep the photograph anyway.
+ */
+export async function precheckDocument(
+  dataUrl: string,
+  docName: string,
+  focus: string,
+  lang: Lang
+): Promise<{ result: DocCheckResult; source: Source }> {
+  const pass: DocCheckResult = { match: true, readable: true, issue: null, saw: null };
+  const api = getClient();
+  if (!api) return { result: pass, source: "fallback" };
+
+  try {
+    const res = await api.chat.completions.create(
+      {
+        model: MODEL,
+        temperature: 0,
+        max_tokens: 160,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: DOC_PROMPT(docName, focus, lang) },
+              /* `detail: high` here, unlike the face check. Whether a number
+                 on a passbook is legible is a question about small print,
+                 and the low-detail path resizes it away. */
+              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+            ],
+          },
+        ],
+      },
+      { timeout: TIMEOUT_MS }
+    );
+
+    const raw = res.choices[0]?.message?.content;
+    if (!raw) return { result: pass, source: "fallback" };
+
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const match = parsed.match !== false;
+    const readable = parsed.readable !== false;
+    const issue = clean(parsed.issue);
+    const saw = match ? null : clean(parsed.saw);
+
+    // A complaint with nothing to act on is worse than no complaint.
+    if ((!match || !readable) && !issue) return { result: pass, source: "fallback" };
+    if (issue && issue.length > 220) return { result: pass, source: "fallback" };
+
+    return {
+      result: { match, readable, issue: match && readable ? null : issue, saw },
+      source: "openai",
+    };
+  } catch {
+    // Never block a submission because a model call failed.
+    return { result: pass, source: "fallback" };
+  }
+}
+
+/* ==================================================================
  * 5.3 — Optional TTS upgrade
  * ================================================================== */
 export async function speak(text: string, lang: Lang): Promise<ArrayBuffer | null> {

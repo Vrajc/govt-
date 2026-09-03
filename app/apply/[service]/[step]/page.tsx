@@ -9,6 +9,7 @@ import { BigButton, BigLink } from "@/components/BigButton";
 import { Field } from "@/components/Field";
 import { DateField } from "@/components/DateField";
 import { PhotoCapture } from "@/components/PhotoCapture";
+import { DocSample } from "@/components/DocSample";
 import {
   Alert,
   ArtEyeLevel,
@@ -445,6 +446,7 @@ function DocumentsStep({
       >
         <PhotoCapture
           purpose="document"
+          docId={capturing}
           title={DOCS[capturing] ?? capturing}
           onDone={(url) => {
             patch({ docs: { ...app.docs, [capturing]: url } });
@@ -506,21 +508,10 @@ function DocumentsStep({
                     }}
                   />
                 ) : (
-                  <span
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 8,
-                      border: "2px dashed var(--line)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      color: "var(--ink-soft)",
-                    }}
-                  >
-                    <Camera size={22} />
-                  </span>
+                  /* A drawing of the paper rather than a camera icon. The
+                     icon says "a photograph goes here", which the reader
+                     had worked out; the drawing says which paper. */
+                  <DocSample docId={doc.id} className="doc-thumb" />
                 )}
                 <span>
                   <p className="review-val">
