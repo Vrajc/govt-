@@ -5,6 +5,8 @@ import { gu } from "./gu";
 import { svcEn, type SvcDict } from "./svc-en";
 import { svcHi } from "./svc-hi";
 import { svcGu } from "./svc-gu";
+import { mr } from "./mr";
+import { svcMr } from "./svc-mr";
 import { DEFAULT_LANG, LANGS, fallbackChain, isLang } from "./languages";
 
 /**
@@ -44,6 +46,7 @@ const RAW: Partial<Record<Lang, PartialDict>> = {
   en: { ...en, ...svcEn },
   hi: { ...hi, ...svcHi },
   gu: { ...gu, ...svcGu },
+  mr: { ...mr, ...svcMr },
 };
 
 /**

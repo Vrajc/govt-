@@ -239,7 +239,7 @@ export const en = {
     real2: "Taking the photo and checking its quality",
     real3: "The plain-language explanation when something needs fixing (live OpenAI call)",
     real4: "The check on your photo before it is sent (live OpenAI call)",
-    real5: "Spoken guidance in all three languages",
+    real5: "Spoken guidance in every language here, including the ones no phone has a voice for",
     real6: "The status state machine and its audit log",
     mock1: "Aadhaar number, the code on the phone, the PPO lookup",
     mock2: "Matching your face against the government database",
@@ -266,7 +266,7 @@ export const en = {
       "Roughly one crore submissions a year, heavily concentrated in November and December. That is a queue problem, not a compute problem — the async job model used here is the shape of the answer. Staggering reminders by PPO series would flatten the peak.",
     scale6Head: "Accessibility as infrastructure.",
     scale6:
-      "Three languages here; 22 scheduled languages is a content-pipeline problem, not a rebuild. Every string already goes through one dictionary.",
+      "Eleven languages here, and the twelfth is a data file: one row in the registry and a dictionary that may start out half-written, because every string falls back rather than breaking. Twenty-two scheduled languages is a content problem, not a rebuild.",
 
     techTitle: "For the technically curious",
     techBody:
@@ -341,3 +341,14 @@ export type Dict = {
 };
 
 export type Section = keyof Dict;
+
+/**
+ * What a language file may be while it is still being translated.
+ *
+ * Anything absent resolves down the fallback chain in `./index`, so a
+ * language ships the moment its first screen is done rather than waiting for
+ * its eight hundredth string. What the type must still refuse is a key that
+ * English does not have: a typo would silently keep the English string
+ * forever and nobody would ever see it.
+ */
+export type PartialDict = { [Section in keyof Dict]?: Partial<Dict[Section]> };

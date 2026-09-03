@@ -37,7 +37,7 @@ export const svcEn = {
   landing: {
     heroTitle: "Find your pension. Claim it. Keep it.",
     heroSub:
-      "Fourteen government schemes for pensioners and their families, in one place — in Hindi, Gujarati or English, in words a 78-year-old actually uses.",
+      "Fourteen government schemes for pensioners and their families, in one place — in eleven Indian languages, in words a 78-year-old actually uses.",
     ctaStart: "Show me what I can do",
     ctaFind: "I do not know which one I need",
     ctaTrack: "Check something I already sent",
@@ -71,7 +71,7 @@ export const svcEn = {
 
     builtTitle: "Made for the phone in your pocket",
     built1: "Big type and big buttons, made for reading in daylight with tired eyes.",
-    built2: "Three complete languages — not one language with two translations bolted on.",
+    built2: "Eleven languages, asked for before anything else is shown — not one language with translations bolted on.",
     built3: "A helper mode, so a son can fill it in without pretending to be his father.",
     built4: "Never a dead end. Every screen carries a phone number that works.",
 
@@ -754,3 +754,14 @@ export type SvcDict = {
     [Key in keyof (typeof svcEn)[Section]]: string;
   };
 };
+
+/**
+ * What a language file may be while it is still being translated.
+ *
+ * Anything absent resolves down the fallback chain in `./index`, so a
+ * language ships the moment its first screen is done rather than waiting for
+ * its eight hundredth string. What the type must still refuse is a key that
+ * English does not have: a typo would silently keep the English string
+ * forever and nobody would ever see it.
+ */
+export type PartialSvcDict = { [Section in keyof SvcDict]?: Partial<SvcDict[Section]> };
