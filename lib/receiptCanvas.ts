@@ -6,8 +6,8 @@ import type { PublicRecord } from "./publicRecord";
  *
  * Drawn by hand rather than screenshotted from the DOM: html2canvas and
  * friends are ~200 KB, which is more than the entire rest of this app, and
- * they render Devanagari and Gujarati badly. Canvas `fillText` uses the same
- * font stack the page already loaded, so all three scripts come out right.
+ * they render Indic scripts badly. Canvas `fillText` reads the same font
+ * stack the page already loaded, so every script comes out right.
  */
 
 export interface ReceiptStrings {
@@ -34,10 +34,44 @@ const LINE = "#E3DACC";
 const RULE = "#F1EADD";
 const GREEN = "#17694A";
 
+/* Only reached if the custom property is missing — a canvas drawn before the
+   stylesheet applied, or a browser that will not compute it. Named families
+   rather than the next/font hashes, which are not knowable from here. */
+const FALLBACK: Record<string, string> = {
+  deva: '"Noto Sans Devanagari", "Nirmala UI"',
+  gujr: '"Noto Sans Gujarati", "Nirmala UI"',
+  beng: '"Noto Sans Bengali", "Nirmala UI", "Vrinda"',
+  telu: '"Noto Sans Telugu", "Nirmala UI", "Gautami"',
+  taml: '"Noto Sans Tamil", "Nirmala UI", "Latha"',
+  knda: '"Noto Sans Kannada", "Nirmala UI", "Tunga"',
+  mlym: '"Noto Sans Malayalam", "Nirmala UI", "Kartika"',
+  guru: '"Noto Sans Gurmukhi", "Nirmala UI", "Raavi"',
+  orya: '"Noto Sans Oriya", "Nirmala UI", "Kalinga"',
+  latn: '"Noto Sans"',
+};
+
+/**
+ * The stack the page is already using, read off the document rather than
+ * restated here.
+ *
+ * This used to be a two-line map of Hindi and Gujarati, which was correct
+ * when there were three languages and silently wrong at eleven: every other
+ * Indic language fell through to Noto Sans, which has no Tamil or Odia in
+ * it, and the receipt — the one thing a pensioner saves to show their son —
+ * came out as empty boxes. `--font-ui` is set per script on `<html>` and
+ * resolves to the face that was already downloaded for this language, so
+ * reading it is both correct today and incapable of drifting tomorrow.
+ */
 function fontStack(lang: Lang): string {
-  if (lang === "hi") return '"Noto Sans Devanagari", "Nirmala UI", sans-serif';
-  if (lang === "gu") return '"Noto Sans Gujarati", "Nirmala UI", sans-serif';
-  return '"Noto Sans", system-ui, sans-serif';
+  if (typeof document !== "undefined") {
+    const ui = getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-ui")
+      .trim();
+    if (ui) return ui;
+  }
+  const cls = typeof document !== "undefined" ? document.documentElement.className : "";
+  const script = /script-(\w+)/.exec(cls)?.[1] ?? (lang === "en" ? "latn" : "deva");
+  return `${FALLBACK[script] ?? FALLBACK.latn}, system-ui, sans-serif`;
 }
 
 export function drawReceipt(

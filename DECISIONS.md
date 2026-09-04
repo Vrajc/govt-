@@ -131,9 +131,15 @@ this stutter on a five-year-old Android.
 
 **The receipt PNG is drawn by hand on a canvas**, including the arc text on
 the stamp. html2canvas is ~200 KB — more than the entire rest of the app — and
-it renders Devanagari and Gujarati badly. `fillText` uses the same font stack
-the page already loaded, so all three scripts come out right. Print is offered
-alongside, for anyone whose browser blocks the download.
+it renders Indic scripts badly. `fillText` *reads* the same font stack the page
+already loaded, off `--font-ui`, so every script comes out right. Print is
+offered alongside, for anyone whose browser blocks the download.
+
+That stack used to be restated in the canvas file as a two-line map of Hindi
+and Gujarati. It was correct at three languages and silently wrong at eleven:
+Tamil and Odia fell through to Noto Sans, which has no glyphs for them, and
+the receipt came out as empty boxes. Restating a value is how it drifts;
+reading it is how it cannot.
 
 **`hasKey()` rejects the `sk-...` placeholder from `.env.example`.** Treating
 it as real cost every call a 7-second timeout before falling back — exactly
