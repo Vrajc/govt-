@@ -85,14 +85,19 @@ export const svcEn = {
 
     storiesTitle: "The people this is for",
     storiesSub: "Five moments from the year of a pension.",
-    story1: "Every November, she has to show she is still alive.",
-    story2: "The passbook the family keeps in a tin.",
-    story3: "Most of the time, it is the son who fills the form.",
-    story4: "Proof she can hold, and show.",
+    story1: "Facing a window, on the phone that replaced the trip to the bank.",
+    story2: "Every November, more than a crore people must show they are still alive.",
+    story3: "A widow pension exists. Most people never learn its name.",
+    story4: "Four questions, and it names the pension that is yours.",
     story5: "The queue at the bank that no longer has to happen.",
     storyPrev: "Previous picture",
     storyNext: "Next picture",
     storyOf: "Picture {n} of {total}",
+
+    chainTitle: "Where your file actually is",
+    chainLede: "An old-age pension is approved by people in rooms, in a fixed order. So the tracker shows the rooms.",
+    scriptsTitle: "Eleven languages, and a Listen button for everything else",
+    scriptsLede: "Language is asked before anything else, so nobody reads an English screen first.",
   },
 
   hub: {

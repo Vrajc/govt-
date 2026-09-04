@@ -1,211 +1,37 @@
-"use client";
-
-import Link from "next/link";
-import { useApp } from "@/lib/app-state";
-import { BigLink } from "@/components/BigButton";
-import {
-  Book,
-  Check,
-  Chevron,
-  Clock,
-  Info,
-  People,
-  Person,
-  Search,
-} from "@/components/Icons";
-import { PassbookArt } from "@/components/LandingArt";
-import { Stories } from "@/components/Stories";
-import { servicesIn } from "@/lib/services/catalogue";
-import type { Category } from "@/lib/services/types";
+import { cookies } from "next/headers";
+import { LANG_COOKIE } from "@/lib/constants";
+import { dictFor, isLang, LANGUAGES } from "@/lib/i18n";
+import type { Lang } from "@/lib/types";
+import { LandingScreen, type ScriptLine } from "@/components/LandingScreen";
 
 /**
- * The landing page.
+ * The landing page, as a server component.
  *
- * Somebody arriving from a message link has no idea what this is. The hub at
- * /start assumes they already do — it asks them to pick a door before it has
- * said what building they are in. This page answers that first: what it
- * covers, why it exists, how it works, and where the honesty line falls,
- * before anyone commits to a journey.
+ * Everything below the fold is text, so it renders on the server and the
+ * browser downloads none of it. The one section that could not work any
+ * other way is the script showcase: it prints the tagline in all eleven
+ * languages at once, and `lib/i18n/index.ts` is server-only precisely so
+ * that a visitor never downloads eleven dictionaries to read one.
  *
- * It renders in whatever language has been chosen. On a first visit the
- * LanguageGate sits on top of it until that choice is made, so nothing here
- * is ever read in a language the visitor did not pick.
+ * Resolving them here gets both halves of that: the reader sees every
+ * script, and the client bundle still carries exactly one language. The
+ * alternative — copying eleven taglines into a list next to the registry —
+ * is the restated value that drifts, which this codebase has now been bitten
+ * by twice in one week.
  */
-export default function LandingScreen() {
-  const { t, d } = useApp();
-  const L = d.landing as Record<string, string>;
-  const HUB = d.hub as Record<string, string>;
-  const SVC = d.svc as Record<string, string>;
+export default async function LandingPage() {
+  const jar = await cookies();
+  const raw = jar.get(LANG_COOKIE)?.value;
+  const lang: Lang = isLang(raw) ? raw : "en";
 
-  const doors: { c: Category; icon: React.ReactNode; title: string; sub: string }[] = [
-    { c: "start", icon: <Person size={26} />, title: HUB.catStart, sub: HUB.catStartSub },
-    { c: "have", icon: <Clock size={26} />, title: HUB.catHave, sub: HUB.catHaveSub },
-    { c: "family", icon: <People size={26} />, title: HUB.catFamily, sub: HUB.catFamilySub },
-  ];
+  /* Read out of each language's own dictionary rather than from a table
+     kept beside it, so a reworded tagline reaches this page for free. */
+  const scripts: ScriptLine[] = LANGUAGES.map((meta) => ({
+    code: meta.code,
+    english: meta.english,
+    where: meta.where,
+    tagline: (dictFor(meta.code).common as Record<string, string>).tagline,
+  }));
 
-  const steps = [
-    { t: L.how1Title, b: L.how1 },
-    { t: L.how2Title, b: L.how2 },
-    { t: L.how3Title, b: L.how3 },
-    { t: L.how4Title, b: L.how4 },
-  ];
-
-  const built = [L.built1, L.built2, L.built3, L.built4];
-
-  return (
-    <div className="sheet sheet-wide">
-      <main className="shell-main" id="main">
-        {/* ---------------- hero ---------------- */}
-        <section className="hero hero-grid">
-          <div>
-          <h1 className="hero-title">{L.heroTitle}</h1>
-          <p className="hero-sub">{L.heroSub}</p>
-
-          <div className="hero-cta">
-            <BigLink href="/start" icon={<Chevron size={22} />}>
-              {L.ctaStart}
-            </BigLink>
-            <BigLink href="/find" variant="secondary" icon={<Search size={22} />}>
-              {L.ctaFind}
-            </BigLink>
-          </div>
-
-          <p className="hero-track">
-            <Link href="/start">{L.ctaTrack}</Link>
-          </p>
-          </div>
-
-          {/* The two objects this product sits between: the passbook the
-              family already keeps, and the phone that replaced the trip. */}
-          <div className="hero-art">
-            <PassbookArt />
-          </div>
-        </section>
-
-        {/* ---------------- who this is for ---------------- */}
-        {/* Placed straight after the hero, and after the buttons rather than
-            before them: somebody who already knows what they came for should
-            never have to scroll past a picture to reach the thing they came
-            to do. */}
-        <Stories />
-
-        {/* ---------------- what you can do ---------------- */}
-        <section className="lp-section">
-          <h2 className="lp-h2">{L.doTitle}</h2>
-          <p className="lp-lede">{L.doSub}</p>
-
-          <div className="grid-cards">
-            {doors.map((door) => (
-              <Link key={door.c} href={`/start/${door.c}`} className="card">
-                <span className="card-icon">{door.icon}</span>
-                <span className="card-title">{door.title}</span>
-                <span className="card-sub">{door.sub}</span>
-                <ul className="card-peek">
-                  {servicesIn(door.c).map((s) => (
-                    <li key={s.id}>{SVC[`${s.id}Name`]}</li>
-                  ))}
-                </ul>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* ---------------- why ---------------- */}
-        <section className="lp-section why-grid">
-          <div>
-            <h2 className="lp-h2">{L.whyTitle}</h2>
-            {/* The first line is the one that should stop someone scrolling. */}
-            <p className="lp-standfirst">{L.why1}</p>
-            <p className="body">{L.why2}</p>
-            <p className="body">{L.why3}</p>
-          </div>
-
-          {/* The scale of the problem, as three figures. Numbers carry this
-              better than a drawing would, and they are all true. */}
-          <aside className="lp-figures" aria-label={L.whyTitle}>
-            {[
-              [L.stat1n, L.stat1],
-              [L.stat2n, L.stat2],
-              [L.stat3n, L.stat3],
-            ].map(([n, label]) => (
-              <div className="lp-figure" key={label}>
-                <span className="lp-figure-n">{n}</span>
-                <span className="lp-figure-l">{label}</span>
-              </div>
-            ))}
-          </aside>
-        </section>
-
-        {/* ---------------- how it works ---------------- */}
-        <section className="lp-section">
-          <h2 className="lp-h2">{L.howTitle}</h2>
-          {/* Numbered because it genuinely is a sequence. */}
-          <ol className="lp-steps">
-            {steps.map((s, i) => (
-              <li key={s.t}>
-                <span className="lp-step-n" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <span>
-                  <span className="lp-step-t">{s.t}</span>
-                  <span className="lp-step-b">{s.b}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ---------------- made for ---------------- */}
-        <section className="lp-section">
-          <h2 className="lp-h2">{L.builtTitle}</h2>
-          <ul className="lp-ticks">
-            {built.map((b) => (
-              <li key={b}>
-                <Check size={20} />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* ---------------- honesty, before they start ---------------- */}
-        <section className="lp-section">
-          <div className="panel panel-warn lp-honest">
-            <h2 className="lp-h3">
-              <Info size={22} />
-              {L.honestTitle}
-            </h2>
-            <p className="body" style={{ color: "var(--ink)" }}>
-              {L.honestBody}
-            </p>
-            <Link href="/about" className="review-edit">
-              <Book size={18} />
-              <span style={{ marginLeft: 8 }}>{L.honestLink}</span>
-            </Link>
-          </div>
-        </section>
-
-        <div className="action-dock">
-          <BigLink href="/start" icon={<Chevron size={22} />}>
-            {L.ctaStart}
-          </BigLink>
-        </div>
-
-        <p className="helpline">
-          {t("common.needHelp")}{" "}
-          <a href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-            {t("common.helpNumber")}
-          </a>
-        </p>
-      </main>
-
-      <footer className="shell-foot">
-        <p className="micro">
-          <Link href="/about" style={{ color: "var(--primary-dark)", fontWeight: 600 }}>
-            {t("common.aboutLink")}
-          </Link>
-        </p>
-      </footer>
-    </div>
-  );
+  return <LandingScreen lang={lang} scripts={scripts} />;
 }

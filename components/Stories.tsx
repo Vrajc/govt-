@@ -6,7 +6,7 @@ import { Chevron } from "@/components/Icons";
 import { STORY_SCENES } from "@/components/StoryArt";
 
 /**
- * The landing-page carousel: five scenes, five seconds each.
+ * The landing-page carousel: five scenes, three seconds each.
  *
  * Auto-advancing carousels are usually a bad idea, and on a page read by
  * 78-year-olds they would be an actively hostile one, so this is built to
@@ -29,9 +29,15 @@ import { STORY_SCENES } from "@/components/StoryArt";
  */
 
 const COUNT = STORY_SCENES.length;
-const DWELL = 5000;
+/* Three seconds. Long enough to read a short caption, short enough that
+   all five are seen without anybody choosing to wait. */
+const DWELL = 3000;
 
-const USE_PHOTOS = process.env.NEXT_PUBLIC_STORY_PHOTOS === "true";
+/* On unless switched off. The photographs are committed, so a fresh clone
+   and a Vercel deploy both get them with no configuration — which an
+   opt-in flag living in an ignored .env.local would quietly deny them.
+   Set NEXT_PUBLIC_STORY_PHOTOS=false to fall back to the drawings. */
+const USE_PHOTOS = process.env.NEXT_PUBLIC_STORY_PHOTOS !== "false";
 
 export function Stories() {
   const { d } = useApp();

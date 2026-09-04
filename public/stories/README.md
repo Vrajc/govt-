@@ -1,48 +1,46 @@
 # Photographs for the landing-page carousel
 
-The carousel on `/` ships with five hand-drawn scenes. Nothing here is
-required — the page is finished as it stands. This folder exists so that
-real photography can replace the drawings without touching any code.
+Five photographs are **in use**, and are the default — they are committed,
+so a fresh clone and a Vercel deploy both get them with no configuration.
+Set `NEXT_PUBLIC_STORY_PHOTOS=false` and the hand-drawn scenes in
+`components/StoryArt.tsx` come back, captions and all.
 
-## To use photographs
+## What is here
 
-1. Put five files in this folder, named exactly:
+| File | Pexels ID | What it shows | Caption it carries |
+|---|---|---|---|
+| `1.jpg` | 14798015 | An older Sikh man seated by a window, reading his phone | Facing a window, on the phone that replaced the trip to the bank |
+| `2.jpg` | 38252281 | An older woman in a saree, smiling, in daylight | Every November, more than a crore people must show they are still alive |
+| `3.jpg` | 36874547 | Two older women seated together against a rock wall | A widow pension exists. Most people never learn its name |
+| `4.jpg` | 18083457 | An older man in a courtyard holding a phone | Four questions, and it names the pension that is yours |
+| `5.jpg` | 34763973 | An older man sitting on a charpai in a village yard | The queue at the bank that no longer has to happen |
 
-   ```
-   1.jpg   a pensioner facing a window, phone at eye level
-   2.jpg   hands holding an open pension passbook
-   3.jpg   a family member helping an older person with a phone
-   4.jpg   a stamped receipt or paper being held up
-   5.jpg   a bank counter or queue
-   ```
+Source: [Pexels](https://www.pexels.com), under the Pexels licence — free to
+use and modify, commercially, without attribution. Attribution is recorded
+here anyway, because knowing where a picture came from is part of being able
+to replace it.
 
-2. Set the flag, locally in `.env.local` and in the Vercel project:
+## Two rules that shaped the captions
 
-   ```
-   NEXT_PUBLIC_STORY_PHOTOS=true
-   ```
+**They describe the system, never the person.** These are identifiable
+people who agreed to be photographed, not to be labelled. No caption says
+that *this* woman is a widow or that *this* man is claiming a pension —
+each one states a fact about the scheme and lets the picture be a picture.
+Keep that if you swap the images.
 
-That is the whole change. Captions, timing, keyboard control, the
-reduced-motion behaviour and the language handling all stay as they are.
+**Every caption is written in all eleven languages**, as `landing.story1` …
+`landing.story5` in `lib/i18n/svc-*.ts`. Change a picture and you change
+eleven strings, or the sentence stops describing what is above it.
+`npm run check:copy` catches a language left behind, but it cannot tell you
+a caption has stopped being true.
 
-## What the files need to be
+## Replacing them
+
+Drop in `1.jpg` … `5.jpg` and rewrite those captions.
 
 | | |
 |---|---|
-| Aspect ratio | **400 × 260** (about 3:2 landscape). Other ratios are cropped from the centre by `object-fit: cover`, so keep the subject away from the edges. |
-| Size | 1200 × 780 is plenty. Above that you are spending a pensioner's data on detail nobody sees. |
-| Weight | Aim under 150 KB each. The whole app's JS is 103 KB; five careless photographs would dwarf it. |
-| Format | `.jpg`. Rename to `.webp` in `components/Stories.tsx` if you would rather serve that. |
-
-## Two things worth saying out loud
-
-**Licensing is yours to check.** Nothing in this repo ships a photograph,
-partly for this reason. If a picture shows an identifiable person, you need
-their permission — more so here, where the implied caption is that they are
-poor, elderly, or recently widowed.
-
-**The captions are already written**, in all eleven languages, as
-`landing.story1` … `landing.story5`. If your photographs say something
-different from the drawings they replace, change the captions to match
-rather than leaving a sentence that no longer describes the picture above
-it. `npm run check:copy` will tell you if a language falls behind.
+| Aspect ratio | The frame is **400 × 260**. Portraits are fine — `object-fit: cover` crops them, and `.story-art { object-position }` in `globals.css` biases the crop up so faces survive. Check each one after swapping. |
+| Size | 1000px on the long edge is plenty. |
+| Weight | Under ~200 KB each. The whole app's JS is 103 KB; five careless photographs would dwarf it. |
+| Format | `.jpg`, or change the extension in `components/Stories.tsx`. |

@@ -1,10 +1,10 @@
 /**
  * Five scenes for the landing-page carousel.
  *
- * Hand-drawn inline SVG, for the same reasons as `LandingArt`: no image
- * files, no CDN, no licence, nothing to load on a 3G connection. Stock
- * photography of smiling strangers would say less than these do and cost
- * more to ship.
+ * Hand-drawn inline SVG: no image files, no CDN, no licence, nothing to
+ * load on a 3G connection. They are also the fallback — drop five
+ * photographs into `public/stories/` and set NEXT_PUBLIC_STORY_PHOTOS and
+ * these step aside without a line of code changing.
  *
  * They share one visual grammar so the carousel reads as a set rather than
  * five unrelated pictures: the same 400x260 frame, the same ink-blue line at
