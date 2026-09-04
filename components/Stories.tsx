@@ -39,7 +39,7 @@ const DWELL = 3000;
    Set NEXT_PUBLIC_STORY_PHOTOS=false to fall back to the drawings. */
 const USE_PHOTOS = process.env.NEXT_PUBLIC_STORY_PHOTOS !== "false";
 
-export function Stories() {
+export function Stories({ compact = false }: { compact?: boolean } = {}) {
   const { d } = useApp();
   const L = d.landing as Record<string, string>;
 
@@ -88,7 +88,7 @@ export function Stories() {
 
   return (
     <section
-      className="lp-section stories"
+      className={compact ? "stories stories-compact" : "lp-section stories"}
       aria-roledescription="carousel"
       aria-label={L.storiesTitle}
       onMouseEnter={() => setHeld(true)}
@@ -96,8 +96,12 @@ export function Stories() {
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
     >
-      <h2 className="lp-h2">{L.storiesTitle}</h2>
-      <p className="lp-lede">{L.storiesSub}</p>
+      {!compact && (
+        <>
+          <h2 className="lp-h2">{L.storiesTitle}</h2>
+          <p className="lp-lede">{L.storiesSub}</p>
+        </>
+      )}
 
       <div className="stories-frame">
         <div className="stories-stage">
@@ -131,6 +135,26 @@ export function Stories() {
               </div>
             );
           })}
+
+          {/* Compact form: the dots ride on the picture. Arrows and the
+              bar row below it were furniture around an image that is
+              already the subject — five dots say the same thing without
+              taking a row of their own. */}
+          {compact && (
+            <div className="stories-pips" role="tablist" aria-label={L.storiesTitle}>
+              {STORY_SCENES.map((_, n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="tab"
+                  aria-selected={n === i}
+                  aria-label={label(n)}
+                  className={`stories-pip${n === i ? " is-on" : ""}`}
+                  onClick={() => go(n)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* The caption sits outside the stage so it never moves with the
@@ -139,6 +163,7 @@ export function Stories() {
           {caption(i)}
         </p>
 
+        {!compact && (
         <div className="stories-controls">
           <button
             type="button"
@@ -180,6 +205,7 @@ export function Stories() {
             <Chevron size={20} />
           </button>
         </div>
+        )}
       </div>
     </section>
   );

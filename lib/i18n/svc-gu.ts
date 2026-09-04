@@ -17,6 +17,12 @@ export const svcGu: SvcDict = {
     stepNow: "{step} — તમે અહીં છો",
     stepTodo: "{step} — હજી બાકી",
     menu: "યાદી",
+    textSize: "અક્ષરનું કદ",
+    contrast: "ઘાટો રંગ",
+    footHelplines: "મદદના નંબર",
+    footServices: "સેવાઓ",
+    footAbout: "આ સાઇટ વિશે",
+    heroEyebrow: "ભારતમાં દરેક એ વ્યક્તિ માટે, જેનું પેન્શન બને છે",
     close: "બંધ કરો",
   },
 

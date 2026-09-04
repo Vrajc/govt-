@@ -17,6 +17,12 @@ export const svcTa: PartialSvcDict = {
     stepNow: "{step} — நீங்கள் இங்கே இருக்கிறீர்கள்",
     stepTodo: "{step} — இன்னும் மீதம்",
     menu: "பட்டியல்",
+    textSize: "எழுத்து அளவு",
+    contrast: "அடர் நிறம்",
+    footHelplines: "உதவி எண்கள்",
+    footServices: "சேவைகள்",
+    footAbout: "இந்தத் தளத்தைப் பற்றி",
+    heroEyebrow: "இந்தியாவில் பென்ஷன் வர வேண்டிய ஒவ்வொருவருக்கும்",
     close: "மூடுங்கள்",
   },
 

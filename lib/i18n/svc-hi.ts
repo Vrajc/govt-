@@ -17,6 +17,12 @@ export const svcHi: SvcDict = {
     stepNow: "{step} — आप यहाँ हैं",
     stepTodo: "{step} — अभी बाकी",
     menu: "सूची",
+    textSize: "अक्षर का आकार",
+    contrast: "गहरा रंग",
+    footHelplines: "मदद के नंबर",
+    footServices: "सेवाएँ",
+    footAbout: "इस साइट के बारे में",
+    heroEyebrow: "भारत में हर उस व्यक्ति के लिए, जिसकी पेंशन बनती है",
     close: "बंद कीजिए",
   },
 

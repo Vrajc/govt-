@@ -17,6 +17,12 @@ export const svcKn: PartialSvcDict = {
     stepNow: "{step} — ನೀವು ಇಲ್ಲಿದ್ದೀರಿ",
     stepTodo: "{step} — ಇನ್ನೂ ಬಾಕಿ",
     menu: "ಪಟ್ಟಿ",
+    textSize: "ಅಕ್ಷರದ ಗಾತ್ರ",
+    contrast: "ಗಾಢ ಬಣ್ಣ",
+    footHelplines: "ಸಹಾಯ ಸಂಖ್ಯೆಗಳು",
+    footServices: "ಸೇವೆಗಳು",
+    footAbout: "ಈ ತಾಣದ ಬಗ್ಗೆ",
+    heroEyebrow: "ಭಾರತದಲ್ಲಿ ಪಿಂಚಣಿ ಬರಬೇಕಾದ ಪ್ರತಿಯೊಬ್ಬರಿಗೂ",
     close: "ಮುಚ್ಚಿ",
   },
 

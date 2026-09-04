@@ -17,6 +17,12 @@ export const svcMl: PartialSvcDict = {
     stepNow: "{step} — നിങ്ങൾ ഇവിടെയാണ്",
     stepTodo: "{step} — ഇനിയും ബാക്കി",
     menu: "പട്ടിക",
+    textSize: "അക്ഷരത്തിന്റെ വലുപ്പം",
+    contrast: "കടും നിറം",
+    footHelplines: "സഹായ നമ്പരുകൾ",
+    footServices: "സേവനങ്ങൾ",
+    footAbout: "ഈ സൈറ്റിനെക്കുറിച്ച്",
+    heroEyebrow: "ഇന്ത്യയിൽ പെൻഷൻ കിട്ടേണ്ട എല്ലാവർക്കും",
     close: "അടയ്ക്കൂ",
   },
 

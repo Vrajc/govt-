@@ -17,6 +17,12 @@ export const svcTe: PartialSvcDict = {
     stepNow: "{step} — మీరు ఇక్కడ ఉన్నారు",
     stepTodo: "{step} — ఇంకా మిగిలింది",
     menu: "జాబితా",
+    textSize: "అక్షరం పరిమాణం",
+    contrast: "ముదురు రంగు",
+    footHelplines: "సాయం నంబర్లు",
+    footServices: "సేవలు",
+    footAbout: "ఈ సైటు గురించి",
+    heroEyebrow: "భారతదేశంలో పెన్షన్ రావాల్సిన ప్రతి ఒక్కరి కోసం",
     close: "మూసేయండి",
   },
 

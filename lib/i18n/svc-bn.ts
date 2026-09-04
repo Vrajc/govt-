@@ -17,6 +17,12 @@ export const svcBn: PartialSvcDict = {
     stepNow: "{step} — আপনি এখানে আছেন",
     stepTodo: "{step} — এখনও বাকি",
     menu: "তালিকা",
+    textSize: "অক্ষরের মাপ",
+    contrast: "গাঢ় রং",
+    footHelplines: "সাহায্যের নম্বর",
+    footServices: "পরিষেবা",
+    footAbout: "এই সাইট সম্পর্কে",
+    heroEyebrow: "ভারতে সেই সবার জন্য, যাঁদের পেনশন পাওনা",
     close: "বন্ধ করুন",
   },
 

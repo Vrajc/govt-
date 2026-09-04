@@ -1,24 +1,24 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import {
-  Noto_Sans,
-  Noto_Sans_Bengali,
-  Noto_Sans_Devanagari,
-  Noto_Sans_Gujarati,
-  Noto_Sans_Gurmukhi,
-  Noto_Sans_Kannada,
-  Noto_Sans_Malayalam,
-  Noto_Sans_Oriya,
-  Noto_Sans_Tamil,
-  Noto_Sans_Telugu,
+  Anek_Bangla,
+  Anek_Devanagari,
+  Anek_Gujarati,
+  Anek_Gurmukhi,
+  Anek_Kannada,
+  Anek_Latin,
+  Anek_Malayalam,
+  Anek_Odia,
+  Anek_Tamil,
+  Anek_Telugu,
+  IBM_Plex_Mono,
 } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/lib/app-state";
 import { LANG_COOKIE } from "@/lib/constants";
 import { coverageReport, dictFor, isLang, langMeta } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
-import { PrototypeBanner } from "@/components/PrototypeBanner";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SiteChrome, SiteFooter } from "@/components/SiteChrome";
 import { LanguageGate } from "@/components/LanguageGate";
 import { DemoShortcut } from "@/components/DemoShortcut";
 
@@ -34,9 +34,16 @@ import { DemoShortcut } from "@/components/DemoShortcut";
  * for a reader who will use exactly one. `display: swap` covers the gap with
  * the system's own Indic face, which every Android phone ships.
  */
-const notoSans = Noto_Sans({
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "600"],
+  display: "swap",
+  preload: false,
+  variable: "--font-mono",
+});
+
+const notoSans = Anek_Latin({
+  subsets: ["latin"],
   display: "swap",
   variable: "--font-latn",
 });
@@ -44,18 +51,19 @@ const notoSans = Noto_Sans({
 /* next/font reads these calls at build time with a static parser, so every
    argument has to be a literal here — no shared options object, no spread.
    The repetition is the price of the build-time subsetting. */
-const notoDeva = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-deva" });
-const notoGujr = Noto_Sans_Gujarati({ subsets: ["gujarati"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-gujr" });
-const notoBeng = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-beng" });
-const notoTelu = Noto_Sans_Telugu({ subsets: ["telugu"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-telu" });
-const notoTaml = Noto_Sans_Tamil({ subsets: ["tamil"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-taml" });
-const notoKnda = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-knda" });
-const notoMlym = Noto_Sans_Malayalam({ subsets: ["malayalam"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-mlym" });
-const notoGuru = Noto_Sans_Gurmukhi({ subsets: ["gurmukhi"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-guru" });
-const notoOrya = Noto_Sans_Oriya({ subsets: ["oriya"], weight: ["400", "600", "700"], display: "swap", preload: false, variable: "--font-orya" });
+const notoDeva = Anek_Devanagari({ subsets: ["devanagari"], display: "swap", preload: false, variable: "--font-deva" });
+const notoGujr = Anek_Gujarati({ subsets: ["gujarati"], display: "swap", preload: false, variable: "--font-gujr" });
+const notoBeng = Anek_Bangla({ subsets: ["bengali"], display: "swap", preload: false, variable: "--font-beng" });
+const notoTelu = Anek_Telugu({ subsets: ["telugu"], display: "swap", preload: false, variable: "--font-telu" });
+const notoTaml = Anek_Tamil({ subsets: ["tamil"], display: "swap", preload: false, variable: "--font-taml" });
+const notoKnda = Anek_Kannada({ subsets: ["kannada"], display: "swap", preload: false, variable: "--font-knda" });
+const notoMlym = Anek_Malayalam({ subsets: ["malayalam"], display: "swap", preload: false, variable: "--font-mlym" });
+const notoGuru = Anek_Gurmukhi({ subsets: ["gurmukhi"], display: "swap", preload: false, variable: "--font-guru" });
+const notoOrya = Anek_Odia({ subsets: ["oriya"], display: "swap", preload: false, variable: "--font-orya" });
 
 const FONT_VARS = [
   notoSans,
+  plexMono,
   notoDeva,
   notoGujr,
   notoBeng,
@@ -116,11 +124,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* One sticky block, not two. The header used to pin itself
                 at the banner's one-line height, which is not its height on a
                 phone, where the sentence wraps. */}
-            <div className="topbars">
-              <PrototypeBanner text={d.common.protoBanner} />
-              <SiteHeader coverage={coverage} />
-            </div>
+            <SiteChrome />
             {children}
+            <SiteFooter />
           </div>
           {!chosen && <LanguageGate coverage={coverage} />}
           <DemoShortcut />

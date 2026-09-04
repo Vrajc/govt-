@@ -30,6 +30,12 @@ export const svcEn = {
     stepNow: "{step} — you are here",
     stepTodo: "{step} — not yet",
     menu: "Menu",
+    textSize: "Text size",
+    contrast: "High contrast",
+    footHelplines: "Helplines",
+    footServices: "Services",
+    footAbout: "About this site",
+    heroEyebrow: "For anyone in India owed a pension",
     close: "Close",
   },
 

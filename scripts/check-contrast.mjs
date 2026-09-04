@@ -8,28 +8,53 @@
  * held to the AAA large-text bar of 4.5:1.
  */
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+/**
+ * The palette is read out of globals.css, never restated here.
+ *
+ * It used to be a copy of the token block. That copy passed cleanly on the
+ * day the ground changed from cream to tan, reporting ratios for colours
+ * the site no longer used — an audit that cannot fail is worse than no
+ * audit, because it is trusted. Every value below now comes from the one
+ * place the browser reads it from too.
+ */
+const cssPath = join(dirname(fileURLToPath(import.meta.url)), "..", "app", "globals.css");
+const css = readFileSync(cssPath, "utf8");
+/* The first :root block is the light palette; later ones are overrides. */
+const rootBlock = css.slice(css.indexOf(":root"), css.indexOf("}", css.indexOf(":root")));
+
+function token(name, fallback) {
+  const m = new RegExp(`--${name}\\s*:\\s*(#[0-9A-Fa-f]{6})`).exec(rootBlock);
+  if (m) return m[1];
+  if (fallback) return fallback;
+  console.error(`  Missing token --${name} in globals.css`);
+  process.exit(1);
+}
+
 const T = {
-  paper: "#FBF8F2",
-  desk: "#EDE6DA",   // the desktop page background behind the paper sheet
-  surface: "#FFFFFF",
-  ink: "#1F1C1A",
-  inkSoft: "#534D47",
-  line: "#E3DACC",
-  lineStrong: "#94866D",
-  primary: "#23507A",
-  primaryDark: "#17395A",
-  primaryTint: "#E8EEF5",
-  success: "#17694A",
-  successTint: "#E5F0EA",
-  attention: "#A8452A",
-  attentionText: "#83321D",
-  attentionTint: "#FAEBE3",
-  focus: "#B8791F",
+  paper: token("paper"),
+  surface: token("surface"),
+  ink: token("ink"),
+  inkSoft: token("ink-soft"),
+  line: token("line"),
+  lineStrong: token("line-strong"),
+  primary: token("primary"),
+  primaryDark: token("primary-dark"),
+  primaryTint: token("primary-tint"),
+  success: token("success"),
+  successTint: token("success-tint"),
+  attention: token("attention"),
+  attentionText: token("attention-text"),
+  attentionTint: token("attention-tint"),
+  focus: token("focus"),
   white: "#FFFFFF",
   bannerText: "#FFF6F1",
-  noteGoodText: "#0F4B34",
-  noteWarnText: "#7C3018",
-  placeholder: "#767068",
+  noteGoodText: token("note-good"),
+  noteWarnText: token("note-warn"),
+  placeholder: token("placeholder"),
 };
 
 function srgb(c) {
@@ -52,8 +77,9 @@ function ratio(a, b) {
 /** [description, foreground, background, required ratio] */
 const PAIRS = [
   ["body text on paper", T.ink, T.paper, 7],
-  ["paper sheet against the desk", T.paper, T.desk, 1.05],
-  ["hairline against the desk", T.line, T.desk, 1.05],
+  /* Two checks went with the sheet — the paper against the desk, and the
+     hairline against it. The page is the paper now, edge to edge, and
+     there is no second ground behind it to be told apart from. */
   ["body text on surface", T.ink, T.surface, 7],
   ["secondary text on paper", T.inkSoft, T.paper, 7],
   ["secondary text on surface", T.inkSoft, T.surface, 7],

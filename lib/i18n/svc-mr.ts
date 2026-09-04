@@ -17,6 +17,12 @@ export const svcMr: PartialSvcDict = {
     stepNow: "{step} — तुम्ही इथे आहात",
     stepTodo: "{step} — अजून बाकी",
     menu: "यादी",
+    textSize: "अक्षराचा आकार",
+    contrast: "गडद रंग",
+    footHelplines: "मदतीचे नंबर",
+    footServices: "सेवा",
+    footAbout: "या साइटबद्दल",
+    heroEyebrow: "भारतातल्या प्रत्येकासाठी, ज्याची पेन्शन बनते",
     close: "बंद करा",
   },
 

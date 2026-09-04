@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { useApp } from "@/lib/app-state";
 import { BigLink } from "@/components/BigButton";
-import {
-  Book,
-  Check,
-  Chevron,
-  Clock,
-  Info,
-  People,
-  Person,
-  Search,
-} from "@/components/Icons";
+import { Book, Chevron, Info, Search } from "@/components/Icons";
 import { Stories } from "@/components/Stories";
 import { servicesIn } from "@/lib/services/catalogue";
 import type { Category } from "@/lib/services/types";
@@ -28,18 +19,23 @@ export interface ScriptLine {
 /**
  * The landing page.
  *
- * Somebody arriving from a message link has no idea what this is. The hub at
- * /start assumes they already do — it asks them to pick a door before it has
- * said what building they are in. This page answers that first, in the order
- * a stranger meets the questions: what it is, who it is for, what is broken,
- * what you can do here, how it works, where your file goes, who it reaches,
- * and where the honesty line falls.
+ * Somebody arriving from a message link has no idea what this is, so this
+ * page answers in the order a stranger meets the questions: what it is,
+ * who it is for, what is broken, what you can do, how it works, where your
+ * file goes, who it reaches, and where the honesty line falls.
  *
- * Set as a ledger rather than a stack of cards: an ochre margin rule down
- * the left of every section, figures in ruled rows, and depth spent on
- * exactly two things — the hero plate and the carousel. Everything else is
- * hairlines and space, which is what keeps a page with nine sections on it
- * from reading as nine competing boxes.
+ * The first pass at this was nine sections in one rhythm — eyebrow,
+ * heading, lede, content, repeat — with no borders holding them apart. It
+ * read as one undifferentiated column, which is what happens when you take
+ * the boxes away and put nothing in their place. Structure now comes from
+ * three things instead:
+ *
+ *   · alternating grounds, so a section is separated by the paper changing
+ *     under it rather than by a line drawn around it;
+ *   · asymmetric columns — prose against a panel, a wide measure against a
+ *     narrow one — so no two consecutive sections have the same shape;
+ *   · one bordered object on the whole page, the approval chain, which is
+ *     the thing most worth stopping at.
  */
 export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }) {
   const { t, d } = useApp();
@@ -47,11 +43,12 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
   const HUB = d.hub as Record<string, string>;
   const SVC = d.svc as Record<string, string>;
   const ST = d.stages as Record<string, string>;
+  const AB = d.about as Record<string, string>;
 
-  const doors: { c: Category; icon: React.ReactNode; title: string; sub: string }[] = [
-    { c: "start", icon: <Person size={22} />, title: HUB.catStart, sub: HUB.catStartSub },
-    { c: "have", icon: <Clock size={22} />, title: HUB.catHave, sub: HUB.catHaveSub },
-    { c: "family", icon: <People size={22} />, title: HUB.catFamily, sub: HUB.catFamilySub },
+  const doors: { c: Category; title: string; sub: string }[] = [
+    { c: "start", title: HUB.catStart, sub: HUB.catStartSub },
+    { c: "have", title: HUB.catHave, sub: HUB.catHaveSub },
+    { c: "family", title: HUB.catFamily, sub: HUB.catFamilySub },
   ];
 
   const steps = [
@@ -61,9 +58,8 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
     { t: L.how4Title, b: L.how4 },
   ];
 
-  /* The real approval chain for a state pension, named with the same
-     strings the tracker itself uses — so the promise on the landing page
-     and the screen it describes can never drift apart. */
+  /* Named with the same strings the tracker uses, so the promise here and
+     the screen it describes cannot drift apart. */
   const chain = [
     { t: ST.villageCheck, a: ST.actorVillage },
     { t: ST.gramSabha, a: ST.actorVillage },
@@ -71,120 +67,126 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
     { t: ST.districtSanction, a: ST.actorDistrict },
   ];
 
+  const real = [AB.real1, AB.real2, AB.real3, AB.real4, AB.real5, AB.real6];
+  const mock = [AB.mock1, AB.mock2, AB.mock3, AB.mock4, AB.mock5];
+
   return (
-    <div className="sheet sheet-wide">
-      <main className="shell-main" id="main">
-        {/* ---------------- hero ---------------- */}
-        <section className="hero hero-grid">
-          <div className="hero-words">
-            <h1 className="hero-title">{L.heroTitle}</h1>
-            <p className="hero-sub">{L.heroSub}</p>
-
-            <div className="hero-cta">
-              <BigLink href="/start" icon={<Chevron size={20} />}>
-                {L.ctaStart}
-              </BigLink>
-              <BigLink href="/find" variant="secondary" icon={<Search size={20} />}>
-                {L.ctaFind}
-              </BigLink>
-            </div>
-
-            <p className="hero-track">
-              <Link href="/start">{L.ctaTrack}</Link>
-            </p>
+    <main className="lp" id="main">
+      {/* ---------------- hero ---------------- */}
+      <section className="lp-hero">
+        <div className="lp-w lp-hero-grid">
+          <div className="lp-hero-words">
+          <p className="kicker">{L.heroEyebrow}</p>
+          <h1 className="lp-display">{L.heroTitle}</h1>
+          <p className="lp-standfirst">{L.heroSub}</p>
+          <div className="lp-actions">
+            <BigLink href="/start" icon={<Chevron size={19} />}>
+              {L.ctaStart}
+            </BigLink>
+            <BigLink href="/find" variant="secondary" icon={<Search size={19} />}>
+              {L.ctaFind}
+            </BigLink>
+          </div>
+          <p className="lp-quiet">
+            <Link href="/start">{L.ctaTrack}</Link>
+          </p>
           </div>
 
-          {/* The three figures carry the hero rather than an illustration:
-              they are the argument, and they are all true. */}
-          <aside className="hero-figures" aria-label={L.whyTitle}>
+          <div className="lp-hero-art">
+            <Stories compact />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- the three figures, on their own ground ------- */}
+      <section className="lp-band lp-band-sunk">
+        <div className="lp-w">
+          <ul className="figs">
             {[
               [L.stat1n, L.stat1],
               [L.stat2n, L.stat2],
               [L.stat3n, L.stat3],
             ].map(([n, label]) => (
-              <div className="figure-row" key={label}>
-                <span className="figure-n">{n}</span>
-                <span className="figure-l">{label}</span>
-              </div>
+              <li className="fig" key={label}>
+                <span className="fig-n">{n}</span>
+                <span className="fig-l">{label}</span>
+              </li>
             ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ---- the problem, against the panel that answers it ---- */}
+      <section className="lp-band">
+        <div className="lp-w lp-split">
+          <div className="lp-prose">
+            <p className="kicker">{L.whyTitle}</p>
+            <h2 className="lp-h2">{L.why1}</h2>
+            <p className="body lp-body">{L.why2}</p>
+            <p className="body lp-body">{L.why3}</p>
+            <p className="lp-source">{L.chainLede}</p>
+          </div>
+
+          <aside className="lp-panel">
+            <p className="panel-kicker">{L.chainTitle}</p>
+            <ol className="chain">
+              {chain.map((stop, i) => (
+                <li key={stop.t} className={`chain-stop${i === 1 ? " is-here" : ""}`}>
+                  <span className="chain-t">{stop.t}</span>
+                  <span className="chain-a">{i === 1 ? ST.waitingHere : stop.a}</span>
+                </li>
+              ))}
+            </ol>
           </aside>
-        </section>
+        </div>
+      </section>
 
-        {/* ---------------- who this is for ---------------- */}
-        <Stories />
-
-        {/* ---------------- why ---------------- */}
-        <section className="lp-section ledger">
-          <p className="eyebrow">{L.whyTitle}</p>
-          <h2 className="lp-h2">{L.why1}</h2>
-          <p className="body lp-body">{L.why2}</p>
-          <p className="body lp-body">{L.why3}</p>
-        </section>
-
-        {/* ---------------- what you can do ---------------- */}
-        <section className="lp-section ledger">
-          <h2 className="lp-h2">{L.doTitle}</h2>
+      {/* ---------------- the three doors ---------------- */}
+      <section className="lp-band lp-band-sunk">
+        <div className="lp-w">
+          <h2 className="lp-h2 lp-h2-wide">{L.doTitle}</h2>
           <p className="lp-lede">{L.doSub}</p>
 
-          <div className="grid-cards">
+          <div className="cols3">
             {doors.map((door) => (
-              <Link key={door.c} href={`/start/${door.c}`} className="card">
-                <span className="card-icon">{door.icon}</span>
-                <span className="card-title">{door.title}</span>
-                <span className="card-sub">{door.sub}</span>
-                <ul className="card-peek">
+              <Link key={door.c} href={`/start/${door.c}`} className="col-item">
+                <h3 className="col-h">{door.title}</h3>
+                <p className="col-b">{door.sub}</p>
+                <ul className="col-peek">
                   {servicesIn(door.c).map((s) => (
                     <li key={s.id}>{SVC[`${s.id}Name`]}</li>
                   ))}
                 </ul>
+                <span className="col-go">
+                  {HUB.title} <Chevron size={15} />
+                </span>
               </Link>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ---------------- how it works ---------------- */}
-        <section className="lp-section ledger">
-          <h2 className="lp-h2">{L.howTitle}</h2>
-          <ol className="lp-steps">
+      {/* ---------------- how it works ---------------- */}
+      <section className="lp-band">
+        <div className="lp-w">
+          <h2 className="lp-h2 lp-h2-wide">{L.howTitle}</h2>
+          <ol className="steps4">
             {steps.map((s, i) => (
               <li key={s.t}>
-                <span className="lp-step-n" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <span>
-                  <span className="lp-step-t">{s.t}</span>
-                  <span className="lp-step-b">{s.b}</span>
-                </span>
+                <span className="step-n">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="col-h">{s.t}</h3>
+                <p className="col-b">{s.b}</p>
               </li>
             ))}
           </ol>
-        </section>
+        </div>
+      </section>
 
-        {/* ---------------- where your file is ---------------- */}
-        <section className="lp-section ledger">
-          <p className="eyebrow">{ST.waitingHere}</p>
-          <h2 className="lp-h2">{L.chainTitle}</h2>
-          <p className="lp-lede">{L.chainLede}</p>
-
-          <ol className="chain">
-            {chain.map((stop, i) => (
-              <li key={stop.t} className={`chain-stop${i === 1 ? " is-here" : ""}`}>
-                <span className="chain-i">
-                  {i === 1 ? ST.waitingHere : `${i + 1}`}
-                </span>
-                <span className="chain-t">{stop.t}</span>
-                <span className="chain-a">{stop.a}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ---------------- eleven scripts ---------------- */}
-        <section className="lp-section ledger">
-          <p className="eyebrow">{t("common.appName")}</p>
-          <h2 className="lp-h2">{L.scriptsTitle}</h2>
+      {/* ---------------- eleven scripts ---------------- */}
+      <section className="lp-band lp-band-sunk">
+        <div className="lp-w">
+          <h2 className="lp-h2 lp-h2-wide">{L.scriptsTitle}</h2>
           <p className="lp-lede">{L.scriptsLede}</p>
-
           <ul className="scripts">
             {scripts.map((s) => (
               <li className="script" key={s.code} lang={s.code}>
@@ -198,59 +200,75 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
               </li>
             ))}
           </ul>
-        </section>
+        </div>
+      </section>
 
-        {/* ---------------- made for ---------------- */}
-        <section className="lp-section ledger">
-          <p className="eyebrow">{L.builtTitle}</p>
-          <ul className="lp-ticks">
+      {/* ---------------- built for ---------------- */}
+      <section className="lp-band">
+        <div className="lp-w">
+          <h2 className="lp-h2 lp-h2-wide">{L.builtTitle}</h2>
+          <ul className="cols3 cols3-plain">
             {[L.built1, L.built2, L.built3, L.built4].map((b) => (
-              <li key={b}>
-                <Check size={18} />
-                <span>{b}</span>
+              <li className="col-item" key={b}>
+                <p className="col-b">{b}</p>
               </li>
             ))}
           </ul>
-        </section>
-
-        {/* ---------------- honesty, before they start ---------------- */}
-        <section className="lp-section">
-          <div className="panel panel-warn lp-honest">
-            <h2 className="lp-h3">
-              <Info size={20} />
-              {L.honestTitle}
-            </h2>
-            <p className="body" style={{ color: "var(--ink)" }}>
-              {L.honestBody}
-            </p>
-            <Link href="/about" className="review-edit">
-              <Book size={16} />
-              <span style={{ marginLeft: 8 }}>{L.honestLink}</span>
-            </Link>
-          </div>
-        </section>
-
-        <div className="action-dock">
-          <BigLink href="/start" icon={<Chevron size={20} />}>
-            {L.ctaStart}
-          </BigLink>
         </div>
+      </section>
 
-        <p className="helpline">
-          {t("common.needHelp")}{" "}
-          <a href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-            {t("common.helpNumber")}
-          </a>
-        </p>
-      </main>
+      {/* ---------------- honesty ---------------- */}
+      <section className="lp-band">
+        <div className="lp-w lp-split lp-split-even">
+          <div>
+            <p className="kicker">{AB.realHead}</p>
+            <ul className="honest honest-real">
+              {real.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="kicker kicker-warn">{AB.mockHead}</p>
+            <ul className="honest honest-mock">
+              {mock.map((m) => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
-      <footer className="shell-foot">
-        <p className="micro">
-          <Link href="/about" style={{ color: "var(--primary-dark)", fontWeight: 600 }}>
-            {t("common.aboutLink")}
-          </Link>
-        </p>
-      </footer>
-    </div>
+      {/* ---------------- close ---------------- */}
+      <section className="lp-band lp-close">
+        <div className="lp-w">
+          <div className="lp-note">
+            <Info size={19} />
+            <div>
+              <h2 className="lp-h3">{L.honestTitle}</h2>
+              <p className="body" style={{ color: "var(--ink)" }}>
+                {L.honestBody}
+              </p>
+              <Link href="/about" className="lp-inline-link">
+                <Book size={15} />
+                <span>{L.honestLink}</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="lp-final">
+            <BigLink href="/start" icon={<Chevron size={19} />}>
+              {L.ctaStart}
+            </BigLink>
+            <p className="lp-quiet">
+              {t("common.needHelp")}{" "}
+              <a href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
+                {t("common.helpNumber")}
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

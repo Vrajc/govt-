@@ -17,6 +17,12 @@ export const svcPa: PartialSvcDict = {
     stepNow: "{step} — ਤੁਸੀਂ ਇੱਥੇ ਹੋ",
     stepTodo: "{step} — ਅਜੇ ਬਾਕੀ",
     menu: "ਸੂਚੀ",
+    textSize: "ਅੱਖਰ ਦਾ ਆਕਾਰ",
+    contrast: "ਗੂੜ੍ਹਾ ਰੰਗ",
+    footHelplines: "ਮਦਦ ਦੇ ਨੰਬਰ",
+    footServices: "ਸੇਵਾਵਾਂ",
+    footAbout: "ਇਸ ਸਾਈਟ ਬਾਰੇ",
+    heroEyebrow: "ਭਾਰਤ ਵਿੱਚ ਹਰ ਉਸ ਬੰਦੇ ਲਈ, ਜਿਸ ਦੀ ਪੈਨਸ਼ਨ ਬਣਦੀ ਹੈ",
     close: "ਬੰਦ ਕਰੋ",
   },
 
