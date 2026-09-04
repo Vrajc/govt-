@@ -8,6 +8,7 @@ import { BigButton, BigLink } from "@/components/BigButton";
 import { Check, Chevron, Clock, Info } from "@/components/Icons";
 import { serviceById } from "@/lib/services/catalogue";
 import { dlcWindow } from "@/lib/dlcWindow";
+import { localeOf } from "@/lib/i18n/util";
 
 /**
  * The service page. Everything a person needs to decide whether to start,
@@ -46,7 +47,7 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
      not know the reader's age on this screen. */
   const dlc = dlcWindow();
   const windowDate = (dt: Date) =>
-    new Intl.DateTimeFormat(lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN", {
+    new Intl.DateTimeFormat(localeOf(lang), {
       day: "numeric",
       month: "long",
       timeZone: "UTC",

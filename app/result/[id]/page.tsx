@@ -12,6 +12,7 @@ import { drawReceipt, downloadCanvas } from "@/lib/receiptCanvas";
 import { serviceById } from "@/lib/services/catalogue";
 import { stepsFor } from "@/lib/services/engine";
 import type { PublicRecord } from "@/lib/publicRecord";
+import { localeOf } from "@/lib/i18n/util";
 
 interface ExplainResponse {
   reason: string;
@@ -91,7 +92,7 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
   const SVC = d.svc as Record<string, string>;
   const OUT = d.outcome as Record<string, string>;
 
-  const locale = lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN";
+  const locale = localeOf(lang);
   const fmt = (iso: string, withTime = false) =>
     new Intl.DateTimeFormat(locale, {
       day: "numeric",

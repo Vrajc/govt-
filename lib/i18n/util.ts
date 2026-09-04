@@ -24,6 +24,7 @@ export {
   fallbackChain,
   isLang,
   langMeta,
+  localeOf,
 } from "./languages";
 
 export type { Lang, LangMeta, Script } from "./languages";

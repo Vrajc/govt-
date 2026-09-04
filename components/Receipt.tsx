@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 import { useApp } from "@/lib/app-state";
 import { InkStamp } from "./CameraArt";
 import type { PublicRecord } from "@/lib/publicRecord";
+import { localeOf } from "@/lib/i18n/util";
 
 /** Completed years, for the sentence that explains the age slab. */
 function ageOn(dob: string | undefined, now = new Date()): number {
@@ -34,7 +35,7 @@ export const Receipt = forwardRef<HTMLDivElement, { record: PublicRecord }>(
     const { t, d, lang } = useApp();
     const SVC = d.svc as Record<string, string>;
 
-    const locale = lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN";
+    const locale = localeOf(lang);
     const fmt = (iso: string, withTime = false) => {
       try {
         return new Intl.DateTimeFormat(locale, {

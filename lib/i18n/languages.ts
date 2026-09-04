@@ -126,6 +126,20 @@ export const SPEECH_TAGS: Record<Lang, string> = Object.fromEntries(
   LANGUAGES.map((l) => [l.code, l.speech]),
 ) as Record<Lang, string>;
 
+/**
+ * The BCP-47 tag for `Intl` — dates and numbers.
+ *
+ * The same tag `speechSynthesis` wants, but named for the other job so that a
+ * date formatter never appears to be reading out of a speech table. This
+ * exists because four call sites had independently written
+ * `lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN"`, which was
+ * complete at three languages and quietly printed English dates in the
+ * middle of a Tamil page at eleven.
+ */
+export function localeOf(lang: Lang): string {
+  return langMeta(lang).speech;
+}
+
 /** The `lang-xx` class names, so a stale one can be removed without a list. */
 export const LANG_CLASSES: string[] = LANGUAGES.map((l) => `lang-${l.code}`);
 

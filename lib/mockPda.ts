@@ -1,4 +1,4 @@
-import { dictFor, fill } from "./i18n";
+import { dictFor, fill, localeOf } from "./i18n";
 import { pushSms, store } from "./store";
 import { transition } from "./stateMachine";
 import { serviceById } from "./services/catalogue";
@@ -446,7 +446,7 @@ function stageName(svc: ServiceDef, i: number): string {
  * Outbound messages
  * ================================================================== */
 export function formatDate(iso: string, lang: Lang): string {
-  const locale = lang === "hi" ? "hi-IN" : lang === "gu" ? "gu-IN" : "en-IN";
+  const locale = localeOf(lang);
   try {
     return new Intl.DateTimeFormat(locale, {
       day: "numeric",
