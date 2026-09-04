@@ -82,6 +82,17 @@ export const svcEn = {
 
     gateTitle: "Choose your language",
     gateNote: "You can change it later, at the top of any page.",
+
+    storiesTitle: "The people this is for",
+    storiesSub: "Five moments from the year of a pension.",
+    story1: "Every November, she has to show she is still alive.",
+    story2: "The passbook the family keeps in a tin.",
+    story3: "Most of the time, it is the son who fills the form.",
+    story4: "Proof she can hold, and show.",
+    story5: "The queue at the bank that no longer has to happen.",
+    storyPrev: "Previous picture",
+    storyNext: "Next picture",
+    storyOf: "Picture {n} of {total}",
   },
 
   hub: {
@@ -514,6 +525,12 @@ export const svcEn = {
     focusFace: "The face has to be clear.",
     focusWhole: "All four corners have to be in the picture.",
     bothSides: "The back is needed too. Take that one straight after.",
+
+    /* The two lines the enlarged drawing needs and the thumbnail does
+       not. Once a drawing is good enough to be held next to the real
+       card, it has to say out loud that it is not one. */
+    sampleMark: "SAMPLE",
+    sampleNote: "This is a drawing, not a photograph of a real one. Yours will look a little different — what matters is that the marked part comes out readable.",
 
     /* Live, while the camera is open. One line, the thing to fix first. */
     starting: "Starting the camera",

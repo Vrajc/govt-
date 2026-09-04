@@ -14,6 +14,7 @@ import {
   Search,
 } from "@/components/Icons";
 import { PassbookArt } from "@/components/LandingArt";
+import { Stories } from "@/components/Stories";
 import { servicesIn } from "@/lib/services/catalogue";
 import type { Category } from "@/lib/services/types";
 
@@ -80,6 +81,13 @@ export default function LandingScreen() {
             <PassbookArt />
           </div>
         </section>
+
+        {/* ---------------- who this is for ---------------- */}
+        {/* Placed straight after the hero, and after the buttons rather than
+            before them: somebody who already knows what they came for should
+            never have to scroll past a picture to reach the thing they came
+            to do. */}
+        <Stories />
 
         {/* ---------------- what you can do ---------------- */}
         <section className="lp-section">
