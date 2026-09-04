@@ -1,6 +1,6 @@
 # Photographs for the landing-page carousel
 
-Five photographs are **in use**, and are the default — they are committed,
+Six photographs are **in use**, and are the default — they are committed,
 so a fresh clone and a Vercel deploy both get them with no configuration.
 Set `NEXT_PUBLIC_STORY_PHOTOS=false` and the hand-drawn scenes in
 `components/StoryArt.tsx` come back, captions and all.
@@ -14,6 +14,7 @@ Set `NEXT_PUBLIC_STORY_PHOTOS=false` and the hand-drawn scenes in
 | `3.jpg` | 36874547 | Two older women seated together against a rock wall | A widow pension exists. Most people never learn its name |
 | `4.jpg` | 18083457 | An older man in a courtyard holding a phone | Four questions, and it names the pension that is yours |
 | `5.jpg` | 34763973 | An older man sitting on a charpai in a village yard | The queue at the bank that no longer has to happen |
+| `6.jpg` | 31259259 | A woman folding cloth in a textile factory | If a company cut PF from your salary for ten years, there is a pension in it |
 
 Source: [Pexels](https://www.pexels.com), under the Pexels licence — free to
 use and modify, commercially, without attribution. Attribution is recorded
@@ -29,14 +30,14 @@ each one states a fact about the scheme and lets the picture be a picture.
 Keep that if you swap the images.
 
 **Every caption is written in all eleven languages**, as `landing.story1` …
-`landing.story5` in `lib/i18n/svc-*.ts`. Change a picture and you change
+`landing.story6` in `lib/i18n/svc-*.ts`. Change a picture and you change
 eleven strings, or the sentence stops describing what is above it.
 `npm run check:copy` catches a language left behind, but it cannot tell you
 a caption has stopped being true.
 
 ## Replacing them
 
-Drop in `1.jpg` … `5.jpg` and rewrite those captions.
+Drop in `1.jpg` … `6.jpg` and rewrite those captions.
 
 | | |
 |---|---|

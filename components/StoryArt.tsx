@@ -1,19 +1,19 @@
 /**
- * Five scenes for the landing-page carousel.
+ * Six scenes for the landing-page carousel.
  *
  * Hand-drawn inline SVG: no image files, no CDN, no licence, nothing to
- * load on a 3G connection. They are also the fallback — drop five
- * photographs into `public/stories/` and set NEXT_PUBLIC_STORY_PHOTOS and
- * these step aside without a line of code changing.
+ * load on a 3G connection. They are also the fallback — the six
+ * photographs in `public/stories/` step in front of them, and back out
+ * again if NEXT_PUBLIC_STORY_PHOTOS is set to false.
  *
  * They share one visual grammar so the carousel reads as a set rather than
- * five unrelated pictures: the same 400x260 frame, the same ink-blue line at
+ * six unrelated pictures: the same 400x260 frame, the same ink-blue line at
  * 2.5, warm paper behind, and exactly one warm accent per scene. Faces are
  * drawn in profile and without features — this is a pension service, not a
  * portrait gallery, and a blank face lets the reader put their own mother in
  * the frame.
  *
- * All five are decorative. The caption beside each one carries the meaning,
+ * All six are decorative. The caption beside each one carries the meaning,
  * so they are hidden from screen readers rather than given alt text that
  * would only repeat the sentence underneath.
  */
@@ -259,6 +259,52 @@ export function StoryQueue() {
   );
 }
 
+
+/**
+ * 6 · The work that earned it.
+ * A machine, a folded stack, a shift. The EPF pension is the one people
+ * are least likely to know they hold, because nobody tells you that a
+ * line on an old payslip becomes money at fifty-eight.
+ */
+export function StoryWork() {
+  return (
+    <svg {...svgProps}>
+      <Ground />
+
+      {/* the bench */}
+      <rect x="40" y="150" width="320" height="12" rx="3" fill="var(--paper)" stroke="var(--primary-dark)" strokeWidth="2.5" />
+      <line x1="70" y1="162" x2="70" y2="212" {...ink} />
+      <line x1="330" y1="162" x2="330" y2="212" {...ink} />
+
+      {/* the machine: head, arm, needle */}
+      <path d="M112 150 v-30 h20 v-22 h58 q10 0 10 10 v42" {...ink} fill="var(--surface)" />
+      <circle cx="200" cy="112" r="9" fill="var(--primary-tint)" stroke="var(--primary-dark)" strokeWidth="2.5" />
+      <line x1="132" y1="122" x2="132" y2="146" stroke="var(--primary-dark)" strokeWidth="3" strokeLinecap="round" />
+      <line x1="122" y1="146" x2="142" y2="146" stroke="var(--primary-dark)" strokeWidth="2.5" strokeLinecap="round" />
+      {/* the thread */}
+      <path d="M196 104 q-22 -14 -40 -2 q-14 10 -24 20" stroke="var(--focus)" strokeWidth="2" fill="none" strokeLinecap="round" />
+
+      {/* cloth running under the needle */}
+      <path d="M96 150 q40 -12 80 -4 q30 6 60 4" stroke="var(--primary)" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.75" />
+
+      {/* the folded stack, which is the shift made visible */}
+      {[0, 1, 2, 3].map((i) => (
+        <rect
+          key={i}
+          x={252}
+          y={150 - 13 - i * 13}
+          width={82 - i * 4}
+          height="11"
+          rx="2"
+          fill="var(--surface)"
+          stroke="var(--primary-dark)"
+          strokeWidth="2"
+        />
+      ))}
+    </svg>
+  );
+}
+
 /** In carousel order. Index is the slide number the captions key off. */
 export const STORY_SCENES = [
   StoryWindow,
@@ -266,4 +312,5 @@ export const STORY_SCENES = [
   StoryHelping,
   StoryReceipt,
   StoryQueue,
+  StoryWork,
 ];

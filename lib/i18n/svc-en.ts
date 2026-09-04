@@ -96,6 +96,7 @@ export const svcEn = {
     story3: "A widow pension exists. Most people never learn its name.",
     story4: "Four questions, and it names the pension that is yours.",
     story5: "The queue at the bank that no longer has to happen.",
+    story6: "If a company cut PF from your salary for ten years, there is a pension in it.",
     storyPrev: "Previous picture",
     storyNext: "Next picture",
     storyOf: "Picture {n} of {total}",
