@@ -59,6 +59,14 @@ export function PhotoCapture({
   const [second, setSecond] = useState<SecondLook>({ state: "idle" });
   /** The drawing, held up close. A detour, not a step. */
   const [sample, setSample] = useState(false);
+  /* Which way the camera points. A document wants the back camera — it is
+     the sharper sensor and the one you can hold over a table; a face wants
+     the front one. Held in state rather than derived on every render so the
+     flip button has something to change. */
+  const [facing, setFacing] = useState<"environment" | "user">(
+    purpose === "document" ? "environment" : "user"
+  );
+  const [canFlip, setCanFlip] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -79,6 +87,27 @@ export function PhotoCapture({
 
   useEffect(() => stopCamera, [stopCamera]);
 
+  /* A running track cannot change which way it points, so flipping means
+     tearing the stream down and asking again. Guarded on `started` so this
+     does not fire on the way in, and on `shot` so it does not reopen the
+     camera behind a photograph that has already been taken. */
+  const firstOpen = useRef(true);
+  useEffect(() => {
+    if (firstOpen.current) {
+      firstOpen.current = false;
+      return;
+    }
+    if (!started || shot) return;
+    stopCamera();
+    void openCamera();
+    // openCamera is recreated when `facing` changes, which is the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facing]);
+
+  const flip = useCallback(() => {
+    setFacing((f) => (f === "user" ? "environment" : "user"));
+  }, []);
+
   const openCamera = useCallback(async () => {
     setCamError(false);
     setStarted(true);
@@ -89,15 +118,35 @@ export function PhotoCapture({
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      /* `facingMode: "environment"` on its own is a *preference*, and a lot
+         of Android browsers quietly ignore it and hand back the selfie
+         camera — which is how a document step ends up photographing the
+         ceiling. `exact` makes it a requirement. It throws on a device with
+         only one camera, so the soft form is the fallback rather than the
+         default. */
+      const constraints = (mode: "environment" | "user", exact: boolean) => ({
         video: {
-          // Selfie camera for a face; the back camera is sharper for paper.
-          facingMode: isDoc ? "environment" : "user",
-          width: { ideal: 960 },
+          facingMode: exact ? { exact: mode } : mode,
+          width: { ideal: 1280 },
           height: { ideal: 1280 },
         },
         audio: false,
       });
+
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints(facing, true));
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia(constraints(facing, false));
+      }
+
+      /* Only offer the flip once we know there is something to flip to.
+         A button that does nothing is worse than no button, and a laptop
+         with one webcam is a device a reviewer will actually open this on. */
+      void navigator.mediaDevices
+        .enumerateDevices()
+        .then((ds) => setCanFlip(ds.filter((dv) => dv.kind === "videoinput").length > 1))
+        .catch(() => setCanFlip(false));
       streamRef.current = stream;
 
       const video = videoRef.current;
@@ -133,7 +182,7 @@ export function PhotoCapture({
       // a consolation prize — it is a fully supported route through.
       setCamError(true);
     }
-  }, [isDoc, docId]);
+  }, [isDoc, docId, facing]);
 
   /**
    * The second look. Sends the still to the model, which is the only thing
@@ -458,6 +507,11 @@ export function PhotoCapture({
             <BigButton onClick={capture} icon={<Camera size={22} />}>
               {isDoc ? t("apply.docsTake") : t("photo.capture")}
             </BigButton>
+            {canFlip && (
+              <BigButton variant="secondary" onClick={flip} icon={<Refresh size={22} />}>
+                {t("photo.switchCam")}
+              </BigButton>
+            )}
             <BigButton
               variant="secondary"
               onClick={() => fileRef.current?.click()}
