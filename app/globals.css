@@ -737,6 +737,130 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--paper);
 }
 
+/* ------------------------------------------------------------------
+   Tapping the drawing.
+
+   The thumbnail answers "a card or a sheet" and stops there. The reader
+   standing over an open tin box with four plastic cards in their hand
+   has a harder question, so the drawing is a button: it opens the same
+   paper at a size you can hold the card up against. The magnifier in
+   the corner is the only part of that a glance can see, so it sits
+   outside the frame where it cannot be mistaken for part of the paper.
+   ------------------------------------------------------------------ */
+.doc-thumb-btn,
+.doc-sample-btn {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  line-height: 0;
+  cursor: pointer;
+}
+.doc-thumb-btn:hover .doc-thumb,
+.doc-sample-btn:hover .doc-sample-art {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+}
+.doc-thumb-btn:active,
+.doc-sample-btn:active { transform: translateY(1px); }
+
+.doc-sample-art {
+  border: 1px dashed transparent;
+  border-radius: 10px;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.doc-thumb-zoom {
+  position: absolute;
+  inset-block-end: -7px;
+  inset-inline-end: -7px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-1);
+}
+
+/* ------------------------------------------------------------------
+   The drawing, held up close.
+
+   Deliberately light furniture — no title bar, no close cross. This is a
+   detour rather than a step, and the two ways out of it are a full-width
+   button and the darkness around the panel.
+   ------------------------------------------------------------------ */
+.sample {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(31, 28, 26, 0.55);
+  overflow-y: auto;
+}
+
+/* Focused on opening so a screen reader reads the document's name first.
+   That is a programmatic focus, not a keyboard one, and a ring around the
+   whole panel would say the panel is the thing you are about to press. */
+.sample-panel:focus { outline: none; }
+
+.sample-panel {
+  width: 100%;
+  max-width: 30rem;
+  margin: auto;
+  padding: 20px 20px 18px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 64px rgba(31, 28, 26, 0.28);
+}
+
+.sample-title {
+  margin: 0 0 4px;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.sample-hint {
+  margin: 0 0 14px;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* The paper itself. The width comes from the drawing, which sizes itself
+   so that a passbook and a cheque are drawn with the same pen — and so that
+   the cheque is the wider of the two, as it is on the table. */
+.sample-art {
+  display: block;
+  height: auto;
+  margin: 0 auto 16px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* The sentence that has to be there because the drawing got good. */
+.sample-note {
+  margin: 14px 0 16px;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.sample-actions { display: grid; gap: 10px; }
+
 .coach-line {
   display: flex;
   align-items: center;

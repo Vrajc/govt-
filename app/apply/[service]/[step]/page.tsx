@@ -10,6 +10,7 @@ import { Field } from "@/components/Field";
 import { DateField } from "@/components/DateField";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import { DocSample } from "@/components/DocSample";
+import { DocSampleDialog } from "@/components/DocSampleDialog";
 import {
   Alert,
   ArtEyeLevel,
@@ -22,6 +23,7 @@ import {
   People,
   Person,
   Refresh,
+  Search,
   Send,
 } from "@/components/Icons";
 import { serviceById } from "@/lib/services/catalogue";
@@ -430,6 +432,8 @@ function DocumentsStep({
   const { t, d, app, patch } = useApp();
   const DOCS = d.docs as Record<string, string>;
   const [capturing, setCapturing] = useState<string | null>(null);
+  /** Which document's drawing is being looked at, held up close. */
+  const [sample, setSample] = useState<string | null>(null);
 
   const required = svc.documents.filter((x) => x.required);
   const doneCount = svc.documents.filter((x) => app.docs[x.id]).length;
@@ -510,8 +514,21 @@ function DocumentsStep({
                 ) : (
                   /* A drawing of the paper rather than a camera icon. The
                      icon says "a photograph goes here", which the reader
-                     had worked out; the drawing says which paper. */
-                  <DocSample docId={doc.id} className="doc-thumb" />
+                     had worked out; the drawing says which paper — and
+                     tapping it says it at a size you can hold the card up
+                     against, which is the question somebody standing over
+                     an open tin box is actually asking. */
+                  <button
+                    type="button"
+                    className="doc-thumb-btn"
+                    onClick={() => setSample(doc.id)}
+                    aria-label={`${t("docshot.example")} — ${DOCS[doc.id]}`}
+                  >
+                    <DocSample docId={doc.id} className="doc-thumb" />
+                    <span className="doc-thumb-zoom" aria-hidden="true">
+                      <Search size={14} />
+                    </span>
+                  </button>
                 )}
                 <span>
                   <p className="review-val">
@@ -539,6 +556,21 @@ function DocumentsStep({
           );
         })}
       </div>
+
+      {sample && (
+        <DocSampleDialog
+          docId={sample}
+          name={DOCS[sample] ?? sample}
+          hint={DOCS[`${sample}Hint`]}
+          onClose={() => setSample(null)}
+          /* Straight to the camera from the picture, rather than back to
+             the list to find the row again. */
+          onTake={() => {
+            setCapturing(sample);
+            setSample(null);
+          }}
+        />
+      )}
     </ScreenShell>
   );
 }

@@ -6,10 +6,10 @@ import { apiFetch } from "@/lib/api";
 import { BigButton } from "./BigButton";
 import { FaceOval } from "./CameraArt";
 import { DocSample } from "./DocSample";
-import { Alert, Camera, Check, Info, Refresh, Upload } from "./Icons";
+import { DocNotes, DocSampleDialog } from "./DocSampleDialog";
+import { Alert, Camera, Check, Info, Refresh, Search, Upload } from "./Icons";
 import { coachKey, createAnalyser, toJpegDataUrl } from "@/lib/imageQuality";
 import { createDocAnalyser, docCoachKey, type DocQuality } from "@/lib/docCheck";
-import { lookFor } from "@/lib/services/docShapes";
 import type { PhotoQuality } from "@/lib/types";
 
 /**
@@ -49,7 +49,7 @@ export function PhotoCapture({
   onDone: (dataUrl: string, quality: PhotoQuality | null) => void;
   onCancel: () => void;
 }) {
-  const { t, lang } = useApp();
+  const { t, d, lang } = useApp();
 
   const [quality, setQuality] = useState<PhotoQuality | null>(null);
   const [docQuality, setDocQuality] = useState<DocQuality | null>(null);
@@ -57,6 +57,8 @@ export function PhotoCapture({
   const [camError, setCamError] = useState(false);
   const [started, setStarted] = useState(false);
   const [second, setSecond] = useState<SecondLook>({ state: "idle" });
+  /** The drawing, held up close. A detour, not a step. */
+  const [sample, setSample] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -64,7 +66,7 @@ export function PhotoCapture({
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const isDoc = purpose === "document";
-  const look = lookFor(docId ?? "");
+  const hint = docId ? (d.docs as Record<string, string>)[`${docId}Hint`] : undefined;
 
   const stopCamera = useCallback(() => {
     if (rafRef.current !== null) {
@@ -362,12 +364,20 @@ export function PhotoCapture({
             one and find out in six weeks. */}
         {isDoc && docId && (
           <div className="doc-sample">
-            <DocSample docId={docId} className="doc-sample-art" />
-            <ul className="doc-sample-notes">
-              <li>{t(`docshot.shape${cap(look.shape)}`)}</li>
-              <li>{t(`docshot.focus${cap(look.focus)}`)}</li>
-              {look.twoSided && <li>{t("docshot.bothSides")}</li>}
-            </ul>
+            {/* Tapping the drawing enlarges it. At 160px it says which paper;
+                at full width it says which of the four cards in the hand. */}
+            <button
+              type="button"
+              className="doc-sample-btn"
+              onClick={() => setSample(true)}
+              aria-label={`${t("docshot.example")} — ${title}`}
+            >
+              <DocSample docId={docId} className="doc-sample-art" />
+              <span className="doc-thumb-zoom" aria-hidden="true">
+                <Search size={16} />
+              </span>
+            </button>
+            <DocNotes docId={docId} />
           </div>
         )}
 
@@ -385,6 +395,19 @@ export function PhotoCapture({
           {t("common.back")}
         </BigButton>
         {hiddenInput}
+
+        {sample && docId && (
+          <DocSampleDialog
+            docId={docId}
+            name={title}
+            hint={hint}
+            onClose={() => setSample(false)}
+            onTake={() => {
+              setSample(false);
+              void openCamera();
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -480,6 +503,3 @@ function DocBrackets({ tone }: { tone: "neutral" | "good" | "warn" }) {
   );
 }
 
-function cap(v: string): string {
-  return v.charAt(0).toUpperCase() + v.slice(1);
-}
