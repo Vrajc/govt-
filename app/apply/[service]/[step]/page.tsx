@@ -995,7 +995,15 @@ function ReviewStep({ svc, shell }: { svc: ServiceDef; shell: Shell }) {
     let res = app.fixingId
       ? await apiFetch<{ record: PublicRecord }>(`/api/resubmit/${app.fixingId}`, {
           method: "POST",
-          body: JSON.stringify({ requestId: app.requestId, precheckFlagged: flagged }),
+          /* The corrected details travel with the resend. Without them the
+             office re-reads the values it already rejected and says the
+             same thing again, which from the reader's side is a button
+             that does nothing. */
+          body: JSON.stringify({
+            requestId: app.requestId,
+            precheckFlagged: flagged,
+            values: app.values,
+          }),
         })
       : await asNew();
 
