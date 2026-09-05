@@ -974,27 +974,43 @@ function ReviewStep({ svc, shell }: { svc: ServiceDef; shell: Shell }) {
 
     const flagged = pre.s === "warn";
 
+    const asNew = () =>
+      apiFetch<{ record: PublicRecord }>("/api/submit", {
+        method: "POST",
+        body: JSON.stringify({
+          requestId: app.requestId,
+          serviceId: svc.id,
+          lang,
+          mode: app.mode,
+          helperName: app.helperName,
+          values: app.values,
+          docCount: Object.keys(app.docs).length,
+          precheckFlagged: flagged,
+        }),
+      });
+
     /* Resubmitting keeps the same reference number and the same audit trail.
        Both paths reuse the client-generated requestId, so a retry after a
        dropped connection cannot create a second pension record. */
-    const res = app.fixingId
+    let res = app.fixingId
       ? await apiFetch<{ record: PublicRecord }>(`/api/resubmit/${app.fixingId}`, {
           method: "POST",
           body: JSON.stringify({ requestId: app.requestId, precheckFlagged: flagged }),
         })
-      : await apiFetch<{ record: PublicRecord }>("/api/submit", {
-          method: "POST",
-          body: JSON.stringify({
-            requestId: app.requestId,
-            serviceId: svc.id,
-            lang,
-            mode: app.mode,
-            helperName: app.helperName,
-            values: app.values,
-            docCount: Object.keys(app.docs).length,
-            precheckFlagged: flagged,
-          }),
-        });
+      : await asNew();
+
+    /* The office has no record of the thing we were fixing. In this
+       prototype that means the server restarted — the store is a Map and
+       /about says as much — so there is nothing on the other end to amend.
+
+       Sending it as a new application is strictly better than stopping
+       here. The reader keeps every word they typed and comes away with a
+       reference number; the alternative is a button that fails in exactly
+       the same way however many times they press it, which is the shape of
+       the dead end this whole product exists to remove. */
+    if (!res.ok && app.fixingId && res.error.code === "NOT_FOUND") {
+      res = await asNew();
+    }
 
     setSending(false);
 

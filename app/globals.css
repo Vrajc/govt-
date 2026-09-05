@@ -53,9 +53,14 @@
 
   --focus:        #E3C463;  /* haldi, lifted — 8.9:1 on the ground */
 
-  /* Control borders still owe WCAG 3:1 against what is behind them.
-     4.1:1 on the ground, 3.4:1 on the tint panels. */
-  --line-strong:  #4B5A6B;
+  /* Control borders still owe WCAG 3:1 against what is behind them, and the
+     tint panel is the hardest of the three grounds to clear because it is
+     the lightest. The redesign asked for #4B5A6B and described it as 4.1:1
+     on the ground; it measures 2.64:1 there and 2.12:1 on the tint, so
+     every control border in the product sat under the bar. This is the
+     colour that value was describing — 4.1:1, 3.8:1 and 3.3:1, checked by
+     scripts/check-contrast.mjs. */
+  --line-strong:  #67788C;
 
   --r-sm:  8px;
   --r-md:  12px;
