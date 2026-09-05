@@ -50,8 +50,7 @@ const T = {
   attentionText: token("attention-text"),
   attentionTint: token("attention-tint"),
   focus: token("focus"),
-  white: "#FFFFFF",
-  bannerText: "#FFF6F1",
+  sunk: token("sunk"),
   noteGoodText: token("note-good"),
   noteWarnText: token("note-warn"),
   placeholder: token("placeholder"),
@@ -84,8 +83,8 @@ const PAIRS = [
   ["secondary text on paper", T.inkSoft, T.paper, 7],
   ["secondary text on surface", T.inkSoft, T.surface, 7],
   ["helper text on tint panel", T.inkSoft, T.primaryTint, 7],
-  ["primary button label", T.white, T.primary, 7],
-  ["primary button label (hover)", T.white, T.primaryDark, 7],
+  ["primary button label", T.paper, T.primary, 7],
+  ["primary button label (hover)", T.paper, T.primaryDark, 7],
   ["secondary button label", T.primaryDark, T.surface, 7],
   ["secondary button label (hover)", T.primaryDark, T.primaryTint, 7],
   ["link on paper", T.primaryDark, T.paper, 7],
@@ -93,7 +92,7 @@ const PAIRS = [
   ["warn note text", T.noteWarnText, T.attentionTint, 7],
   ["field error text on paper", T.attentionText, T.paper, 7],
   ["field error text on surface", T.attentionText, T.surface, 7],
-  ["prototype banner text", T.bannerText, T.attention, 4.5],
+  ["prototype banner text", T.paper, T.attention, 4.5],
   ["stamp ink on surface", T.success, T.surface, 4.5],
   ["receipt date (26px bold, large)", T.success, T.surface, 4.5],
   ["screen title (25px bold, large)", T.ink, T.paper, 4.5],
@@ -108,6 +107,11 @@ const PAIRS = [
   ["control border on surface", T.lineStrong, T.surface, 3],
   ["control border on paper", T.lineStrong, T.paper, 3],
   ["control border on tint panel", T.lineStrong, T.primaryTint, 3],
+  /* The utility bar, the footer and the prototype strip all sit on --sunk,
+     which is a third ground and was never audited against anything. */
+  ["body text on sunk", T.ink, T.sunk, 7],
+  ["secondary text on sunk", T.inkSoft, T.sunk, 7],
+  ["prototype tag on sunk", T.attention, T.sunk, 4.5],
 ];
 
 let failed = 0;

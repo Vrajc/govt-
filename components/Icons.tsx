@@ -231,8 +231,15 @@ export const ArtEyeLevel = ({ size = 56 }: { size?: number }) => (
   </svg>
 );
 
-export const Chevron = ({ size = 22, className }: P) => (
-  <svg {...base(size)} className={className}>
+/* The chevron points right — "onward", which is the direction every link in
+   this product goes. `down` turns it a quarter turn for the one control that
+   opens something in place instead of moving you on: the language menu. */
+export const Chevron = ({ size = 22, className, down }: P & { down?: boolean }) => (
+  <svg
+    {...base(size)}
+    className={className}
+    style={down ? { transform: "rotate(90deg)" } : undefined}
+  >
     <path d="m9 5 7 7-7 7" />
   </svg>
 );

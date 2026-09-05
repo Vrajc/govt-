@@ -97,6 +97,11 @@ export const svcPa: PartialSvcDict = {
     title: "ਤੁਹਾਨੂੰ ਕੀ ਕਰਨਾ ਹੈ?",
     guide: "ਜਿਹੜੀ ਤੁਹਾਡੇ ਵਰਗੀ ਲੱਗੇ ਉਹ ਚੁਣੋ.",
 
+    commonHead: "ਬਹੁਤੇ ਲੋਕ ਇਸੇ ਲਈ ਆਉਂਦੇ ਹਨ",
+    chooseHead: "ਜਾਂ ਆਪਣੀ ਹਾਲਤ ਚੁਣੋ",
+    countOf:    "{n} ਸੇਵਾਵਾਂ",
+    seeThem:    "ਸਾਰੀਆਂ {n} ਵੇਖੋ",
+
     catStart: "ਮੈਂ ਪੈਨਸ਼ਨ ਲੈਣੀ ਸ਼ੁਰੂ ਕਰਨੀ ਹੈ",
     catStartSub: "ਮੈਨੂੰ ਅਜੇ ਨਹੀਂ ਮਿਲਦੀ",
     catHave: "ਮੈਨੂੰ ਪਹਿਲਾਂ ਹੀ ਪੈਨਸ਼ਨ ਮਿਲਦੀ ਹੈ",

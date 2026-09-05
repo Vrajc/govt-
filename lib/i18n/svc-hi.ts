@@ -97,6 +97,11 @@ export const svcHi: SvcDict = {
     title: "आपको क्या करना है?",
     guide: "जो आपकी बात लगे, वही चुनिए.",
 
+    commonHead: "ज़्यादातर लोग इसके लिए आते हैं",
+    chooseHead: "या अपनी स्थिति चुनिए",
+    countOf:    "{n} सेवाएँ",
+    seeThem:    "सभी {n} देखिए",
+
     catStart: "मुझे पेंशन शुरू करवानी है",
     catStartSub: "अभी मुझे कोई पेंशन नहीं मिलती",
     catHave: "मुझे पेंशन मिलती है",

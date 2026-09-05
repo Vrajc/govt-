@@ -97,6 +97,11 @@ export const svcBn: PartialSvcDict = {
     title: "আপনার কী করার দরকার?",
     guide: "যেটা আপনার মতো শোনায় সেটা বেছে নিন।",
 
+    commonHead: "বেশিরভাগ মানুষ এর জন্যই আসেন",
+    chooseHead: "বা আপনার অবস্থা বেছে নিন",
+    countOf:    "{n}টি পরিষেবা",
+    seeThem:    "সবগুলি {n}টি দেখুন",
+
     catStart: "আমি পেনশন পাওয়া শুরু করতে চাই",
     catStartSub: "আমি এখনও পাই না",
     catHave: "আমি আগে থেকেই পেনশন পাই",

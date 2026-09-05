@@ -73,12 +73,12 @@ export function InkStamp({
         <path id="ps-stamp-bottom" d="M70,70 m-45,0 a45,45 0 1,0 90,0" fill="none" />
       </defs>
 
-      <g stroke="#17694A" fill="none" opacity="0.85">
+      <g stroke="var(--success)" fill="none" opacity="0.85">
         <circle cx="70" cy="70" r="60" strokeWidth="3" />
         <circle cx="70" cy="70" r="52" strokeWidth="1.4" />
       </g>
 
-      <g fill="#17694A" opacity="0.9">
+      <g fill="var(--success)" opacity="0.9">
         <text fontSize="12" fontWeight="700" letterSpacing="2.4">
           <textPath href="#ps-stamp-top" startOffset="50%" textAnchor="middle">
             {top}
@@ -94,7 +94,7 @@ export function InkStamp({
         </text>
       </g>
 
-      <path d="M50 76h40" stroke="#17694A" strokeWidth="2" opacity="0.7" fill="none" />
+      <path d="M50 76h40" stroke="var(--success)" strokeWidth="2" opacity="0.7" fill="none" />
     </svg>
   );
 }

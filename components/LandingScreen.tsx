@@ -38,7 +38,7 @@ export interface ScriptLine {
  *     the thing most worth stopping at.
  */
 export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }) {
-  const { t, d } = useApp();
+  const { d } = useApp();
   const L = d.landing as Record<string, string>;
   const HUB = d.hub as Record<string, string>;
   const SVC = d.svc as Record<string, string>;
@@ -260,12 +260,6 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
             <BigLink href="/start" icon={<Chevron size={19} />}>
               {L.ctaStart}
             </BigLink>
-            <p className="lp-quiet">
-              {t("common.needHelp")}{" "}
-              <a href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-                {t("common.helpNumber")}
-              </a>
-            </p>
           </div>
         </div>
       </section>
