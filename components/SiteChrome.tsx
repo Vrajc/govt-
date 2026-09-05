@@ -14,9 +14,14 @@ import { LanguagePicker } from "./LanguagePicker";
  *
  *   1. the prototype banner, dark and unmissable, because everything under
  *      it is pretending to be a service that does not exist;
- *   2. a utility bar — text size and language — which is the row every
- *      real portal carries and the row this audience needs most;
- *   3. the name, and the nav.
+ *   2. the name, the two settings this audience actually changes — text
+ *      size and language — the helpline, and the nav.
+ *
+ * Text size and language used to have a strip of their own above the name,
+ * which is the row every real portal carries. It cost a whole band of
+ * vertical space to hold two controls, and on a phone that band pushed the
+ * first real words of the page below the fold. They sit on the masthead
+ * row now, which is where the eye already goes.
  *
  * There was an ornamental rule above all three. Drawn as a tiled vine it
  * stretched to the viewport and read as a smear rather than as carving,
@@ -43,7 +48,6 @@ export function SiteChrome() {
   return (
     <>
       <PrototypeBar />
-      <UtilityBar />
       <Masthead />
     </>
   );
@@ -59,7 +63,8 @@ function PrototypeBar() {
   );
 }
 
-function UtilityBar() {
+/** The text-size control, now a passenger on the masthead row. */
+function TextSize() {
   const { d } = useApp();
   const NAV = d.nav as Record<string, string>;
 
@@ -82,26 +87,20 @@ function UtilityBar() {
   }, [size]);
 
   return (
-    <div className="util-bar">
-      <div className="util-inner">
-        <span className="util-label">{NAV.textSize}</span>
-        <div className="util-sizes" role="group" aria-label={NAV.textSize}>
-          {SIZES.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              className={`util-size${size === s ? " is-on" : ""}`}
-              aria-pressed={size === s}
-              onClick={() => setSize(s)}
-              style={{ fontSize: `${12 + i * 3}px` }}
-            >
-              A{s === "sm" ? "−" : s === "lg" ? "+" : ""}
-            </button>
-          ))}
-        </div>
-
-        <LanguagePicker />
-      </div>
+    <div className="util-sizes" role="group" aria-label={NAV.textSize}>
+      <span className="util-label">{NAV.textSize}</span>
+      {SIZES.map((s, i) => (
+        <button
+          key={s}
+          type="button"
+          className={`util-size${size === s ? " is-on" : ""}`}
+          aria-pressed={size === s}
+          onClick={() => setSize(s)}
+          style={{ fontSize: `${12 + i * 3}px` }}
+        >
+          A{s === "sm" ? "−" : s === "lg" ? "+" : ""}
+        </button>
+      ))}
     </div>
   );
 }
@@ -135,10 +134,14 @@ function Masthead() {
           </span>
         </Link>
 
-        <a className="masthead-help" href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-          <span className="help-label">{t("common.needHelp")}</span>
-          <span className="help-number">{t("common.helpNumber")}</span>
-        </a>
+        <div className="masthead-tools">
+          <TextSize />
+          <LanguagePicker />
+          <a className="masthead-help" href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
+            <span className="help-label">{t("common.needHelp")}</span>
+            <span className="help-number">{t("common.helpNumber")}</span>
+          </a>
+        </div>
       </div>
 
       <nav className="masthead-nav" aria-label={NAV.menu}>

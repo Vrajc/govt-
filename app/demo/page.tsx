@@ -107,7 +107,7 @@ export default function DemoScreen() {
       crumbs={[{ label: "Home", href: "/start" }]}
       title="Presenter controls"
       guide="Not part of the journey. Press Ctrl + Shift + D from any screen to get back here."
-      hideHelpline
+
       action={
         <BigButton variant="secondary" onClick={() => router.push("/")} icon={<Check size={22} />}>
           Back to the journey

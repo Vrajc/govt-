@@ -32,7 +32,7 @@ export default function HelpScreen() {
       crumbs={[{ label: t("nav.home"), href: "/start" }, { label: t("help.title") }]}
       title={t("help.title")}
       guide={t("help.guide")}
-      hideHelpline
+
     >
       <div className="grid-cards">
       <a href={`tel:${tel}`} className="card">

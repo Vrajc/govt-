@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useApp } from "@/lib/app-state";
-import { ArrowLeft, Phone } from "./Icons";
+import { ArrowLeft } from "./Icons";
 import { ProgressBeads } from "./ProgressBeads";
 import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
 import { SpeakButton } from "./SpeakButton";
@@ -32,8 +32,6 @@ interface Props {
   speakExtra?: string;
   /** Rendered in the sticky dock at the bottom. */
   action?: ReactNode;
-  /** Hide the phone-number line — used only where the page IS the help page. */
-  hideHelpline?: boolean;
   /**
    * Let the sheet grow past the reading measure on a desktop. For screens
    * whose content is a grid or a table rather than prose — never for a
@@ -43,6 +41,11 @@ interface Props {
   children: ReactNode;
 }
 
+/* The helpline used to be printed again at the foot of every screen. It is
+   in the masthead of every page and in the site footer of every page, so
+   that was a third copy of the same eleven digits — and the screen that
+   most needed the room, the capture screen on a small phone, was the one
+   paying for it. /help still prints it, because that page is the offer. */
 export function ScreenShell({
   step = null,
   totalSteps,
@@ -54,7 +57,6 @@ export function ScreenShell({
   onGoToStep,
   speakExtra,
   action,
-  hideHelpline = false,
   wide = false,
   children,
 }: Props) {
@@ -106,14 +108,6 @@ export function ScreenShell({
 
         {action && <div className="action-dock">{action}</div>}
 
-        {!hideHelpline && (
-          <p className="helpline">
-            {t("common.needHelp")}{" "}
-            <a href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-              <Phone size={18} /> {t("common.helpNumber")}
-            </a>
-          </p>
-        )}
       </main>
 
       {/* The disclosure lives in the banner at the top of every screen and

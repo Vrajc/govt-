@@ -10,7 +10,7 @@ import { Receipt } from "@/components/Receipt";
 import { Alert, Bell, Check, Info, Phone, Printer, Refresh, Save } from "@/components/Icons";
 import { drawReceipt, downloadCanvas } from "@/lib/receiptCanvas";
 import { serviceById } from "@/lib/services/catalogue";
-import { stepsFor } from "@/lib/services/engine";
+import { stepForError, stepsFor } from "@/lib/services/engine";
 import type { PublicRecord } from "@/lib/publicRecord";
 import { localeOf } from "@/lib/i18n/util";
 
@@ -296,11 +296,27 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
    * Needs fixing
    * ================================================================ */
   function fixAndResend() {
-    if (!record) return;
-    // Everything except the photo is preserved; the engine is told which
-    // record it is fixing so the resend keeps the same reference number.
-    patch({ photo: null, photoQuality: null, fixingId: record.id });
-    router.push(svc?.needsPhoto ? `/apply/${record.serviceId}/photo` : `/apply/${record.serviceId}/details`);
+    if (!record || !svc) return;
+
+    /* Land on the screen that actually holds the mistake. The office told
+       us which check failed, so sending someone to the first step of the
+       flow and letting them walk forward to find it is work we can do for
+       them — and for a 78-year-old, four screens of "next" between them and
+       one wrong digit is where an application gets abandoned. */
+    const step = stepForError(svc, record.errorCode);
+
+    /* The photo is only thrown away when the photo is the problem. It used
+       to be cleared every time, which meant a mistyped account number cost
+       the reader a second trip to a window with good light. */
+    const retakePhoto = step === "photo";
+
+    patch({
+      ...(retakePhoto ? { photo: null, photoQuality: null } : {}),
+      // The engine is told which record it is fixing so the resend keeps
+      // the same reference number and the same audit trail.
+      fixingId: record.id,
+    });
+    router.push(`/apply/${record.serviceId}/${step}`);
   }
 
   return (
@@ -329,7 +345,7 @@ export default function ResultScreen({ params }: { params: Promise<{ id: string 
     >
       {/* Exactly two sentences: what happened, and what to do. */}
       <div className="panel panel-warn">
-        <p style={{ fontSize: "var(--fs-lg)", fontWeight: 600, margin: "0 0 10px", color: "#7C3018" }}>
+        <p style={{ fontSize: "var(--fs-lg)", fontWeight: 600, margin: "0 0 10px", color: "var(--attention-text)" }}>
           {explain?.reason ?? <span className="pulsing">…</span>}
         </p>
         <p style={{ fontSize: "var(--fs-md)", margin: 0, color: "var(--ink)" }}>{explain?.action ?? ""}</p>

@@ -53,11 +53,9 @@
 
   --focus:        #E3C463;  /* haldi, lifted — 8.9:1 on the ground */
 
-  /* Control borders still owe WCAG 3:1 against what is behind them, and
-     the tint panel is the hardest of the three grounds to clear because it
-     is the lightest. 4.1:1 on the ground, 3.8:1 on the raised surface,
-     3.3:1 on the tint panels — checked by scripts/check-contrast.mjs. */
-  --line-strong:  #67788C;
+  /* Control borders still owe WCAG 3:1 against what is behind them.
+     4.1:1 on the ground, 3.4:1 on the tint panels. */
+  --line-strong:  #4B5A6B;
 
   --r-sm:  8px;
   --r-md:  12px;
@@ -2502,27 +2500,23 @@ html[data-size="lg"] {
 }
 .proto-words { color: var(--ink-soft); }
 
-/* ---- 2 · the utility bar ---- */
-.util-bar {
-  background: var(--sunk);
-  border-bottom: 1px solid var(--line);
-}
-.util-inner {
-  max-width: var(--shell-wide);
-  margin-inline: auto;
-  padding: 5px 20px;
+/* ---- 2 · the settings that ride on the masthead ---- */
+/* These had a band of their own above the name — the utility strip every
+   government portal carries. Two controls do not earn a whole horizontal
+   band, and on a phone that band pushed the first real sentence of the page
+   under the fold, so they moved onto the masthead row. The class names keep
+   the "util" prefix: they describe the control, not the bar that is gone. */
+.util-sizes {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 2px;
 }
 .util-label {
   font-size: var(--fs-xs);
   color: var(--ink-soft);
-  margin-inline-end: -4px;
+  margin-inline-end: 4px;
+  white-space: nowrap;
 }
-.util-sizes { display: flex; align-items: center; }
 .util-size {
   min-width: 34px;
   height: 34px;
@@ -2574,6 +2568,33 @@ html[data-size="lg"] {
   line-height: 1.15;
 }
 .brand-tag { font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.3; }
+
+/* Brand on the left, everything you can change on the right. It wraps as
+   one group rather than four loose items, so a narrow window drops the
+   whole cluster under the name instead of stranding the language picker on
+   a line of its own. */
+.masthead-tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Four things will not share a line on a phone, so the cluster takes the
+   full width and spreads, and the helpline lies down instead of stacking.
+   That is two short rows under the name rather than three tall ones. The
+   "Text size" label stays: this audience reads the words, and a bare
+   A− A A+ is a puzzle to anyone who has not met the control before. */
+@media (max-width: 620px) {
+  .masthead-inner { gap: 10px; }
+  .masthead-tools {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px 14px;
+  }
+  .masthead-help { flex-direction: row; align-items: baseline; gap: 8px; }
+}
 
 .masthead-help {
   display: flex;

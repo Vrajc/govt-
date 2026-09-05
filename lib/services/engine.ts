@@ -40,6 +40,72 @@ export function isStep(v: string): v is Step {
   return (STEPS as readonly string[]).includes(v);
 }
 
+/**
+ * Which step a rejection actually belongs to.
+ *
+ * "Fix and send again" used to drop everyone at the first step of the flow —
+ * the photo screen if the service had one, the details form if it did not.
+ * So a pensioner told their bank account did not match was made to retake a
+ * photograph of their face before they could reach the field with the
+ * mistake in it, and a blurred death certificate sent someone to a form
+ * they had already filled in correctly.
+ *
+ * The office tells us which check failed. This turns that into the screen
+ * that holds the answer, so the button lands on the thing that is wrong.
+ *
+ * Codes that are not a mistake in the application — it was already sent,
+ * it is a duplicate — deliberately map to `review`: there is nothing to
+ * edit, and review is where the reader can see the whole thing before
+ * deciding to send it a second time.
+ */
+const STEP_FOR_ERROR: Record<string, Step> = {
+  /* The face, and only the face. */
+  ERR_FACE_NOT_CENTERED: "photo",
+  ERR_FACE_QUALITY_LOW: "photo",
+  ERR_LIVENESS_FAIL: "photo",
+
+  /* A piece of paper that has to be photographed again. */
+  ERR_DOC_UNREADABLE: "documents",
+  ERR_AGE_PROOF_UNCLEAR: "documents",
+  ERR_DEATH_CERT_UNCLEAR: "documents",
+  ERR_DISABILITY_CERT: "documents",
+  ERR_SERVICE_BOOK: "documents",
+  ERR_NOMINATION_MISSING: "documents",
+
+  /* Something typed: a number, a name, a date. */
+  ERR_BANK_MISMATCH: "details",
+  ERR_ACCOUNT_CLOSED: "details",
+  ERR_AADHAAR_NAME_MISMATCH: "details",
+  ERR_UAN_NOT_FOUND: "details",
+  ERR_EXIT_DATE_MISSING: "details",
+  ERR_PPO_NOT_FOUND: "details",
+  ERR_NOT_IN_PPO: "details",
+  ERR_KYC_PENDING: "details",
+  ERR_NEED_MORE_INFO: "details",
+
+  /* An answer about who they are, which is the eligibility questions. */
+  ERR_BPL_NOT_LISTED: "eligibility",
+
+  /* Nothing to correct. */
+  ERR_ALREADY_APPLIED: "review",
+  ERR_DUPLICATE_SUBMISSION: "review",
+};
+
+/**
+ * The step to reopen for a rejection, clamped to the steps this service
+ * actually has. A service with no photo step cannot be sent to `photo`
+ * however the office phrased the failure, so an unmapped or impossible
+ * code falls back to the last editable step before review — which is the
+ * widest net, not the narrowest.
+ */
+export function stepForError(svc: ServiceDef, code: string | null | undefined): Step {
+  const list = stepsFor(svc);
+  const want = code ? STEP_FOR_ERROR[code] : undefined;
+  if (want && list.includes(want)) return want;
+  const editable = list.filter((s) => s !== "review" && s !== "who");
+  return editable.length > 0 ? editable[editable.length - 1] : list[0];
+}
+
 /* ==================================================================
  * Eligibility
  * ================================================================== */

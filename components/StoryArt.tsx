@@ -1,19 +1,19 @@
 /**
- * Six scenes for the landing-page carousel.
+ * Seven scenes for the landing-page carousel.
  *
  * Hand-drawn inline SVG: no image files, no CDN, no licence, nothing to
- * load on a 3G connection. They are also the fallback — the six
+ * load on a 3G connection. They are also the fallback — the seven
  * photographs in `public/stories/` step in front of them, and back out
  * again if NEXT_PUBLIC_STORY_PHOTOS is set to false.
  *
  * They share one visual grammar so the carousel reads as a set rather than
- * six unrelated pictures: the same 400x260 frame, the same ink-blue line at
+ * seven unrelated pictures: the same 400x260 frame, the same ink-blue line at
  * 2.5, warm paper behind, and exactly one warm accent per scene. Faces are
  * drawn in profile and without features — this is a pension service, not a
  * portrait gallery, and a blank face lets the reader put their own mother in
  * the frame.
  *
- * All six are decorative. The caption beside each one carries the meaning,
+ * All seven are decorative. The caption beside each one carries the meaning,
  * so they are hidden from screen readers rather than given alt text that
  * would only repeat the sentence underneath.
  */
@@ -306,6 +306,52 @@ export function StoryWork() {
 }
 
 /** In carousel order. Index is the slide number the captions key off. */
+
+/**
+ * 7 · The pension that carries on.
+ *
+ * A widow with the passbook open on her lap. The account does not close
+ * when the pensioner dies — it continues under a new name, and that is the
+ * whole of the family pension. The shawl is drawn in the paper colour
+ * rather than the indigo tint every other figure wears, because white is
+ * what she would actually be wearing, and it is the one thing in the set
+ * that says which scene this is before the caption does.
+ */
+export function StoryContinue() {
+  return (
+    <svg {...svgProps}>
+      <Ground />
+
+      {/* the chair */}
+      <line x1="128" y1="212" x2="128" y2="176" stroke="var(--primary-dark)" strokeWidth="3" strokeLinecap="round" />
+      <line x1="272" y1="212" x2="272" y2="176" stroke="var(--primary-dark)" strokeWidth="3" strokeLinecap="round" />
+      <rect x="120" y="186" width="160" height="10" rx="4" fill="var(--paper)" stroke="var(--primary-dark)" strokeWidth="2.5" />
+
+      {/* her, seated, the shawl in white rather than the indigo the others wear */}
+      <path d="M150 186 C150 148 168 132 200 132 C232 132 250 148 250 186" {...ink} fill="var(--surface)" />
+      <circle cx="200" cy="102" r="26" fill="var(--surface)" stroke="var(--primary-dark)" strokeWidth="2.5" />
+      <path d="M172 106 C170 82 186 70 200 70 C214 70 230 82 228 106" {...ink} />
+      <path d="M176 112 C168 136 160 162 158 186" {...ink} />
+      <path d="M224 112 C232 136 240 162 242 186" {...ink} />
+
+      {/* the passbook open on her lap */}
+      <rect x="160" y="166" width="80" height="36" rx="2" fill="var(--paper)" stroke="var(--primary-dark)" strokeWidth="2.5" />
+      <line x1="200" y1="166" x2="200" y2="202" stroke="var(--primary-dark)" strokeWidth="2" />
+
+      {/* the entry that ended, and the one opened under it — the only warm
+          mark in the frame, because it is the whole point of the picture */}
+      <line x1="168" y1="177" x2="192" y2="177" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" />
+      <line x1="168" y1="189" x2="184" y2="189" stroke="var(--line)" strokeWidth="2" strokeLinecap="round" />
+      <line x1="208" y1="177" x2="232" y2="177" stroke="var(--line)" strokeWidth="2" strokeLinecap="round" />
+      <line x1="208" y1="189" x2="232" y2="189" stroke="var(--focus)" strokeWidth="2.5" strokeLinecap="round" />
+
+      {/* her hands at the edges of the book */}
+      <path d="M158 186 C154 180 154 174 158 170" {...ink} />
+      <path d="M242 186 C246 180 246 174 242 170" {...ink} />
+    </svg>
+  );
+}
+
 export const STORY_SCENES = [
   StoryWindow,
   StoryPassbook,
@@ -313,4 +359,5 @@ export const STORY_SCENES = [
   StoryReceipt,
   StoryQueue,
   StoryWork,
+  StoryContinue,
 ];
