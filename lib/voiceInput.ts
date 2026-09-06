@@ -1,6 +1,7 @@
 "use client";
 
-import { SPEECH_TAGS, type Lang } from "./i18n/languages";
+import type { Lang } from "./i18n/languages";
+import { SPEECH_TAGS } from "./i18n/languages";
 
 /**
  * Listening, as opposed to speaking.
@@ -11,20 +12,27 @@ import { SPEECH_TAGS, type Lang } from "./i18n/languages";
  * unstandardised for a decade, is missing from Firefox entirely, and on
  * Chrome quietly ships the audio to Google's servers to be transcribed.
  *
- * Three consequences shape everything below:
+ * Four things learned the hard way, each of which is a rule below:
  *
  *   1. It may simply not exist, and that has to be a supported outcome
  *      rather than a broken button. Every screen that uses this also
  *      offers a box to type in, so a phone with no recogniser loses the
  *      microphone and nothing else.
- *   2. The events lie. `onend` fires without `onresult` when nothing was
- *      heard; `onerror` fires after `onend` on some builds and before it
- *      on others. So this wrapper settles exactly once and reports one
- *      outcome.
- *   3. It stops on its own after a few seconds of quiet, which is right
- *      for a sentence and wrong for a pause mid-thought. An old person
- *      finding their words takes longer than the default patience, so the
- *      caller gets an explicit stop and a generous ceiling instead.
+ *   2. **A word that was heard is a word that was heard.** The recogniser
+ *      marks a result "final" when it is finished with it, and it is
+ *      routinely never finished — the user presses stop mid-sentence, the
+ *      network drops, the twenty-second ceiling arrives. Keeping only the
+ *      final results throws the sentence away *after showing it on the
+ *      screen*, which is the worst of both: the person watched their own
+ *      words appear and was then told nothing was heard.
+ *   3. It gives up far too early. Chrome ends the session after a few
+ *      seconds of quiet, and somebody in their eighties finding their
+ *      words takes longer than that. So a session that ends with nothing
+ *      is restarted rather than reported.
+ *   4. The events lie. `onend` fires without `onresult`; `onerror` fires
+ *      after `onend` on some builds and before it on others; `stop()`
+ *      sometimes never produces either. So this settles exactly once, from
+ *      whichever of them arrives, and has a backstop for when none does.
  */
 
 /* The DOM lib does not type this API, and the two globals are not the same
@@ -68,17 +76,55 @@ function ctor(): RecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
-export function canListen(): boolean {
-  return ctor() !== null;
+/**
+ * The tag the recogniser wants, which is not always the tag the voice wants.
+ *
+ * Google's transcriber names Punjabi by its script — `pa-Guru-IN` — and
+ * rejects the plain `pa-IN` that `speechSynthesis` is perfectly happy with.
+ * A rejected tag is not a soft failure: it comes back as
+ * `language-not-supported` and, before this map existed, was reported to a
+ * Punjabi speaker as "this phone cannot listen", which is a lie about their
+ * phone.
+ *
+ * Odia has no entry because Google's recogniser has no Odia. That is a real
+ * gap and it is reported as one, in copy that points at the box to type in,
+ * rather than being disguised as a broken microphone.
+ */
+const HEARD_AS: Partial<Record<Lang, string>> = {
+  pa: "pa-Guru-IN",
+};
+
+function recognitionTag(lang: Lang): string {
+  return HEARD_AS[lang] ?? SPEECH_TAGS[lang];
 }
 
-/** Why the listening stopped, in the only three ways the caller cares. */
+/**
+ * Whether this browser could listen at all.
+ *
+ * The secure-context test matters more than it looks: recognition is refused
+ * outright on plain http, so a phone opening the laptop's dev server over
+ * the house wifi has a microphone, has granted permission, and still cannot
+ * be listened to. Better to never offer the button than to offer one that
+ * fails for a reason nobody can act on.
+ */
+export function canListen(): boolean {
+  if (ctor() === null) return false;
+  return window.isSecureContext !== false;
+}
+
+/** Why the listening stopped, in the ways the caller can say something about. */
 export type ListenFailure =
   /** The phone would not hand over the microphone. */
   | "blocked"
   /** It listened and heard nothing it could turn into words. */
   | "silence"
-  /** Anything else: no network for the recogniser, a browser bug, a stall. */
+  /** There is a microphone but something else has it. */
+  | "busy"
+  /** The recogniser lives on the network and the network was not there. */
+  | "network"
+  /** This browser cannot transcribe this language. Odia, today. */
+  | "language"
+  /** Anything else: a browser bug, a stall, a state we did not predict. */
   | "unavailable";
 
 export interface Listening {
@@ -97,7 +143,13 @@ export interface ListenOptions {
 }
 
 /** Long enough for somebody to find their words; short enough to end. */
-const CEILING_MS = 20_000;
+const CEILING_MS = 25_000;
+
+/** How many times a session that heard nothing is quietly started again. */
+const RESTARTS = 3;
+
+/** If `stop()` produces neither an end nor an error, settle anyway. */
+const STOP_GRACE_MS = 1_200;
 
 export function listen({ lang, onPartial, onFinal, onFailure }: ListenOptions): Listening {
   const Ctor = ctor();
@@ -107,30 +159,59 @@ export function listen({ lang, onPartial, onFinal, onFailure }: ListenOptions): 
   }
 
   const rec = new Ctor();
-  rec.lang = SPEECH_TAGS[lang];
+  rec.lang = recognitionTag(lang);
   /* Not continuous: this is one question, not dictation, and a recogniser
      left running is a microphone left open. */
   rec.continuous = false;
   rec.interimResults = true;
   rec.maxAlternatives = 1;
 
+  /** Results the recogniser committed to. */
   let heard = "";
+  /** Everything on screen, committed or not — see rule 2 above. */
+  let partial = "";
   let settled = false;
   let cancelled = false;
+  /** Set once nothing should be restarted: a stop, a ceiling, a real fault. */
+  let closing = false;
+  let restarts = 0;
+  let fault: ListenFailure | null = null;
+  let grace = 0;
 
-  const timer = window.setTimeout(() => {
+  const startedAt = Date.now();
+
+  const ceiling = window.setTimeout(() => {
+    closing = true;
     try {
       rec.stop();
     } catch {
-      /* already stopped; onend will settle it */
+      /* already stopped; onend settles it */
     }
   }, CEILING_MS);
 
   const settle = (fn: () => void) => {
     if (settled) return;
     settled = true;
-    window.clearTimeout(timer);
+    window.clearTimeout(ceiling);
+    window.clearTimeout(grace);
     if (!cancelled) fn();
+  };
+
+  /* Whichever of the two is longer is the fuller sentence: `partial` is
+     always `heard` plus whatever is still being decided, so a longer one
+     means more words rather than different ones. */
+  const best = (): string => {
+    const done = heard.trim();
+    const live = partial.trim();
+    return live.length > done.length ? live : done;
+  };
+
+  const finish = () => {
+    const text = best();
+    /* Words first, always. If something was heard, it does not matter that
+       the network dropped or the ceiling arrived on the way to saying so. */
+    if (text) return settle(() => onFinal(text));
+    settle(() => onFailure(fault ?? "silence"));
   };
 
   rec.onresult = (e) => {
@@ -143,43 +224,96 @@ export function listen({ lang, onPartial, onFinal, onFailure }: ListenOptions): 
       else interim += text;
     }
     if (final) heard = `${heard} ${final}`.trim();
-    if (onPartial) onPartial(`${heard} ${interim}`.trim());
+    partial = `${heard} ${interim}`.trim();
+    if (onPartial) onPartial(partial);
   };
 
   rec.onerror = (e) => {
-    /* "no-speech" and "aborted" are not faults — the first is somebody who
-       did not speak, the second is our own stop() on a build that reports
-       it as an error. Neither should show a red message. */
-    if (e.error === "aborted") return settle(() => {});
-    if (e.error === "no-speech") return settle(() => onFailure("silence"));
-    if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-      return settle(() => onFailure("blocked"));
+    switch (e.error) {
+      /* Neither of these is a fault. "aborted" is our own stop on a build
+         that reports it as an error, and "no-speech" is somebody who has not
+         started talking yet — which is the normal state of a person who has
+         just been asked a question. Both fall through to `onend`, which
+         restarts or reports as the situation deserves. */
+      case "aborted":
+      case "no-speech":
+        return;
+      case "not-allowed":
+      case "service-not-allowed":
+        fault = "blocked";
+        break;
+      case "audio-capture":
+        fault = "busy";
+        break;
+      case "network":
+        fault = "network";
+        break;
+      case "language-not-supported":
+      case "bad-grammar":
+        fault = "language";
+        break;
+      default:
+        fault = "unavailable";
     }
-    settle(() => onFailure("unavailable"));
+    closing = true;
+    /* Do not settle here. `onend` follows on every build, and settling from
+       the error first is exactly how a sentence that was heard gets reported
+       as a failure. */
   };
 
   rec.onend = () => {
-    const text = heard.trim();
-    settle(() => (text ? onFinal(text) : onFailure("silence")));
+    if (settled || cancelled) return;
+    if (best()) return finish();
+    if (fault) return finish();
+
+    /* Nothing heard, nothing wrong: the recogniser simply ran out of
+       patience before the person did. Start it again. */
+    if (!closing && restarts < RESTARTS && Date.now() - startedAt < CEILING_MS) {
+      restarts++;
+      try {
+        rec.start();
+        return;
+      } catch {
+        /* cannot be restarted — report what we have, which is nothing */
+      }
+    }
+    finish();
   };
 
   try {
     rec.start();
   } catch {
-    settle(() => onFailure("unavailable"));
+    /* Almost always `InvalidStateError` from a recogniser that is already
+       running — a double press, or a previous session that never ended.
+       Aborting and retrying once is the difference between a working button
+       and a button that says the phone cannot listen. */
+    try {
+      rec.abort();
+      rec.start();
+    } catch {
+      settle(() => onFailure("unavailable"));
+    }
   }
 
   return {
     stop: () => {
+      closing = true;
       try {
         rec.stop();
       } catch {
-        settle(() => onFailure("unavailable"));
+        return finish();
       }
+      /* Some builds never fire `onend` after an explicit stop. Rather than
+         leave the panel spinning on a sentence it already has, settle on
+         our own after a moment. */
+      grace = window.setTimeout(finish, STOP_GRACE_MS);
     },
     cancel: () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      closing = true;
+      settled = true;
+      window.clearTimeout(ceiling);
+      window.clearTimeout(grace);
       try {
         rec.abort();
       } catch {

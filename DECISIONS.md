@@ -420,6 +420,59 @@ are also run past the copy rules on the way out; a string the model wrote
 reaches the same reader as a string in the dictionary, and has had none of
 the linting.
 
+## A word that was heard is a word that was heard
+
+The first version of the microphone kept only the results the recogniser
+marked *final*, and showed the interim ones on screen while they arrived.
+That is exactly backwards. The recogniser finalises a result when it is
+finished with it, and it is routinely never finished — the person presses
+stop mid-sentence, the ceiling arrives, the network drops. So somebody
+watched their own words appear on the screen, one by one, and was then told
+that nothing had been heard.
+
+Now the newest text is kept whatever its status, and it is what gets asked
+when the session ends. And the session is much harder to end: Chrome gives
+up after a few seconds of quiet, which is shorter than an eighty-year-old
+takes to find their words, so a session that ends having heard nothing is
+quietly started again rather than reported as silence.
+
+## Every failure said the same wrong thing
+
+Six ways of failing all came out as "this phone cannot listen", which is
+untrue and unactionable when the phone is listening perfectly well. They are
+told apart now, because they need different things from the person: a
+refused permission, a microphone another app is holding, the network the
+recogniser lives on, and a language the recogniser does not have.
+
+That last one was a bug wearing a message. Google names Punjabi by its
+script — `pa-Guru-IN` — and rejects the `pa-IN` that the *voice* is happy
+with. Every Punjabi speaker who pressed the microphone was told their phone
+could not listen. One entry in a map, and the honest version of the message
+for Odia, which Google genuinely cannot transcribe.
+
+## The matcher compares in one alphabet
+
+Which follows from the paragraph above. If a phone with no Odia recogniser
+hands back Devanagari, the sentence is in one script and the dictionary is
+in another, and a matcher comparing them letter for letter concludes it did
+not understand — when it understood perfectly and was reading the wrong
+alphabet.
+
+The transliteration written for the *voice* solves this for free, in the
+other direction: every one of these scripts is Devanagari at a fixed offset,
+so both sides are put in Devanagari before they are compared. Eight
+languages, checked in both scripts, now give the same answer either way.
+
+Note what was tried and thrown away. Weighting each word by how many
+services use it, matching containment both ways, letting two-letter words
+through: three thousand combinations of those, and the best scored exactly
+what the original did on the same twenty-nine sentences — while getting
+there by confidently sending a widow to the free-grain page. Same number,
+worse answers. The remaining misses are vocabulary, not arithmetic: the
+dictionary says "80" and the person says "eighty", says "grain" where they
+say "ration". That is the model's job, and the four questions are the honest
+answer when the model is not there.
+
 ## Left undone
 
 - **The jargon guard is English-only.** "Submit" written in Gurmukhi letters
@@ -427,6 +480,9 @@ the linting.
 - **Recognition is the browser's**, which means Chrome sends the audio to
   Google to be transcribed. That is said plainly on the panel and is the
   reason the box to type in is always there.
+- **Odia cannot be spoken to.** Google has no Odia recogniser, so the panel
+  says so in Odia and points at the box to type in. Everything else in the
+  helper — the answer, the steps, the voice reading them back — works.
 - **It does not read the draft.** Asking "did I fill in my bank details" is
   the obvious next question and the answer is on the device already. It was
   left out because sending a half-finished application to a model is a much

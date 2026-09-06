@@ -210,6 +210,32 @@ function speakable(text: string): string {
   return NUKTA.reduce((acc, [re, to]) => acc.replace(re, to), out);
 }
 
+/** Which Indic block a code point falls in, for text of unknown origin. */
+function scriptOfCode(code: number): Script | null {
+  for (const [script, start] of Object.entries(BLOCK_START) as [Script, number][]) {
+    if (code >= start && code <= start + 0x7f) return script;
+  }
+  return code >= 0x900 && code <= 0x97f ? "deva" : null;
+}
+
+/**
+ * Devanagari, from whichever script this happens to be written in.
+ *
+ * The caller here is not a voice but the matcher, and the problem is the
+ * same shape: two pieces of text that say the same thing in two different
+ * alphabets. A phone whose recogniser has no Odia transcribes an Odia
+ * speaker into Devanagari, and a Gujarati speaker on a phone set to Hindi
+ * gets Devanagari too. Comparing both sides in one script costs a pass over
+ * the string and stops a script mismatch reading as "we did not understand".
+ */
+export function toDevanagariAny(text: string): string {
+  for (const ch of text) {
+    const script = scriptOfCode(ch.codePointAt(0)!);
+    if (script) return toDevanagari(text, script);
+  }
+  return text;
+}
+
 /**
  * Gujarati to Devanagari, kept under its old name.
  *
@@ -443,6 +469,12 @@ export function speakAll(
   };
 
   synth.cancel();
+  /* The heartbeat above pauses and resumes to keep Chrome talking. A
+     cancel that lands between those two leaves the queue paused, and a
+     paused queue accepts `speak()` without complaint and never says a
+     word — which is most of what "the voice sometimes just does not
+     work" turns out to be. One resume costs nothing. */
+  synth.resume();
 
   parts.forEach((part, i) => {
     const u = new SpeechSynthesisUtterance(part);
@@ -510,4 +542,30 @@ export function whenVoicesReady(
     window.clearInterval(timer);
     synth.removeEventListener("voiceschanged", settle);
   };
+}
+
+/**
+ * Wakes the speech engine up inside a press.
+ *
+ * Safari on iOS will not speak unless the first utterance of the page came
+ * out of a real user gesture, and "came out of" is strict: a sentence spoken
+ * after an `await` has lost the gesture and is silently dropped. Every
+ * interesting thing the voice helper says arrives after a network round
+ * trip, so without this the answer is read aloud on a laptop and never on an
+ * iPhone.
+ *
+ * One silent utterance, spoken from the press that opens the panel, is
+ * enough to unlock the engine for the rest of the session.
+ */
+export function primeSpeech(): void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  try {
+    const synth = window.speechSynthesis;
+    synth.resume();
+    const wake = new SpeechSynthesisUtterance(" ");
+    wake.volume = 0;
+    synth.speak(wake);
+  } catch {
+    /* An engine that refuses to be woken will refuse to speak either way. */
+  }
 }

@@ -3780,6 +3780,19 @@ a.col-item:hover .col-go { gap: 10px; }
   color: var(--ink-soft);
 }
 
+/* Why the panel is quiet on a phone that has no voice for this language.
+   Said once, at the top, rather than discovered after pressing a Read-it-
+   out-again button that does nothing. */
+.voice-note {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--sunk);
+  border-inline-start: 3px solid var(--line-strong);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
 /* ---- the one control that matters ---- */
 .voice-mic-row {
   display: flex;

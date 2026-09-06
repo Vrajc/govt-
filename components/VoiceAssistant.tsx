@@ -4,7 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "@/lib/app-state";
 import { apiFetch } from "@/lib/api";
-import { planVoice, speakAll, whenVoicesReady, type Speaking, type VoicePlan } from "@/lib/speech";
+import {
+  planVoice,
+  primeSpeech,
+  speakAll,
+  whenVoicesReady,
+  type Speaking,
+  type VoicePlan,
+} from "@/lib/speech";
 import { canListen, listen, type ListenFailure, type Listening } from "@/lib/voiceInput";
 import { Mic, Speaker, StopSquare } from "./Icons";
 
@@ -25,15 +32,18 @@ import { Mic, Speaker, StopSquare } from "./Icons";
  * Three things it deliberately does not do:
  *
  *   • It does not sit on the microphone. Recognition is a single question,
- *     started by a press, stopped when the sentence ends or twenty seconds
- *     pass, whichever comes first.
+ *     started by a press, stopped when the sentence ends or twenty-five
+ *     seconds pass, whichever comes first.
  *   • It does not require a microphone at all. Firefox has no recogniser,
  *     several Android WebViews have none, and a shared phone may have the
  *     permission switched off — so the box to type in is always there,
  *     never a degraded fallback shown after a failure.
  *   • It does not pretend. When the model cannot be reached the server
  *     answers out of the dictionary, and what comes back is a real path
- *     through the app rather than an apology.
+ *     through the app rather than an apology. When something really did go
+ *     wrong it says which thing, because "this phone cannot listen" told to
+ *     somebody whose phone is listening perfectly well is worse than saying
+ *     nothing.
  */
 
 type Phase = "idle" | "listening" | "thinking" | "answered" | "trouble";
@@ -60,7 +70,13 @@ export function VoiceAssistant() {
       <button
         type="button"
         className="voice-launch"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          /* Everything this panel says arrives after a network round trip,
+             and Safari will not speak after one unless the page has already
+             spoken inside a real press. This is that press. */
+          primeSpeech();
+          setOpen(true);
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -86,14 +102,61 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   const [micUsable, setMicUsable] = useState(false);
 
   const [plan, setPlan] = useState<VoicePlan | null>(null);
+  /** Settled separately from `plan`, because null means two things until it is. */
+  const [voiceless, setVoiceless] = useState(false);
+
   const job = useRef<Speaking | null>(null);
   const session = useRef<Listening | null>(null);
   const panel = useRef<HTMLDivElement>(null);
+  /** The newest words off the microphone, readable without waiting for React. */
+  const catching = useRef("");
 
   /* ---------------- the voice this phone will answer in ---------------- */
-  useEffect(() => whenVoicesReady((voices) => setPlan(planVoice(lang, voices))), [lang]);
+  useEffect(
+    () =>
+      whenVoicesReady((voices) => {
+        const chosen = planVoice(lang, voices);
+        setPlan(chosen);
+        /* No voice for this language on this device is a real answer, and
+           the panel says so rather than going quiet and looking broken.
+           Every word it would have spoken is on the screen either way. */
+        setVoiceless(chosen === null);
+      }),
+    [lang]
+  );
 
-  useEffect(() => setMicUsable(canListen()), []);
+  /* ---------------- whether this phone can listen at all ---------------- */
+  useEffect(() => {
+    const usable = canListen();
+    setMicUsable(usable);
+    if (!usable) return;
+
+    /* A permission that was refused once stays refused, silently, and the
+       phone gives no sign of it until the button has been pressed and has
+       apparently done nothing. Where the browser will tell us, say so first. */
+    let watched: PermissionStatus | null = null;
+    let alive = true;
+    const perms = navigator.permissions;
+    if (perms?.query) {
+      perms
+        .query({ name: "microphone" as PermissionName })
+        .then((status) => {
+          if (!alive) return;
+          watched = status;
+          const check = () => setTrouble(status.state === "denied" ? t("voice.micBlocked") : "");
+          check();
+          status.onchange = check;
+        })
+        .catch(() => {
+          /* Firefox does not know this permission name. Nothing is lost: the
+             failure path below still reports a refusal accurately. */
+        });
+    }
+    return () => {
+      alive = false;
+      if (watched) watched.onchange = null;
+    };
+  }, [t]);
 
   /* ---------------- speaking ---------------- */
   const hush = useCallback(() => {
@@ -109,7 +172,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     (text: string) => {
       const clean = text.trim();
       // No voice on this phone for this language at all: the panel still
-      // shows every word. Silence is a smaller loss than a dead button.
+      // shows every word, and the note above says why it is quiet.
       if (!clean || !plan) return;
       hush();
       setSpeaking(true);
@@ -207,16 +270,48 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   );
 
   /* ---------------- listening ---------------- */
+  /**
+   * Which thing went wrong, said as the thing that went wrong.
+   *
+   * Every one of these used to be "this phone cannot listen", which is the
+   * one sentence that is both wrong and unactionable when the microphone is
+   * working and the permission is granted.
+   */
+  const troubleFor = useCallback(
+    (why: ListenFailure): string => {
+      switch (why) {
+        case "blocked":
+          return t("voice.micBlocked");
+        case "silence":
+          return t("voice.nothingHeard");
+        case "busy":
+          return t("voice.micBusy");
+        case "network":
+          return t("voice.micNetwork");
+        case "language":
+          return t("voice.micLang");
+        default:
+          return t("voice.noMic");
+      }
+    },
+    [t]
+  );
+
   const startListening = useCallback(() => {
+    primeSpeech();
     hush();
     setSaid("");
+    catching.current = "";
     setAnswer(null);
     setTrouble("");
     setPhase("listening");
 
     session.current = listen({
       lang,
-      onPartial: setSaid,
+      onPartial: (text) => {
+        catching.current = text;
+        setSaid(text);
+      },
       onFinal: (text) => {
         session.current = null;
         void ask(text);
@@ -224,17 +319,17 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
       onFailure: (why: ListenFailure) => {
         session.current = null;
         setPhase("trouble");
-        const message =
-          why === "blocked"
-            ? t("voice.micBlocked")
-            : why === "silence"
-              ? t("voice.nothingHeard")
-              : t("voice.noMic");
+        const message = troubleFor(why);
         setTrouble(message);
+        /* Anything caught before it went wrong belongs to the person who
+           said it. It goes into the box, one press from being asked, rather
+           than being thrown away with the failure. */
+        const caught = catching.current.trim();
+        if (caught) setTyped((prev) => prev || caught);
         say(message);
       },
     });
-  }, [ask, hush, lang, say, t]);
+  }, [ask, hush, lang, say, troubleFor]);
 
   const stopListening = useCallback(() => {
     session.current?.stop();
@@ -256,6 +351,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     setPhase("idle");
     setSaid("");
     setTyped("");
+    catching.current = "";
     setAnswer(null);
     setTrouble("");
   }, [hush]);
@@ -283,6 +379,8 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="voice-intro">{t("voice.intro")}</p>
+
+        {voiceless && <p className="voice-note">{t("voice.noVoice")}</p>}
 
         {/* The one control that matters, sized for a thumb that shakes. */}
         <div className="voice-mic-row">
@@ -336,16 +434,19 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
                   {t("voice.goThere", { page: answer.goto.label })}
                 </button>
               )}
-              <button
-                type="button"
-                className="voice-minor"
-                onClick={() =>
-                  speaking ? hush() : say([answer.say, ...answer.steps].join(" "))
-                }
-              >
-                {speaking ? <StopSquare size={18} /> : <Speaker size={18} />}
-                <span>{speaking ? t("common.stop") : t("voice.replay")}</span>
-              </button>
+              {/* Hidden rather than dead when there is no voice to replay with. */}
+              {!voiceless && (
+                <button
+                  type="button"
+                  className="voice-minor"
+                  onClick={() =>
+                    speaking ? hush() : say([answer.say, ...answer.steps].join(" "))
+                  }
+                >
+                  {speaking ? <StopSquare size={18} /> : <Speaker size={18} />}
+                  <span>{speaking ? t("common.stop") : t("voice.replay")}</span>
+                </button>
+              )}
               <button type="button" className="voice-minor" onClick={reset}>
                 {t("voice.again")}
               </button>

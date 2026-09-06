@@ -1,6 +1,7 @@
 import type { Dict } from "@/lib/i18n";
 import { fill } from "@/lib/i18n/util";
 import { CATALOGUE } from "@/lib/services/catalogue";
+import { toDevanagariAny } from "@/lib/speech";
 import { pageDestination, serviceDestination, type Destination } from "./destinations";
 
 /**
@@ -28,9 +29,27 @@ export interface Answer {
 /** Words too short to carry meaning in any of the eleven scripts. */
 const MIN_TOKEN = 3;
 
+/**
+ * One script for both sides of the comparison.
+ *
+ * The words arriving here have been through a speech recogniser, and the
+ * recogniser does not necessarily write in the alphabet the reader chose.
+ * Google has no Odia transcriber at all; a phone set up in Hindi can hand
+ * back Devanagari for a Gujarati sentence. The dictionary is in the
+ * reader's script and the sentence may not be, and a match that compares
+ * them letter for letter reads that mismatch as "we did not understand
+ * you" — which is the one thing this fallback exists not to say.
+ *
+ * Every one of these scripts is Devanagari at a fixed offset, so putting
+ * both sides in Devanagari costs one pass over the string and makes the
+ * question of which alphabet the words arrived in stop mattering.
+ */
+function normalise(text: string): string {
+  return toDevanagariAny(text.toLowerCase());
+}
+
 function tokens(text: string): string[] {
-  return text
-    .toLowerCase()
+  return normalise(text)
     // Punctuation and digits out; every Indic script keeps its letters and
     // its combining marks, which \p{L} and \p{M} between them cover.
     .replace(/[^\p{L}\p{M}\s]/gu, " ")
@@ -61,9 +80,9 @@ function indexOf(d: Dict): Map<string, Fields> {
   const svc = d.svc as Record<string, string>;
   const index = new Map<string, Fields>();
   for (const id of Object.keys(CATALOGUE)) {
-    const name = (svc[`${id}Name`] ?? "").toLowerCase();
-    const short = (svc[`${id}Short`] ?? "").toLowerCase();
-    const who = (svc[`${id}Who`] ?? "").toLowerCase();
+    const name = normalise(svc[`${id}Name`] ?? "");
+    const short = normalise(svc[`${id}Short`] ?? "");
+    const who = normalise(svc[`${id}Who`] ?? "");
     index.set(id, { name, short, who, all: `${name} ${short} ${who}` });
   }
   INDEXES.set(d, index);
