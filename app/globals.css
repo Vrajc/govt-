@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Pension Saral — design tokens, dark
+   Pension Saral — design tokens
 
-   Visual world: the passbook read at night. Same ruling, same ink-blue
-   logic, inverted stock — a cool near-black ground, one light blue for
-   everything you can press, and the neem/laterite pair lifted to sit on
-   a dark ground instead of a cream one.
+   Visual world: newsprint. A warm neutral grey stock, ink that is teal
+   rather than blue, and the neem-and-laterite pair kept from the passbook
+   draft that came before it — those two are the only colours in the
+   product that carry meaning rather than mood, and they were right.
+
+   Teal is the one deliberate departure, and it was chosen against three
+   other light grounds on the real screens rather than on a swatch page.
+   Every government site in the country is navy, and navy is exactly what
+   this audience has learned to associate with a form they could not fill
+   in. Teal reads as serious without reading as the uniform.
 
    The rest of this stylesheet is token-driven, so this block is the
    theme: change these thirty-odd declarations and all fourteen service
@@ -14,74 +20,100 @@
    page turn over with it.
    ------------------------------------------------------------------ */
 :root {
-  /* Ground, raised, and one step below the ground. The gap between paper
-     and surface is deliberately small: on a dark UI a big jump reads as
-     a floating card, and this is still meant to be one sheet. */
-  --paper:        #0F1319;  /* ground */
-  --surface:      #161C24;  /* raised */
-  --sunk:         #0A0D12;  /* utility bar, footer, alternating bands */
+  /* Warm grey rather than tan. A tan ground is a costume — it says
+     "old government form" before a word has been read, which is charming
+     to a designer and is the exact association this product is trying to
+     get out from under. This is the grey of a newspaper: warm enough not
+     to go clinical next to the ink, plain enough to disappear. */
+  --paper:        #F6F4F1;  /* ground */
+  --surface:      #FFFFFF;  /* raised */
+  /* One step below the ground, for the utility bar and the footer. Named
+     rather than repeated as a fallback in three places. */
+  --sunk:         #E7E3DD;
 
-  --ink:          #EDF2F8;
-  /* Secondary text. 8.4:1 on the ground and 7.1:1 on the tint panels, so
-     it still clears AAA everywhere it is used, as the cream version did. */
-  --ink-soft:     #A9B6C4;
-  --line:         #222A34;
+  --ink:          #1B1A18;
+  /* Secondary text. Darker than a designer would pick, because it has to
+     clear AAA 7:1 on the teal tint panels as well as on the ground. */
+  --ink-soft:     #3E3B37;
+  --line:         #DAD5CD;
 
-  /* One light blue does all the work a dark indigo did on cream. Filled
-     controls keep "background: var(--primary); color: var(--paper)", which
-     now resolves to near-black ink on light blue — 11:1. */
-  --primary:      #8FB6E8;
-  --primary-dark: #B9D2F2;  /* hover goes lighter, not darker */
-  --primary-tint: #1B2836;
+  --primary:      #14484F;  /* teal ink */
+  --primary-dark: #0C3238;  /* on a light ground, hover goes darker */
+  --primary-tint: #D9E7E8;
 
-  --success:      #7FB08A;  /* neem, lifted */
-  --success-tint: #111A15;
+  --success:      #2A5636;  /* neem */
+  --success-tint: #DEE9DA;
 
-  --attention:    #F0A98A;  /* laterite, lifted */
-  --attention-tint:#1A1410;
-  /* Laterite one step lighter, for the hover state of a filled attention
-     button. The cream theme darkened on hover; on a dark ground every
-     filled control lightens instead, or the near-black label on it goes
-     out. Mirrors --primary-dark, and is named for the same role. */
-  --attention-dark:#F6C4AC;
-  /* On dark the fill colour is already legible as words, so these three
-     collapse to one value rather than needing a darker variant. */
-  --attention-text:#F0A98A;
-  --note-good:    #9BD1AC;
-  --note-warn:    #F0A98A;
-  --placeholder:  #7C8996;
+  --attention:    #A2401E;  /* laterite */
+  --attention-tint:#F3DED3;
+  /* Laterite one step darker, for the hover state of a filled attention
+     button. Mirrors --primary-dark and is named for the same role. */
+  --attention-dark:#7C2F13;
+  /* The rust above is a fill colour; as small text it does not reach 7:1.
+     This is the same hue taken to AAA, used wherever rust becomes words. */
+  --attention-text:#85331A;
+  /* Note text sits on its own tint, so it needs its own value; these were
+     literals in three rules and a copy in the audit until the ground moved
+     and neither noticed. */
+  --note-good:    #123F27;
+  --note-warn:    #6E2911;
+  --placeholder:  #6F6A63;
 
-  --focus:        #E3C463;  /* haldi, lifted — 8.9:1 on the ground */
+  --focus:        #835500;  /* haldi */
 
-  /* Control borders still owe WCAG 3:1 against what is behind them, and the
-     tint panel is the hardest of the three grounds to clear because it is
-     the lightest. The redesign asked for #4B5A6B and described it as 4.1:1
-     on the ground; it measures 2.64:1 there and 2.12:1 on the tint, so
-     every control border in the product sat under the bar. This is the
-     colour that value was describing — 4.1:1, 3.8:1 and 3.3:1, checked by
-     scripts/check-contrast.mjs. */
-  --line-strong:  #67788C;
+  /* The line around something you press or type into is not decoration —
+     WCAG asks for 3:1 against what is behind it, and the hairline above is
+     nowhere near it. It was drawn at 2px to compensate, which reads as
+     heavy without ever actually passing. So there are two lines: this one
+     for controls, checked against all three grounds it is drawn on, and
+     the hairline for the boxes that only need to say where they stop. */
+  --line-strong:  #777067;
 
+  /* The edge of a tinted panel, one per tint.
+
+     Not the strong colour. A tint panel is a wash the eye reads as one
+     soft shape; ringing it in full teal turns a quiet aside into a boxed
+     warning, and a page of those is a page of boxes. These are each tint
+     carried a few steps toward its own hue — enough to close the shape,
+     not enough to shout. */
+  --primary-line:  #B4CDD0;
+  --success-line:  #B6CDB0;
+  --attention-line:#DFBBA7;
+
+  /* ----------------------------------------------------------------
+     Radius and depth.
+
+     Six ad-hoc radii and no shadow anywhere is what made the product read
+     as a stack of outlined rectangles. Three steps and two very quiet
+     shadows are enough to say which surface sits above which, which is the
+     whole job — anything heavier looks like a phone app trying to be a
+     bank, and this is meant to feel like paper.
+     ---------------------------------------------------------------- */
   --r-sm:  8px;
   --r-md:  12px;
   --r-lg:  16px;
 
-  /* Depth inverts: on cream, shadow was ink bleeding into paper; on a dark
-     ground a shadow alone is invisible, so each step pairs a black ambient
-     with a one-pixel light top edge drawn by the border tokens above.
-     Kept quiet — three steps, same roles as before. */
+  /* Three steps of depth, each built from stacked layers rather than one
+     blur. A single large shadow reads as a drop-shadow filter; a tight
+     contact shadow under a wider ambient one is what actually looks like
+     paper resting on paper. Tinted toward the ink, so nothing goes cold
+     and grey against a warm ground. */
   --shadow-1:
-    0 1px 1px rgba(0, 0, 0, 0.30),
-    0 2px 6px rgba(0, 0, 0, 0.26);
+    0 1px 1px rgba(27, 26, 24, 0.04),
+    0 2px 6px rgba(27, 26, 24, 0.05);
   --shadow-2:
-    0 1px 2px rgba(0, 0, 0, 0.34),
-    0 6px 16px rgba(0, 0, 0, 0.34),
-    0 16px 40px rgba(0, 0, 0, 0.30);
+    0 1px 2px rgba(27, 26, 24, 0.05),
+    0 6px 16px rgba(27, 26, 24, 0.07),
+    0 16px 40px rgba(27, 26, 24, 0.06);
+  /* Reserved for the two things meant to lift off the page: the hero
+     plate and the carousel. Spending it anywhere else flattens both. */
   --shadow-3:
-    0 2px 4px rgba(0, 0, 0, 0.38),
-    0 12px 28px rgba(0, 0, 0, 0.40),
-    0 34px 68px rgba(0, 0, 0, 0.36);
-  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.34);
+    0 2px 4px rgba(27, 26, 24, 0.06),
+    0 12px 28px rgba(27, 26, 24, 0.09),
+    0 34px 68px rgba(27, 26, 24, 0.07);
+  /* A solid action gets its own, tinted with its own colour rather than
+     with grey, which is what stops it looking dirty. */
+  --shadow-btn: 0 1px 2px rgba(20, 72, 79, 0.18), 0 4px 12px rgba(20, 72, 79, 0.16);
 
   --font-ui: var(--font-latn), system-ui, sans-serif;
   --leading: 1.6;
@@ -105,9 +137,10 @@
   --track-label:  0.085em;
 }
 
-/* The dark ground makes the browser's own furniture — scrollbars, form
-   controls, the autofill wash — the only light things left on screen. */
-:root { color-scheme: dark; }
+/* Said out loud, so the browser's own furniture — scrollbars, form
+   controls, the autofill wash — is drawn for a light page whatever the
+   operating system is set to. */
+:root { color-scheme: light; }
 
 /* Type scale is absolute px on purpose. Elderly users often already run the
    OS at a large font size; rem would compound it into an unusable layout. */
@@ -239,7 +272,7 @@ input:focus-visible, select:focus-visible, summary:focus-visible {
 .action-dock {
   position: sticky;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(251, 248, 242, 0) 0%, var(--paper) 22%);
+  background: linear-gradient(to bottom, rgba(246, 244, 241, 0) 0%, var(--paper) 22%);
   padding: 12px 0 10px;
   margin-top: 20px;
   z-index: 20;
@@ -320,7 +353,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   box-shadow: var(--shadow-btn);
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); }
-.btn-primary:active:not(:disabled) { box-shadow: 0 1px 2px rgba(23, 57, 90, 0.2); }
+.btn-primary:active:not(:disabled) { box-shadow: 0 1px 2px rgba(20, 72, 79, 0.2); }
 
 .btn-secondary {
   background: var(--surface);
@@ -340,7 +373,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--attention);
   border-color: var(--attention);
   color: var(--paper);
-  box-shadow: 0 1px 2px rgba(168, 69, 42, 0.18), 0 4px 12px rgba(168, 69, 42, 0.16);
+  box-shadow: 0 1px 2px rgba(162, 64, 30, 0.18), 0 4px 12px rgba(162, 64, 30, 0.16);
 }
 .btn-attention:hover:not(:disabled) { background: var(--attention-dark); border-color: var(--attention-dark); }
 
@@ -499,9 +532,9 @@ p.body strong { color: var(--ink); font-weight: 700; }
 /* A tinted panel is already separated by its colour; a shadow on top of
    that is where quiet depth turns into decoration. */
 .panel-tint, .panel-good, .panel-warn { box-shadow: none; }
-.panel-tint { background: var(--primary-tint); border-color: var(--primary); }
-.panel-good { background: var(--success-tint); border-color: var(--success); }
-.panel-warn { background: var(--attention-tint); border-color: var(--attention); }
+.panel-tint { background: var(--primary-tint); border-color: var(--primary-line); }
+.panel-good { background: var(--success-tint); border-color: var(--success-line); }
+.panel-warn { background: var(--attention-tint); border-color: var(--attention-line); }
 
 .note {
   display: flex;
@@ -513,9 +546,9 @@ p.body strong { color: var(--ink); font-weight: 700; }
   line-height: 1.5;
   margin-bottom: 16px;
 }
-.note-good { background: var(--success-tint); color: var(--note-good); border: 1px solid var(--success); }
-.note-warn { background: var(--attention-tint); color: var(--note-warn); border: 1px solid var(--attention); }
-.note-info { background: var(--primary-tint); color: var(--primary-dark); border: 1px solid var(--primary); }
+.note-good { background: var(--success-tint); color: var(--note-good); border: 1px solid var(--success-line); }
+.note-warn { background: var(--attention-tint); color: var(--note-warn); border: 1px solid var(--attention-line); }
+.note-info { background: var(--primary-tint); color: var(--primary-dark); border: 1px solid var(--primary-line); }
 
 /* Review rows */
 .review-row {
@@ -819,7 +852,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(31, 28, 26, 0.55);
+  background: rgba(27, 26, 24, 0.55);
   overflow-y: auto;
 }
 
@@ -836,7 +869,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: 0 24px 64px rgba(31, 28, 26, 0.28);
+  box-shadow: 0 24px 64px rgba(27, 26, 24, 0.28);
 }
 
 .sample-title {
@@ -891,8 +924,8 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--surface);
   box-shadow: var(--shadow-1);
 }
-.coach-good { background: var(--success-tint); border-color: var(--success); color: var(--note-good); }
-.coach-warn { background: var(--attention-tint); border-color: var(--attention); color: var(--note-warn); }
+.coach-good { background: var(--success-tint); border-color: var(--success-line); color: var(--note-good); }
+.coach-warn { background: var(--attention-tint); border-color: var(--attention-line); color: var(--note-warn); }
 
 .checklist-item {
   display: flex;
@@ -1047,35 +1080,15 @@ html, body { overflow-x: hidden; }
 img, svg, video { max-width: 100%; }
 
 @media print {
-  /* Paper is white whatever the screen was. Without this the dark theme
-     sends near-white ink to the printer and the receipt — the one thing
-     in this product people are told to keep — comes out blank. So the
-     tokens go back to the passbook palette for the one output that is
-     literally a sheet of paper. */
+  /* The three grounds go to pure white. A tan is right on a backlit panel
+     and is a wash of toner on a sheet of paper — and the receipt is the
+     one thing in this product people are told to keep. Everything else in
+     the palette is already ink and travels to paper unchanged. */
   :root {
-    color-scheme: light;
-    --paper:        #FFFFFF;
-    --surface:      #FFFFFF;
-    --sunk:         #FFFFFF;
-    --ink:          #241E1A;
-    --ink-soft:     #3B322A;
-    --line:         #DCCBA9;
-    --line-strong:  #8A7654;
-    --primary:      #1E3A5F;
-    --primary-dark: #152B47;
-    --primary-tint: #DEE4EC;
-    --success:      #46603A;
-    --success-tint: #E2E7D2;
-    --attention:    #B8502E;
-    --attention-dark:#8E3821;
-    --attention-tint:#F3DCCC;
-    --attention-text:#8A381E;
-    --note-good:    #0F4B34;
-    --note-warn:    #7A2E16;
-    --placeholder:  #767068;
-    --focus:        #9A6710;
-    /* The three depth steps were black ambient shadows for a dark screen;
-       on paper they are toner nobody asked for. */
+    --paper:   #FFFFFF;
+    --surface: #FFFFFF;
+    --sunk:    #FFFFFF;
+    /* Depth on paper is toner nobody asked for. */
     --shadow-1: none;
     --shadow-2: none;
     --shadow-3: none;
@@ -1328,7 +1341,7 @@ img, svg, video { max-width: 100%; }
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(31, 28, 26, 0.07);
+    box-shadow: 0 6px 16px rgba(27, 26, 24, 0.07);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1395,7 +1408,7 @@ img, svg, video { max-width: 100%; }
   border-bottom: 1px solid var(--line);
   /* The banner above it is opaque and the header sticks under it, so the
      shadow is what separates the pair from the page as it scrolls beneath. */
-  box-shadow: 0 1px 0 rgba(31, 28, 26, 0.03), 0 4px 14px rgba(31, 28, 26, 0.05);
+  box-shadow: 0 1px 0 rgba(27, 26, 24, 0.03), 0 4px 14px rgba(27, 26, 24, 0.05);
 }
 .site-header-inner {
   max-width: var(--page-max);
@@ -1729,7 +1742,7 @@ details.tech ul { padding-left: 18px; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(31, 28, 26, 0.55);
+  background: rgba(27, 26, 24, 0.55);
   overflow-y: auto;
 }
 
@@ -1740,7 +1753,7 @@ details.tech ul { padding-left: 18px; }
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 28px 24px 22px;
-  box-shadow: 0 24px 64px rgba(31, 28, 26, 0.28);
+  box-shadow: 0 24px 64px rgba(27, 26, 24, 0.28);
   margin: auto;
 }
 
@@ -2557,7 +2570,7 @@ html[data-size="lg"] {
 .brand-tag { font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.3; }
 
 /* Brand on the left, everything you can change on the right. It wraps as
-   one group rather than four loose items, so a narrow window drops the
+   one group rather than three loose items, so a narrow window drops the
    whole cluster under the name instead of stranding the language picker on
    a line of its own. */
 .masthead-tools {
@@ -2568,11 +2581,11 @@ html[data-size="lg"] {
   justify-content: flex-end;
 }
 
-/* Four things will not share a line on a phone, so the cluster takes the
-   full width and spreads, and the helpline lies down instead of stacking.
-   That is two short rows under the name rather than three tall ones. The
-   "Text size" label stays: this audience reads the words, and a bare
-   A− A A+ is a puzzle to anyone who has not met the control before. */
+/* Text size and language will not share a line with the name on a phone,
+   so the cluster takes the full width and spreads: one short row under the
+   name rather than two tall ones. The "Text size" label stays: this
+   audience reads the words, and a bare A− A A+ is a puzzle to anyone who
+   has not met the control before. */
 @media (max-width: 620px) {
   .masthead-inner { gap: 10px; }
   .masthead-tools {
@@ -2580,41 +2593,6 @@ html[data-size="lg"] {
     justify-content: space-between;
     gap: 10px 14px;
   }
-}
-
-.masthead-help {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-decoration: none;
-  color: inherit;
-  min-height: var(--tap-sm);
-  justify-content: center;
-}
-.help-label {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  /* Beside the number on a phone, a two-line label is the same problem. */
-  white-space: nowrap;
-}
-/* The digits are the point, and a break between "1800" and "180" turns one
-   phone number into two half-numbers. */
-.help-number {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  color: var(--attention);
-  white-space: nowrap;
-}
-
-/* This override has to sit after the base rule above rather than up in the
-   phone block with its neighbours: both selectors are a single class, a
-   media query adds no specificity of its own, and so the `column` above
-   won on source order alone. The helpline stacked into two rows on exactly
-   the screens that had no room for the second one. */
-@media (max-width: 620px) {
-  .masthead-help { flex-direction: row; align-items: baseline; gap: 8px; }
 }
 
 .masthead-nav { background: var(--surface); border-bottom: 1px solid var(--line); }
@@ -2950,8 +2928,8 @@ body {
 .site-foot {
   background-color: var(--sunk);
   background-image:
-    repeating-linear-gradient(0deg, rgba(120, 100, 66, 0.05) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(90deg, rgba(120, 100, 66, 0.05) 0 1px, transparent 1px 6px);
+    repeating-linear-gradient(0deg, rgba(119, 112, 103, 0.05) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(90deg, rgba(119, 112, 103, 0.05) 0 1px, transparent 1px 6px);
 }
 .foot-bottom { border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 
@@ -3447,13 +3425,13 @@ a.col-item:hover .col-go { gap: 10px; }
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: rgba(255, 252, 244, 0.5);
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: 0 1px 2px rgba(20, 15, 12, 0.4);
   transition: background 150ms, transform 150ms;
 }
-.stories-pip:hover::before { background: rgba(255, 252, 244, 0.8); }
+.stories-pip:hover::before { background: rgba(255, 255, 255, 0.8); }
 .stories-pip.is-on::before {
-  background: #FFFCF4;
+  background: var(--surface);
   transform: scale(1.25);
 }
 .stories-pip:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; border-radius: 4px; }
@@ -3715,7 +3693,7 @@ a.col-item:hover .col-go { gap: 10px; }
   align-items: flex-end;
   justify-content: center;
   padding: 0;
-  background: rgba(6, 9, 13, 0.62);
+  background: rgba(27, 26, 24, 0.55);
 }
 @media (min-width: 640px) {
   /* Anchored over the launcher rather than centred on the screen. A panel

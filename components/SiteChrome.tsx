@@ -15,7 +15,12 @@ import { LanguagePicker } from "./LanguagePicker";
  *   1. the prototype banner, dark and unmissable, because everything under
  *      it is pretending to be a service that does not exist;
  *   2. the name, the two settings this audience actually changes — text
- *      size and language — the helpline, and the nav.
+ *      size and language — and the nav.
+ *
+ * The helpline number used to sit at the right of the masthead row too.
+ * It is in the footer of every page, which is where a portal keeps its
+ * numbers; in the masthead it was a second copy competing with the name
+ * for the top of a phone screen, and the name lost.
  *
  * Text size and language used to have a strip of their own above the name,
  * which is the row every real portal carries. It cost a whole band of
@@ -137,10 +142,6 @@ function Masthead() {
         <div className="masthead-tools">
           <TextSize />
           <LanguagePicker />
-          <a className="masthead-help" href={`tel:${t("common.helpNumber").replace(/\s/g, "")}`}>
-            <span className="help-label">{t("common.needHelp")}</span>
-            <span className="help-number">{t("common.helpNumber")}</span>
-          </a>
         </div>
       </div>
 

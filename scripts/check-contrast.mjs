@@ -111,7 +111,12 @@ const PAIRS = [
      which is a third ground and was never audited against anything. */
   ["body text on sunk", T.ink, T.sunk, 7],
   ["secondary text on sunk", T.inkSoft, T.sunk, 7],
-  ["prototype tag on sunk", T.attention, T.sunk, 4.5],
+  /* The rust around the PROTOTYPE tag is a 1px box, not the words in it
+     — those are --ink and are checked two lines above. So it owes the
+     3:1 of a boundary, not the 4.5:1 of large text. It was written as
+     text and passed anyway while the ground was near-black, which is
+     how a pair ends up measuring the wrong thing for a while. */
+  ["prototype tag border on sunk", T.attention, T.sunk, 3],
 ];
 
 let failed = 0;

@@ -41,10 +41,10 @@ interface Props {
 }
 
 /* The helpline used to be printed again at the foot of every screen. It is
-   in the masthead of every page and in the site footer of every page, so
-   that was a third copy of the same eleven digits — and the screen that
-   most needed the room, the capture screen on a small phone, was the one
-   paying for it. /help still prints it, because that page is the offer. */
+   in the site footer of every page, so that was a second copy of the same
+   eleven digits — and the screen that most needed the room, the capture
+   screen on a small phone, was the one paying for it. /help still prints
+   it, because that page is the offer. */
 export function ScreenShell({
   step = null,
   totalSteps,
