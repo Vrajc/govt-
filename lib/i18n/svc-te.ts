@@ -673,7 +673,7 @@ export const svcTe: PartialSvcDict = {
 
     detailsTitle: "మీ వివరాలు",
     detailsGuide: "తీరిగ్గా నింపండి. మీరు పంపండి నొక్కేవరకు ఏమీ వెళ్ళదు.",
-    detailsAssisted: "వాళ్ళ వివరాలు",
+    detailsTitleAssisted: "వాళ్ళ వివరాలు",
 
     reviewDocs: "కాగితాలు",
     reviewNoDocs: "కాగితాలేవీ కలపలేదు",

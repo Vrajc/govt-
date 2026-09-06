@@ -673,7 +673,7 @@ export const svcKn: PartialSvcDict = {
 
     detailsTitle: "ನಿಮ್ಮ ವಿವರ",
     detailsGuide: "ನಿಧಾನವಾಗಿ ತುಂಬಿ. ನೀವು ಕಳಿಸಿ ಒತ್ತುವವರೆಗೆ ಏನೂ ಹೋಗುವುದಿಲ್ಲ.",
-    detailsAssisted: "ಅವರ ವಿವರ",
+    detailsTitleAssisted: "ಅವರ ವಿವರ",
 
     reviewDocs: "ಕಾಗದಗಳು",
     reviewNoDocs: "ಯಾವ ಕಾಗದವನ್ನೂ ಸೇರಿಸಿಲ್ಲ",

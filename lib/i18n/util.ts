@@ -44,3 +44,44 @@ export function fill(
     key in vars ? String(vars[key]) : whole,
   );
 }
+
+/**
+ * Lays the assisted wording over the base dictionary.
+ *
+ * Assisted mode is not a different set of screens. It is the same screens
+ * spoken about a third person, and the whole difference lives in the
+ * strings — so rather than have fifty call sites each stop to ask which
+ * mode they are in, every assisted variant is authored as `<key>Assisted`
+ * beside the key it stands in for, and this covers the base with it once.
+ *
+ * Two properties follow, and both matter more than the tidiness:
+ *
+ * A string is flipped only where somebody has written the twin. There is
+ * no rule that rewrites "you" into "they", because half the "you" on these
+ * screens is the son holding the phone and must stay — "hold the phone
+ * still" is not addressed to his mother.
+ *
+ * And a language that has not translated its twin yet keeps its own base
+ * string: the wrong pronoun in the reader's own script, which is a far
+ * smaller failure than the right pronoun in English.
+ */
+export function assistedDict<T>(dict: T, assisted: boolean): T {
+  if (!assisted) return dict;
+  const src = dict as unknown as Record<string, Record<string, string>>;
+  const out: Record<string, Record<string, string>> = {};
+  for (const section of Object.keys(src)) {
+    const table = src[section];
+    let covered: Record<string, string> | null = null;
+    for (const key of Object.keys(table)) {
+      if (!key.endsWith("Assisted")) continue;
+      const base = key.slice(0, -"Assisted".length);
+      /* `who.assisted` is a label in its own right, not a twin: it names
+         the choice on the first screen and has no base key to cover. */
+      if (!base || !(base in table)) continue;
+      covered ??= { ...table };
+      covered[base] = table[key];
+    }
+    out[section] = covered ?? table;
+  }
+  return out as unknown as T;
+}

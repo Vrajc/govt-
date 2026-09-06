@@ -673,7 +673,7 @@ export const svcTa: PartialSvcDict = {
 
     detailsTitle: "உங்கள் விவரங்கள்",
     detailsGuide: "நிதானமாக நிரப்புங்கள். நீங்கள் அனுப்புங்கள் என்பதை அழுத்தும் வரை எதுவும் போவதில்லை.",
-    detailsAssisted: "அவருடைய விவரங்கள்",
+    detailsTitleAssisted: "அவருடைய விவரங்கள்",
 
     reviewDocs: "காகிதங்கள்",
     reviewNoDocs: "காகிதம் எதுவும் சேர்க்கப்படவில்லை",

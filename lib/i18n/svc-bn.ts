@@ -673,7 +673,7 @@ export const svcBn: PartialSvcDict = {
 
     detailsTitle: "আপনার খুঁটিনাটি",
     detailsGuide: "ধীরে সুস্থে ভরুন। আপনি পাঠান না টেপা পর্যন্ত কিছুই যায় না।",
-    detailsAssisted: "ওঁর খুঁটিনাটি",
+    detailsTitleAssisted: "ওঁর খুঁটিনাটি",
 
     reviewDocs: "কাগজ",
     reviewNoDocs: "কোনও কাগজ যোগ করা হয়নি",

@@ -68,6 +68,28 @@ export default function ApplyScreen({
 
   const svc = serviceById(service);
 
+  /**
+   * A real step name that this particular service does not have.
+   *
+   * It is not a wrong address — eight of the fourteen skip a step, so
+   * /apply/apy/photo and /apply/lifecert/documents are simply one step
+   * outside their own journey. Send them to the beginning of it.
+   *
+   * The redirect has to happen in an effect. Calling router.replace while
+   * rendering reaches for `location`, and on the server there is no such
+   * thing: every one of those ten URLs threw an uncaught exception during
+   * render, recovered on the client, and served a 200 the whole time.
+   */
+  const firstStep = svc ? stepsFor(svc)[0] : null;
+  const offJourney =
+    svc !== null && isStep(step) && !stepsFor(svc).includes(step);
+
+  useEffect(() => {
+    if (offJourney && svc && firstStep) {
+      router.replace(`/apply/${svc.id}/${firstStep}`);
+    }
+  }, [offJourney, svc, firstStep, router]);
+
   if (!svc || !isStep(step)) {
     return (
       <ScreenShell step={null} back="/start" title={app.t("errors.notFound")}>
@@ -78,11 +100,7 @@ export default function ApplyScreen({
     );
   }
 
-  const steps = stepsFor(svc);
-  if (!steps.includes(step)) {
-    router.replace(`/apply/${svc.id}/${steps[0]}`);
-    return null;
-  }
+  if (offJourney) return null;
 
   return <Engine svc={svc} step={step} key={`${svc.id}-${step}`} />;
 }
@@ -245,6 +263,7 @@ function EligibilityStep({
   const { t, d, app, patch } = useApp();
   const ELIG = d.elig as Record<string, string>;
   const FIELDS = d.fields as Record<string, string>;
+  const COMMON = d.common as Record<string, string>;
   const SVC = d.svc as Record<string, string>;
 
   const answers = app.eligibility;
@@ -395,7 +414,7 @@ function EligibilityStep({
                     ? o.value === "yes"
                       ? t("common.yes")
                       : t("common.no")
-                    : (FIELDS[o.labelKey] ?? o.labelKey);
+                    : optionLabel(FIELDS, COMMON, o.labelKey);
                 return (
                   <button
                     key={o.value}
@@ -589,6 +608,7 @@ function DetailsStep({
 }) {
   const { t, d, app, patch, lang, demoMode } = useApp();
   const FIELDS = d.fields as Record<string, string>;
+  const COMMON = d.common as Record<string, string>;
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [otpSent, setOtpSent] = useState(false);
@@ -599,7 +619,6 @@ function DetailsStep({
 
   const wantsOtp = needsOtp(svc);
   const fields = visibleFields(svc, app.values);
-  const assisted = app.mode === "assisted";
 
   /* Keep the catalogue's field order, but collect consecutive fields that
      share a heading. Order stays the service's business, not this file's. */
@@ -611,10 +630,10 @@ function DetailsStep({
     else groups.push({ key, items: [f] });
   }
 
-  /* Assisted mode has its own wording for the headings that name a person. */
+  /* Assisted mode has its own wording for the headings that name a person,
+     and for the questions under them. None of that is decided here — the
+     dictionary already arrived in the right voice. */
   const GROUPS = d.groups as Record<string, string>;
-  const groupLabel = (key: string) =>
-    (assisted ? GROUPS[`${key}Assisted`] : undefined) ?? GROUPS[key] ?? "";
 
   function setValue(f: FieldDef, raw: string) {
     patch({ values: { ...app.values, [f.id]: normalise(f, raw) } });
@@ -682,7 +701,7 @@ function DetailsStep({
   return (
     <ScreenShell
       {...shell}
-      title={assisted ? t("apply.detailsAssisted") : t("apply.detailsTitle")}
+      title={t("apply.detailsTitle")}
       guide={t("apply.detailsGuide")}
       speakExtra={fields.map((f) => FIELDS[f.labelKey ?? f.id]).join(". ")}
       action={
@@ -710,9 +729,15 @@ function DetailsStep({
 
       {/* Grouped under quiet headings. Thirteen fields in a row is a wall;
           the same thirteen under four headings is four small asks. */}
-      {groups.map(({ key, items }) => (
-        <section key={key} className="form-group">
-          {key && <h2 className="form-group-title">{groupLabel(key)}</h2>}
+      {/* Keyed by position, not by group name. Five services in the catalogue
+          come back to a heading further down their field order — age80 asks
+          about you, then the pension, then you again — and only consecutive
+          fields are gathered, so the same name can head two sections. React
+          then has two children with one key, and on a re-render it is free
+          to carry a typed value into the wrong section. */}
+      {groups.map(({ key, items }, gi) => (
+        <section key={`${key}-${gi}`} className="form-group">
+          {key && <h2 className="form-group-title">{GROUPS[key] ?? ""}</h2>}
           <div className="fields-grid">
       {items.map((f) => {
         const label = FIELDS[f.labelKey ?? f.id] ?? f.id;
@@ -743,7 +768,7 @@ function DetailsStep({
                       onClick={() => setValue(f, o.value)}
                     >
                       {on && <Check size={20} />}
-                      <span>{FIELDS[o.labelKey] ?? o.labelKey}</span>
+                      <span>{optionLabel(FIELDS, COMMON, o.labelKey)}</span>
                     </button>
                   );
                 })}
@@ -849,18 +874,17 @@ function PhotoStep({
 }) {
   const { t, app, patch } = useApp();
   const [ready, setReady] = useState(false);
-  const assisted = app.mode === "assisted";
 
   if (!ready) {
     const items = [
-      { art: <ArtWindow />, text: assisted ? t("photo.check1Assisted") : t("photo.check1") },
-      { art: <ArtGlasses />, text: assisted ? t("photo.check2Assisted") : t("photo.check2") },
-      { art: <ArtEyeLevel />, text: assisted ? t("photo.check3Assisted") : t("photo.check3") },
+      { art: <ArtWindow />, text: t("photo.check1") },
+      { art: <ArtGlasses />, text: t("photo.check2") },
+      { art: <ArtEyeLevel />, text: t("photo.check3") },
     ];
     return (
       <ScreenShell
         {...shell}
-        title={assisted ? t("photo.titleAssisted") : t("photo.title")}
+        title={t("photo.title")}
         guide={t("photo.guide")}
         speakExtra={items.map((i) => i.text).join(". ")}
         action={
@@ -890,8 +914,8 @@ function PhotoStep({
   return (
     <ScreenShell
       {...shell}
-      title={assisted ? t("photo.titleAssisted") : t("photo.title")}
-      guide={assisted ? t("photo.lookAtAssisted") : t("photo.lookAt")}
+      title={t("photo.title")}
+      guide={t("photo.lookAt")}
     >
       <PhotoCapture
         purpose="face"
@@ -923,6 +947,7 @@ function ReviewStep({ svc, shell }: { svc: ServiceDef; shell: Shell }) {
   const router = useRouter();
   const FIELDS = d.fields as Record<string, string>;
   const DOCS = d.docs as Record<string, string>;
+  const COMMON = d.common as Record<string, string>;
 
   const [pre, setPre] = useState<Pre>({ s: "idle" });
   const [sending, setSending] = useState(false);
@@ -1123,7 +1148,11 @@ function ReviewStep({ svc, shell }: { svc: ServiceDef; shell: Shell }) {
             f.type === "aadhaar"
               ? `XXXX XXXX ${raw.slice(-4) || "----"}`
               : f.type === "choice"
-                ? (FIELDS[f.options?.find((o) => o.value === raw)?.labelKey ?? ""] ?? raw)
+                ? optionLabel(
+                    FIELDS,
+                    COMMON,
+                    f.options?.find((o) => o.value === raw)?.labelKey ?? raw,
+                  )
                 : raw;
           return (
             <div className="review-row" key={f.id}>
@@ -1216,4 +1245,22 @@ function ReviewStep({ svc, shell }: { svc: ServiceDef; shell: Shell }) {
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * The words on one option button.
+ *
+ * An option's labelKey names a string in `fields`, with one exception the
+ * catalogue relies on: a three-way question borrows its plain yes and no
+ * from `common` rather than restating them. `nameInPpo` is the live case —
+ * yes, no, or I do not know. Without the second lookup those two buttons
+ * fall through to the key itself, and every reader in every language gets a
+ * lowercase English "yes" next to a translated "I do not know".
+ */
+function optionLabel(
+  fields: Record<string, string>,
+  common: Record<string, string>,
+  key: string,
+): string {
+  return fields[key] ?? common[key] ?? key;
 }

@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -13,6 +14,7 @@ import {
   LANG_CLASSES,
   SCRIPT_CLASSES,
   SPEECH_TAGS,
+  assistedDict,
   fill,
   isLang,
   langMeta,
@@ -227,9 +229,16 @@ export function AppProvider({
     });
   }, []);
 
-  // One language per page load. Switching does a full navigation so the
-  // server can send the right dictionary, fonts and <html lang> together.
-  const d = dict;
+  /* One language per page load. Switching does a full navigation so the
+     server can send the right dictionary, fonts and <html lang> together.
+
+     Mode is the other half of the voice. A son filling this in for his
+     mother reads the same screens she would, but every question about her
+     has to ask about her — "how old are you" answered by the wrong person
+     is a rejected pension, not a clumsy sentence — so the assisted wording
+     is laid over the dictionary here, once, and `t` and `d` carry it to
+     every screen without a single call site knowing which mode it is in. */
+  const d = useMemo(() => assistedDict(dict, app.mode === "assisted"), [dict, app.mode]);
 
   const t = useCallback(
     (path: string, vars?: Record<string, string | number>) => {

@@ -673,7 +673,7 @@ export const svcMl: PartialSvcDict = {
 
     detailsTitle: "നിങ്ങളുടെ വിവരങ്ങൾ",
     detailsGuide: "സാവധാനം പൂരിപ്പിക്കൂ. നിങ്ങൾ അയക്കൂ അമർത്തുന്നതുവരെ ഒന്നും പോകില്ല.",
-    detailsAssisted: "അവരുടെ വിവരങ്ങൾ",
+    detailsTitleAssisted: "അവരുടെ വിവരങ്ങൾ",
 
     reviewDocs: "കടലാസുകൾ",
     reviewNoDocs: "കടലാസുകളൊന്നും ചേർത്തിട്ടില്ല",

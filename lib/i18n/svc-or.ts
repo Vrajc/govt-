@@ -673,7 +673,7 @@ export const svcOr: PartialSvcDict = {
 
     detailsTitle: "ଆପଣଙ୍କ ବିବରଣୀ",
     detailsGuide: "ଧୀରେ ଧୀରେ ପୂରଣ କରନ୍ତୁ। ଆପଣ ପଠାନ୍ତୁ ନ ଦବାଇବା ପର୍ଯ୍ୟନ୍ତ କିଛି ଯାଏ ନାହିଁ।",
-    detailsAssisted: "ତାଙ୍କ ବିବରଣୀ",
+    detailsTitleAssisted: "ତାଙ୍କ ବିବରଣୀ",
 
     reviewDocs: "କାଗଜ",
     reviewNoDocs: "କୌଣସି କାଗଜ ଯୋଡ଼ାଯାଇ ନାହିଁ",
