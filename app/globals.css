@@ -235,20 +235,6 @@ input:focus-visible, select:focus-visible, summary:focus-visible {
   padding: 4px 16px 24px;
 }
 
-.shell-foot {
-  width: 100%;
-  max-width: var(--shell-max);
-  margin: 24px auto 0;
-  padding: 12px 16px 24px;
-  border-top: 1px solid var(--line);
-}
-.shell-foot a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 4px 2px;
-}
-
 /* Sticky primary action: reachable by thumb without scrolling past content. */
 .action-dock {
   position: sticky;
@@ -1095,7 +1081,7 @@ img, svg, video { max-width: 100%; }
     --shadow-3: none;
     --shadow-btn: none;
   }
-  .proto-banner, .shell-top, .action-dock, .shell-foot, .no-print { display: none !important; }
+  .proto-banner, .shell-top, .action-dock, .no-print { display: none !important; }
   body { background: #FFF; }
   .receipt { border-color: #000; }
 }
@@ -1133,8 +1119,7 @@ img, svg, video { max-width: 100%; }
 }
 /* The children used to own the measure; the sheet owns it now. */
 .sheet > .shell-top,
-.sheet > .shell-main,
-.sheet > .shell-foot {
+.sheet > .shell-main {
   max-width: none;
   margin-left: 0;
   margin-right: 0;
@@ -1181,8 +1166,7 @@ img, svg, video { max-width: 100%; }
 @media (min-width: 640px) {
   .sheet { max-width: 38rem; }
   .shell-main { padding: 8px 28px 28px; }
-  .shell-top,
-  .shell-foot { padding-left: 28px; padding-right: 28px; }
+  .shell-top { padding-left: 28px; padding-right: 28px; }
 
   .grid-cards,
   .grid-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1222,7 +1206,6 @@ img, svg, video { max-width: 100%; }
     min-height: 62px;
   }
   .shell-main { padding: 20px 40px 32px; }
-  .shell-foot { padding: 18px 40px 26px; }
 
   /* A card has a little more room to breathe once there is room. */
   .card { padding: 18px; }
@@ -1520,8 +1503,7 @@ img, svg, video { max-width: 100%; }
   /* 16px each side of a 320px screen left 288px, and a 22px card inset
      took another 44px out of that. */
   .shell-main  { padding: 4px 14px 20px; }
-  .shell-top,
-  .shell-foot  { padding-left: 14px; padding-right: 14px; }
+  .shell-top   { padding-left: 14px; padding-right: 14px; }
 
   .card { padding: 14px; }
   .card-icon { width: 34px; height: 34px; margin-bottom: 8px; }
@@ -2598,7 +2580,6 @@ html[data-size="lg"] {
     justify-content: space-between;
     gap: 10px 14px;
   }
-  .masthead-help { flex-direction: row; align-items: baseline; gap: 8px; }
 }
 
 .masthead-help {
@@ -2615,8 +2596,26 @@ html[data-size="lg"] {
   letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--ink-soft);
+  /* Beside the number on a phone, a two-line label is the same problem. */
+  white-space: nowrap;
 }
-.help-number { font-size: var(--fs-lg); font-weight: 700; color: var(--attention); }
+/* The digits are the point, and a break between "1800" and "180" turns one
+   phone number into two half-numbers. */
+.help-number {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--attention);
+  white-space: nowrap;
+}
+
+/* This override has to sit after the base rule above rather than up in the
+   phone block with its neighbours: both selectors are a single class, a
+   media query adds no specificity of its own, and so the `column` above
+   won on source order alone. The helpline stacked into two rows on exactly
+   the screens that had no room for the second one. */
+@media (max-width: 620px) {
+  .masthead-help { flex-direction: row; align-items: baseline; gap: 8px; }
+}
 
 .masthead-nav { background: var(--surface); border-bottom: 1px solid var(--line); }
 .masthead-nav-inner {
@@ -2725,7 +2724,7 @@ body {
   padding: 0 24px 80px;
   width: 100%;
 }
-.shell-top, .shell-foot { max-width: 1140px; margin-inline: auto; width: 100%; }
+.shell-top { max-width: 1140px; margin-inline: auto; width: 100%; }
 
 @media (min-width: 1024px) {
   .shell-main { padding: 0 32px 96px; }

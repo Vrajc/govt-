@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useApp } from "@/lib/app-state";
@@ -60,7 +59,7 @@ export function ScreenShell({
   wide = false,
   children,
 }: Props) {
-  const { t, d } = useApp();
+  const { t } = useApp();
   const router = useRouter();
 
   const spoken = [title, guide, speakExtra].filter(Boolean).join(". ");
@@ -110,17 +109,9 @@ export function ScreenShell({
 
       </main>
 
-      {/* The disclosure lives in the banner at the top of every screen and
-          nowhere else in the journey. Repeating it in the footer of all
-          eighteen screens made it wallpaper, which is the one thing a
-          disclosure must never become. */}
-      <footer className="shell-foot">
-        <p className="micro">
-          <Link href="/about" style={{ color: "var(--primary-dark)", fontWeight: 600 }}>
-            {t("common.aboutLink")}
-          </Link>
-        </p>
-      </footer>
+      {/* No screen footer. The link to /about was printed under all eighteen
+          screens while the masthead nav already carries it — a second copy
+          that cost a rule, a band of whitespace, and nothing else. */}
     </div>
   );
 }
