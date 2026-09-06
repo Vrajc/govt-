@@ -21,6 +21,7 @@ import type { Lang } from "@/lib/types";
 import { SiteChrome, SiteFooter } from "@/components/SiteChrome";
 import { LanguageGate } from "@/components/LanguageGate";
 import { DemoShortcut } from "@/components/DemoShortcut";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
 
 /**
  * One family, ten scripts. Noto is the only face with correct, legible
@@ -130,6 +131,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
             <SiteFooter />
           </div>
+          {/* Floats over every screen, on top of the page and under the
+              language gate — there is nothing useful to ask before the
+              language the answer will be spoken in has been chosen. */}
+          <VoiceAssistant />
           {!chosen && <LanguageGate coverage={coverage} />}
           <DemoShortcut />
         </AppProvider>

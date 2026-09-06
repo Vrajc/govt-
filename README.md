@@ -64,6 +64,7 @@ explanations instead of live ones.
 | Variable | Default | Effect |
 |---|---|---|
 | `OPENAI_API_KEY` | unset | Server-side only. Enables the live explainer and photo check. |
+| `GEMINI_API_KEY` | unset | Server-side only. Enables the live voice helper. Without it the helper still answers, from the catalogue and the dictionaries. |
 | `NEXT_PUBLIC_DEMO_MODE` | `true` | 8-second processing, on-screen OTP, `/demo` controls. |
 | `NEXT_PUBLIC_ENABLE_TTS_FALLBACK` | `false` | Routes voice through OpenAI TTS when a device has no local voice. |
 
@@ -168,6 +169,10 @@ lib/
   mockPda.ts                  the pretend offices, with their knobs at the top
   store.ts                    the in-memory Map, and what it would be in production
   openai.ts                   server-only, timeout-bounded, fallback on every path
+  gemini.ts                   the same three rules, for the voice helper
+  assistant/                  where the voice helper may send you, and what it
+                              says when the model cannot be reached
+  voiceInput.ts               the browser recogniser, wrapped so it settles once
   explainFallback.ts          21 codes × 3 languages, hardcoded
   imageQuality.ts             luminance / Laplacian / centre variance, on-device
   receiptCanvas.ts            the receipt drawn to PNG by hand
@@ -195,17 +200,40 @@ Consequences you can see:
 - **A page left open for ten minutes catches up in one poll**, rather than
   crawling forward one stage at a time.
 
-### The three AI jobs
+### The four AI jobs
 
 | Where | What it does | Fallback |
 |---|---|---|
 | `/api/explain` | Turns a code into two sentences a 78-year-old understands, in their language | A hardcoded table, 21 codes × 3 languages. It shipped first; the model is layered on top. |
 | `/api/precheck` | One vision call on the captured photo, before sending | The on-device analysis that was already coaching the camera |
+| `/api/assistant` | Ask out loud: a spoken question becomes one spoken sentence, two to five steps, and a button to the right page | Matches what was said against the service names **in the reader's own language** and answers from the dictionaries. Unmatched goes to the finder. |
 | `SpeakButton` | Reads the screen aloud | `speechSynthesis` **is** the default — free, instant, no bandwidth. OpenAI TTS is a flagged fallback. |
 
-All three are server-side. None decides an outcome — the explainer explains a
-result the government system already returned, and the pre-check only warns.
+All four are server-side. None decides an outcome — the explainer explains a
+result the government system already returned, the pre-check only warns, and
+the voice helper only points at a page.
 **A wrong guess costs one retake, never a pension.**
+
+### Ask out loud
+
+The Listen button reads a screen to somebody who cannot read it. The voice
+helper is the other direction, and it matters more: a person who cannot read
+cannot find the screen worth listening to. They press the microphone
+floating at the bottom right of every screen, say "my pension has not come"
+in any of the eleven languages, and get back a spoken sentence, the steps in
+order, and one button that goes there.
+
+- **Speech in** is the browser's own recogniser, set to the reader's language
+  tag. Firefox has none and some Android WebViews have none, so the box to
+  type in is always on the panel — never a punishment shown after a failure.
+- **Speech out** reuses `lib/speech.ts`, including the transliteration path
+  that lets a Hindi voice read Malayalam words when a phone ships no
+  Malayalam voice.
+- **The model never returns a link.** It picks one id from a list it is
+  given; the server looks the id up and reads the button's label out of the
+  reader's dictionary. An id nobody recognises becomes no button at all.
+- **Nothing personal is sent.** The sentence they said, and the shape of the
+  page they said it on. No name, no number, no draft.
 
 ### Built for a cheap phone in daylight
 

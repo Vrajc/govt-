@@ -322,3 +322,112 @@ prefix `PS-` did not have to change, which is a small piece of luck.
 `MASTER_PROMPT.md` and the original dossier keep the old name deliberately.
 They are dated inputs, not product surfaces, and rewriting a brief after the
 fact to match what you built is the wrong kind of tidy.
+
+---
+
+# Decisions — asking out loud
+
+The Listen button was always the most-used thing in this product, and it was
+always only half an answer. It reads a screen to somebody who cannot read it.
+It cannot tell them which screen is theirs. A person who cannot read cannot
+navigate to the page worth listening to, and fourteen services is thirteen
+more chances to land on the wrong one.
+
+So: a microphone, a sentence, and a path. They say "my pension has not come"
+or "my husband died last month" — the words they would use at a counter — and
+get back one spoken sentence, two to five steps in order, and one button that
+goes there.
+
+## The model is given a menu, never a keyboard
+
+It returns an id — `svc:widow`, `finder`, `track` — out of a list the prompt
+hands it. The server looks the id up in a table and builds the link itself.
+An id nobody recognises becomes no button, not a guess.
+
+A model that can write a URL can invent one, and an invented URL here is a
+404 shown to a 78-year-old who has just been *told out loud* that this is
+where to go. The button's words come out of the reader's own dictionary too,
+so the page is named on the button exactly as it is named everywhere else in
+the app — in Odia, in Tamil, in whichever of the eleven they chose.
+
+## The fallback answers in eleven languages without a word of new copy
+
+No key, a refused key, a model that is overloaded — all the same to the
+person asking, because the server answers anyway. It scores what was said
+against the service names and descriptions **in the reader's own language**,
+which the app already has translated, and builds the steps from six sentences
+in the dictionary. A Kannada speaker saying ವಿಧವಾ ಪಿಂಚಣಿ is matched on the
+Kannada strings and never routes through English.
+
+Substring matching, not equality: every one of these languages inflects, and
+ಪಿಂಚಣಿಗೆ is ಪಿಂಚಣಿ with a case ending. A weak single overlap is thrown away —
+"pension" appears in all fourteen — because sending somebody confidently to
+the wrong scheme is worse than admitting we did not catch it. Nothing
+matched goes to the finder, which is the honest answer and also the right
+one: the finder exists precisely for people who cannot name what they need.
+
+## It floats, bottom right, like every chat widget on the web
+
+It started on the masthead, beside text size and language, on the reasoning
+that a floating button lands on top of the sticky action dock and that
+anything floating covers words at 200% zoom.
+
+Half of that was already wrong. The action dock stopped being a sticky bar
+in an earlier pass — "the action dock is not a floating bar", further up this
+file — so there is no primary button pinned to the foot of any screen for
+this to cover. And the half that was right was outweighed: a control whose
+entire audience cannot read the label has to be findable by shape alone, and
+bottom-right-circle is the one shape the whole web has already taught people
+means *ask something here*. A tinted button in a row of four other buttons
+is not findable by shape. It is findable by reading.
+
+So it floats, and it is the only solid filled shape on the page — everything
+else is an outline or a ghost. What it costs is body text at the bottom of a
+long page, covered by a control that is one press away from reading that text
+aloud, which is a trade worth making.
+
+## The panel introduces itself out loud
+
+Opening a voice helper is good evidence that you cannot read the sentence
+explaining how to use one. The press that opened the panel is also the user
+gesture browsers require before a page may make a sound, so the two line up
+exactly: it opens, and it says what to do.
+
+## Thinking is switched off, and the budget is large
+
+Both were bugs before they were decisions.
+
+The current models think before answering unless told not to, and thinking
+tokens come out of the same budget as the answer. Left on, the model spent
+the budget reasoning about a question with nothing to reason about — one
+sentence and a short list picked off a menu — and returned four tokens of
+truncated JSON. Every reader silently got the dictionary answer.
+
+The budget is 1200 tokens because every Indic script costs several tokens a
+word where English costs one. A ceiling that fits a five-step answer in
+English does not fit the same answer in Malayalam, and it does not fail
+loudly: it returns a truncated string, `JSON.parse` throws, and the fallback
+covers for it forever.
+
+## The steps have to be steps this app has
+
+Unprompted, the model writes the government website it has read a thousand
+of: upload a scan, visit the portal, submit the form. Every one of those is a
+thing this app exists to remove — the papers are photographed with the phone,
+inside the app, and nothing is ever printed or uploaded. So the prompt says
+how the app actually works, and names the banned words. The English answers
+are also run past the copy rules on the way out; a string the model wrote
+reaches the same reader as a string in the dictionary, and has had none of
+the linting.
+
+## Left undone
+
+- **The jargon guard is English-only.** "Submit" written in Gurmukhi letters
+  is beyond a word list, and the prompt is what holds that line there.
+- **Recognition is the browser's**, which means Chrome sends the audio to
+  Google to be transcribed. That is said plainly on the panel and is the
+  reason the box to type in is always there.
+- **It does not read the draft.** Asking "did I fill in my bank details" is
+  the obvious next question and the answer is on the device already. It was
+  left out because sending a half-finished application to a model is a much
+  bigger promise than sending one spoken sentence.

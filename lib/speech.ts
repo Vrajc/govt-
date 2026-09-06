@@ -465,3 +465,49 @@ export function speakAll(
     },
   };
 }
+
+/**
+ * The voice list, once it exists.
+ *
+ * `getVoices()` is empty on the first call nearly everywhere, and the event
+ * that says otherwise is not dependable: Chrome fires `voiceschanged` once,
+ * Safari sometimes never fires it, Android fires it before the list is
+ * populated. So this listens *and* polls, settles exactly once, and gives
+ * up after three seconds with an empty list — which is an answer too.
+ *
+ * Returns its own cleanup, so a caller is one line: an effect that hands in
+ * a callback and hands back what this returns.
+ */
+export function whenVoicesReady(
+  run: (voices: SpeechSynthesisVoice[]) => void,
+): () => void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    run([]);
+    return () => {};
+  }
+
+  const synth = window.speechSynthesis;
+  let tries = 0;
+  let done = false;
+  let timer = 0;
+
+  const settle = () => {
+    if (done) return;
+    const voices = synth.getVoices();
+    if (!voices.length && ++tries <= 12) return;
+    done = true;
+    window.clearInterval(timer);
+    synth.removeEventListener("voiceschanged", settle);
+    run(voices);
+  };
+
+  timer = window.setInterval(settle, 250);
+  synth.addEventListener("voiceschanged", settle);
+  settle();
+
+  return () => {
+    done = true;
+    window.clearInterval(timer);
+    synth.removeEventListener("voiceschanged", settle);
+  };
+}

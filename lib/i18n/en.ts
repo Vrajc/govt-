@@ -328,6 +328,44 @@ export const en = {
     badRequest: "Some details were missing.",
     tooMany: "That was sent already. We are using the first one.",
   },
+
+  /* ================================================================
+   * Ask out loud — the voice helper
+   * ================================================================
+   * Somebody who cannot read cannot find the screen worth listening to.
+   * These are the words around the microphone; the answer itself comes
+   * back in the reader's language from /api/assistant.
+   */
+  voice: {
+    open: "Ask out loud",
+    title: "Ask out loud",
+    intro: "Press the round button and say what you need. You will hear the answer, and see the steps.",
+    press: "Press, then speak",
+    listening: "Listening. Say it now.",
+    thinking: "One moment",
+    youSaid: "You said",
+    steps: "What to do",
+    goThere: "Take me to {page}",
+    replay: "Read it out again",
+    again: "Ask something else",
+    typeInstead: "Or write it here",
+    typePlaceholder: "What do you need",
+    ask: "Ask",
+    noMic: "This phone cannot listen. Write what you need instead.",
+    nothingHeard: "Nothing was heard. Say it once more, a little louder.",
+    micBlocked: "The phone did not let us use the microphone. Write it here instead.",
+    offline: "We could not reach the helper. Answer four short questions instead.",
+    privacy: "What you say goes once, to find the right page. Nothing is kept.",
+    fallbackSay: "The page you want is {service}.",
+    fallbackNone: "Four short questions will find the right one for you.",
+    stepOpen: "Open {service}.",
+    stepWho: "Read who it is for, then press Continue.",
+    stepPapers: "Photograph the papers with this phone. Nothing has to be printed.",
+    stepFace: "Take one photograph of your face, in good light.",
+    stepSend: "Check the answers once, then send it.",
+    stepFinder: "Answer the four short questions.",
+  },
+
 } as const;
 
 /**

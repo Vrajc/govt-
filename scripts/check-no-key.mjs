@@ -3,8 +3,9 @@
  * Build-output audit (MASTER_PROMPT §10).
  *
  * Two things must be true of every production build:
- *   1. No OpenAI key, and no trace of the OpenAI SDK, reaches the browser.
- *   2. Nothing in the client bundle even knows the API host exists.
+ *   1. No model key — OpenAI's or Google's — and no trace of the OpenAI
+ *      SDK reaches the browser.
+ *   2. Nothing in the client bundle even knows either API host exists.
  *
  * Run after `next build`.
  */
@@ -26,6 +27,12 @@ const FORBIDDEN = [
   { label: "an OpenAI secret key", re: /\bsk-[A-Za-z0-9_-]{20,}/ },
   { label: "the OpenAI API host", re: /api\.openai\.com/ },
   { label: "an OpenAI SDK user-agent", re: /OpenAI\/JS/ },
+  /* The voice helper's key. Two shapes: the long-standing `AIza...` studio
+     key and the `AQ.` form issued since 2025. Both are server-only, both
+     would be catastrophic in a bundle anybody can view-source. */
+  { label: "the literal env var name", re: /GEMINI_API_KEY/ },
+  { label: "a Gemini API key", re: /\bAIza[A-Za-z0-9_-]{20,}|\bAQ\.[A-Za-z0-9_-]{20,}/ },
+  { label: "the Gemini API host", re: /generativelanguage\.googleapis\.com/ },
 ];
 
 function* walk(dir) {
@@ -54,7 +61,7 @@ for (const file of walk(staticDir)) {
 console.log(`Scanned ${checked} client files in .next/static`);
 console.log(
   hits === 0
-    ? "  ✓ no key, no SDK, no API host in the client bundle"
+    ? "  ✓ no keys, no SDK, no API hosts in the client bundle"
     : `  ${hits} problem(s) found`
 );
 process.exit(hits === 0 ? 0 : 1);

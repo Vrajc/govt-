@@ -3643,3 +3643,362 @@ a.col-item:hover .col-go { gap: 10px; }
 }
 .card-go > svg { flex: 0 0 auto; }
 .card:hover .card-go { color: var(--primary-dark); }
+
+/* ==================================================================
+   Ask out loud — the voice helper
+
+   It floats, bottom right, the way every chat widget on the web does.
+   That is the shape people already recognise as "ask something here",
+   and recognition is most of the battle for a control whose whole
+   audience is somebody who cannot read the label.
+
+   It floats safely because of an earlier decision, not in spite of one:
+   the action dock stopped being a sticky bar further up this file, so
+   there is no longer a primary button pinned to the foot of the page for
+   this to land on top of. What it does cover, at the bottom of a long
+   page, is body text — which is the price of the pattern, paid by a
+   control that is one press away from reading that text aloud.
+
+   Filled, not tinted. Every other control on these screens is an outline
+   or a ghost; this one is the only solid shape on the page, which is what
+   makes it findable without reading it.
+   ================================================================== */
+.voice-launch {
+  position: fixed;
+  right: 16px;
+  /* Above the home indicator on a phone, and above nothing on a desk. */
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  /* Over the page, under the language gate at 100 and the panel at 96:
+     nobody should be asking this before they have chosen a language to
+     be answered in. */
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--paper);
+  box-shadow: var(--shadow-3);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.voice-launch:hover { background: var(--primary-dark); }
+.voice-launch:active { transform: translateY(1px); }
+.voice-launch > svg { flex: 0 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-launch:active { transform: none; }
+}
+
+/* A phone in landscape has no vertical room to spare, and a pensioner
+   holding one is usually reading a form. The words go; the microphone
+   and its accessible name stay. */
+@media (max-height: 460px) and (orientation: landscape) {
+  .voice-launch { padding: 0; width: var(--tap); justify-content: center; }
+  .voice-launch > span { display: none; }
+}
+
+/* ---- the panel ---- */
+.voice-scrim {
+  position: fixed;
+  inset: 0;
+  /* Under the language gate at 100, over everything else. Nobody should
+     be asking this before they have chosen a language to be answered in. */
+  z-index: 96;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(6, 9, 13, 0.62);
+}
+@media (min-width: 640px) {
+  /* Anchored over the launcher rather than centred on the screen. A panel
+     that opens where the button was is a panel the eye does not have to
+     re-find. */
+  .voice-scrim { align-items: flex-end; justify-content: flex-end; padding: 20px; }
+}
+
+.voice-panel {
+  width: 100%;
+  max-width: 34rem;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: var(--shadow-3);
+}
+@media (min-width: 640px) {
+  .voice-panel {
+    max-width: 27rem;
+    max-height: min(82vh, 44rem);
+    border-radius: var(--r-lg);
+    padding-bottom: 20px;
+    /* Clear of the launcher, which stays visible underneath. */
+    margin-bottom: calc(var(--tap) + 12px);
+  }
+}
+
+.voice-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.voice-title {
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0;
+}
+.voice-close {
+  flex: 0 0 auto;
+  min-height: var(--tap-sm);
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.voice-close:hover { border-color: var(--primary); color: var(--primary); }
+
+.voice-intro {
+  margin: 8px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+/* ---- the one control that matters ---- */
+.voice-mic-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 18px;
+}
+.voice-mic {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.voice-mic:hover { background: color-mix(in srgb, var(--primary-tint) 60%, var(--primary)); }
+.voice-mic:disabled { opacity: 0.45; cursor: not-allowed; }
+.voice-mic.is-live {
+  border-color: var(--attention);
+  background: var(--attention-tint);
+  color: var(--attention);
+  animation: voice-pulse 1.6s ease-out infinite;
+}
+/* The ring says "it is hearing you" to somebody who cannot read the line
+   underneath saying so. It is a shadow rather than a transform, so it
+   never nudges the button under a finger already on its way down. */
+@keyframes voice-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--attention) 55%, transparent); }
+  70%  { box-shadow: 0 0 0 18px rgba(0, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-mic.is-live { animation: none; border-width: 3px; }
+}
+.voice-mic-label {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink);
+}
+
+/* ---- what was heard, and what came back ---- */
+.voice-said {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--sunk);
+  border: 1px solid var(--line);
+  font-size: var(--fs-md);
+}
+.voice-said-l {
+  display: block;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 3px;
+}
+.voice-said-w { color: var(--ink); }
+
+.voice-wait {
+  margin: 0 0 14px;
+  font-size: var(--fs-md);
+  color: var(--ink-soft);
+}
+
+.voice-trouble {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--attention-tint);
+  border-inline-start: 4px solid var(--attention);
+  color: var(--attention-text);
+  font-size: var(--fs-md);
+}
+
+.voice-answer {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.voice-say {
+  margin: 0 0 14px;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.voice-steps-h {
+  margin: 0 0 8px;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.voice-steps {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.voice-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: var(--fs-md);
+  line-height: var(--leading);
+  color: var(--ink);
+}
+.voice-step-n {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.voice-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.voice-go {
+  flex: 1 1 100%;
+  min-height: var(--tap);
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--primary);
+  color: var(--paper);
+  font-family: inherit;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+}
+.voice-go:hover { background: var(--primary-dark); }
+.voice-minor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap-sm);
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.voice-minor:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ---- the box to type in, which is never a punishment ---- */
+.voice-type {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.voice-type-l {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.voice-type-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.voice-type-in {
+  flex: 1 1 12rem;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-md);
+}
+.voice-type-in::placeholder { color: var(--placeholder); }
+.voice-type-go {
+  flex: 0 0 auto;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border: 1px solid var(--primary);
+  border-radius: var(--r-sm);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+.voice-type-go:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.voice-privacy {
+  margin: 16px 0 0;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+
+@media print {
+  .voice-launch, .voice-scrim { display: none !important; }
+}
