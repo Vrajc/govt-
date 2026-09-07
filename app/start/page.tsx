@@ -6,6 +6,7 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { Chevron, Clock, People, Person, Search } from "@/components/Icons";
 import { NumberBadge } from "@/components/NumberBadge";
 import { NumberBox } from "@/components/NumberBox";
+import { TrackBox } from "@/components/TrackBox";
 import { servicesIn } from "@/lib/services/catalogue";
 import { numberOfService } from "@/lib/numbers";
 import type { Category } from "@/lib/services/types";
@@ -121,15 +122,24 @@ export default function StartScreen() {
         <span className="card-sub">{t("hub.notSureSub")}</span>
       </Link>
 
-      {/* Low on the page on purpose. Most people arrive here with a
-          situation and no number, and the doors above are for them; this is
-          for the one who arrives having already been told "nine", and for
-          whom every other row on this screen is something to scroll past. */}
-      <NumberBox className="num-box-card" />
+      {/* The row for people who arrive already holding something.
 
-      <p className="hub-track-link">
-        <Link href="/track">{t("hub.track")}</Link>
-      </p>
+          Low on the page on purpose, and paired on purpose. Most people
+          come to this screen with a situation and no identifier at all, and
+          the doors above are for them. These two are for the ones who have
+          been given something to type: a number from the helpline, or a
+          reference from a thing they already sent. Neither is competing
+          with the decision above, and next to each other they read as one
+          idea — "if you already know something, start here" — rather than
+          as two odd controls at the bottom of a page.
+
+          The reference used to be a bare line of link text here, which told
+          somebody holding a slip of paper that the thing they wanted
+          existed and then sent them somewhere else to type it. */}
+      <div className="hub-shortcuts">
+        <NumberBox className="num-box-card" />
+        <TrackBox className="num-box-card" />
+      </div>
     </ScreenShell>
   );
 }

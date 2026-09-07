@@ -3577,7 +3577,10 @@ a.col-item:hover .col-go { gap: 10px; }
    rather than one door and the top of another. */
 .hub-door-point {
   display: flex;
-  align-items: center;
+  /* Against the first line. "Get back the part of your pension you sold"
+     runs to three lines in a phone-width card, and a number centred on
+     that block reads as belonging to none of them. */
+  align-items: flex-start;
   gap: 12px;
   padding: 6px 0;
 }
@@ -3614,12 +3617,26 @@ a.col-item:hover .col-go { gap: 10px; }
 
 .hub-unsure { margin-top: 24px; }
 
-.hub-track-link {
-  margin: 28px 0 0;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  font-size: var(--fs-sm);
+/* The two shortcuts, side by side.
+
+   auto-fit rather than a breakpoint: they are a pair when there is room
+   for two readable columns and a stack when there is not, and the width
+   at which that flips is a property of the boxes rather than of a phone
+   somebody owns. 20rem is the reference number at its own font size with
+   the button beside it. */
+.hub-shortcuts {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+  /* min() is load-bearing, not tidiness: a bare minmax(20rem, 1fr) floor
+     is 320px whatever the container is, so on a 320px phone — where the
+     card has 252px inside it — the track stays 320px and the page scrolls
+     sideways. Capping the floor at 100% lets it collapse instead. */
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
 }
+/* Inside the pair the grid owns the spacing, not the card. */
+.hub-shortcuts > .num-box-card { margin-top: 0; }
+
 
 /* The door's own call to action, at the foot of the card. It is a span
    inside the button, not a link of its own — the whole card is the target,
@@ -3929,7 +3946,7 @@ a.col-item:hover .col-go { gap: 10px; }
 .voice-go {
   flex: 1 1 100%;
   min-height: var(--tap);
-  padding: 0 18px;
+  padding: 12px 18px;
   border: 0;
   border-radius: var(--r-md);
   background: var(--primary);
@@ -4119,6 +4136,24 @@ a.col-item:hover .col-go { gap: 10px; }
   color: var(--placeholder);
   font-size: var(--fs-md);
   font-weight: 400;
+}
+
+/* The reference field is the same control holding sixteen characters
+   instead of two, so it gives up everything the number box does for two
+   digits: the fixed width, the centring, and the weight. It grows to take
+   whatever the card has left after the button, and its own basis is wide
+   enough that a narrow card wraps the button underneath rather than
+   squeezing the field down to a stub. */
+.track-box-in {
+  flex: 1 1 14rem;
+  width: auto;
+  text-align: start;
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+.track-box-in::placeholder {
+  font-size: var(--fs-sm);
+  letter-spacing: 0.01em;
 }
 .num-box-go {
   flex: 0 0 auto;

@@ -190,7 +190,12 @@ export function SiteFooter() {
           <ul className="foot-links">
             <li><Link href="/start">{HUB.title}</Link></li>
             <li><Link href="/find">{HUB.notSure}</Link></li>
-            <li><Link href="/start">{HUB.track}</Link></li>
+            {/* Straight to the screen it names. It used to point at the hub,
+                because the hub's foot carried the only link on to /track;
+                the hub carries the field itself now, so sending somebody
+                there would land them above three cards they have to scroll
+                past to reach the thing they clicked. */}
+            <li><Link href="/track">{HUB.track}</Link></li>
             <li><Link href="/help">{HELP.centres}</Link></li>
           </ul>
         </section>

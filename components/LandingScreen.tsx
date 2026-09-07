@@ -88,7 +88,7 @@ export function LandingScreen({ scripts }: { lang: Lang; scripts: ScriptLine[] }
             </BigLink>
           </div>
           <p className="lp-quiet">
-            <Link href="/start">{L.ctaTrack}</Link>
+            <Link href="/track">{L.ctaTrack}</Link>
           </p>
           </div>
 
