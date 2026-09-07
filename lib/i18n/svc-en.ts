@@ -798,6 +798,8 @@ export const svcEn = {
     eligAge18: "This one starts at 18.",
     eligAge58Eps: "The PF pension starts at 58. You can take a smaller one from 50.",
     eligApyAge: "This one is for people aged 18 to 40.",
+    eligApyOver40:
+      "This one closes at 40. There is no central pension left to join after that — your state may have one, and the help line can check for you.",
     eligAge80: "This is only for people who have turned 80.",
     eligBpl: "This one is only for households on the BPL list.",
     eligOtherPension: "You cannot take two of these at the same time.",

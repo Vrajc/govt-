@@ -9,10 +9,11 @@
     "typecheck": "tsc --noEmit",
     "check:copy": "node scripts/check-copy.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check": "npm run typecheck && npm run check:copy && npm run check:contrast",
+    "check": "npm run typecheck && npm run check:copy && npm run check:contrast && npm run check:schemes",
     "verify:no-key": "node scripts/check-no-key.mjs",
     "check:services": "node scripts/check-services.mjs",
-    "check:keys": "node scripts/check-keys.mjs"
+    "check:keys": "node scripts/check-keys.mjs",
+    "check:schemes": "node scripts/check-schemes.mjs"
   },
   "dependencies": {
     "next": "^15.5.24",

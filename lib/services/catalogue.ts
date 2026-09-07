@@ -321,7 +321,19 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     typicalDays: 7,
     needsPhoto: false,
     eligibility: [
-      { id: "age", type: "age", range: { min: 18, max: 40 }, failKey: "eligApyAge", suggest: "oldage" },
+      {
+        id: "age",
+        type: "age",
+        /* Closes at 40, and unlike the NSAP schemes there is nowhere to be
+           sent: the old-age pension starts at 60, so offering it to a
+           45-year-old is a door that does not open for fifteen years. The
+           far end says that plainly instead. */
+        range: { min: 18, max: 40 },
+        failKey: "eligApyAge",
+        suggest: "oldage",
+        failOverKey: "eligApyOver40",
+        suggestOver: null,
+      },
       { id: "savings", type: "yesno", pass: ["yes"], failKey: "eligNoAccount" },
       { id: "taxpayer", type: "yesno", pass: ["no"], failKey: "eligTaxpayer" },
     ],

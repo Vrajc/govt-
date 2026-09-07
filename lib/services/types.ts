@@ -129,7 +129,16 @@ export interface EligQ {
    * cruel. When these are absent the single failKey covers both ends.
    */
   failOverKey?: string;
-  suggestOver?: ServiceId;
+  /**
+   * Where somebody over the maximum goes instead.
+   *
+   * `null` is a real answer and not the same as leaving this out: it says
+   * there is nowhere, which for Atal Pension Yojana past 40 is the truth.
+   * Omitting it falls back to the question's own `suggest`, which would
+   * send a 45-year-old to a pension that starts at 60 — a dead end dressed
+   * up as help.
+   */
+  suggestOver?: ServiceId | null;
 }
 
 /* ==================================================================

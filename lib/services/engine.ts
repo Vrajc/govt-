@@ -150,7 +150,9 @@ export function evaluateEligibility(
           complete: true,
           failed: q,
           failKey: q.failOverKey ?? q.failKey,
-          suggest: q.suggestOver ?? q.suggest ?? null,
+          /* An explicit null means "nowhere", and must not fall through to
+             the question's general suggestion. */
+          suggest: q.suggestOver !== undefined ? q.suggestOver : (q.suggest ?? null),
         };
       }
       if (min !== undefined && n < min) {
