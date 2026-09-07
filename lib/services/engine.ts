@@ -306,7 +306,32 @@ export function normalise(f: FieldDef, raw: string): string {
       return digits(raw).slice(0, 9);
     case "account":
       return digits(raw).slice(0, 20);
-    case "ifsc":
+    case "ifsc": {
+      /**
+       * The letter O at the fifth character is always a typo, so it is
+       * always fixed.
+       *
+       * Every IFSC ever issued has the digit zero in that position — it is
+       * reserved by the RBI and no bank has ever used anything else. So a
+       * letter O there cannot be what somebody meant, and correcting it
+       * loses nothing.
+       *
+       * It has to be corrected because O and 0 are the same shape in
+       * almost every interface font, and because the placeholder we show
+       * is SBIN0001234 — four letters and then three zeros in a row. A
+       * person copying that off the screen, or off a passbook printed in a
+       * font just as ambiguous, types the letter. They then get told their
+       * code is not 11 characters when they can plainly see 11 characters,
+       * which is the kind of dead end this whole product exists to remove.
+       *
+       * Only the fifth. The six characters after it are a branch code and
+       * may legitimately contain the letter O, so nothing else is touched.
+       * Spaces go too: a passbook prints the code in groups.
+       */
+      const up = raw.toUpperCase().replace(/\s+/g, "");
+      if (up.length < 5) return up;
+      return `${up.slice(0, 4)}${up[4] === "O" ? "0" : up[4]}${up.slice(5)}`;
+    }
     case "ppo":
       return raw.toUpperCase().trim();
     default:

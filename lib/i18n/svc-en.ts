@@ -882,7 +882,7 @@ export const svcEn = {
     errRequired: "This one is needed.",
     errDigits: "That is {n} digits. It needs {want}.",
     errDate: "Type the date as day, month, year.",
-    errIfsc: "An IFSC code is 11 characters, like SBIN0001234.",
+    errIfsc: "An IFSC code is four letters, then a zero, then six more, like SBIN0001234.",
     errAge: "Type your age in years.",
     errAgeAssisted: "Type their age in years.",
     errPick: "Pick one of these.",
