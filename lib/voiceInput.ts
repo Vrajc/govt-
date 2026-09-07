@@ -232,6 +232,18 @@ export interface ListenOptions {
   lang: Lang;
   /** Words as they arrive, so the screen can show them being heard. */
   onPartial?: (text: string) => void;
+  /**
+   * The microphone has closed and the words are being worked out.
+   *
+   * Only the recording path has anything to report here, and it matters
+   * there because the gap is seconds long: the recogniser used to answer
+   * the moment it was stopped, so nothing needed saying. Without this the
+   * panel goes on claiming to be listening while it uploads, the button
+   * does nothing because the session is already finished, and a person who
+   * has done exactly as they were told watches a screen that appears to
+   * have died.
+   */
+  onWorking?: () => void;
   onFinal: (text: string) => void;
   onFailure: (why: ListenFailure) => void;
 }
@@ -251,6 +263,27 @@ const STOP_GRACE_MS = 1_200;
 
 /** Long enough to say a sentence; short enough that a forgotten press ends. */
 const RECORD_CEILING_MS = 20_000;
+
+/**
+ * Quiet, after speech, for this long means they have finished.
+ *
+ * The recogniser this replaced stopped by itself when somebody stopped
+ * talking, and that is what a person expects from a microphone button. Made
+ * to press a second time, they press once, wait, and conclude it is broken
+ * — which is exactly what happened. Long enough to survive the pause in the
+ * middle of a sentence, short enough not to feel abandoned.
+ */
+const SILENCE_MS = 1_800;
+
+/** How often the loudness is sampled. Cheap: one small array, no allocation. */
+const SILENCE_TICK_MS = 150;
+
+/**
+ * Above the noise floor. A quiet room reads 1-3 on this scale and speech
+ * reads well above 10, so this sits between them with room on both sides —
+ * a threshold too low never stops, and one too high cuts somebody off.
+ */
+const SPEECH_LEVEL = 7;
 
 /**
  * Whether this device can record at all. Every phone can; a few old
@@ -280,16 +313,25 @@ export function canRecord(): boolean {
  * either: press to start, press again to send. Nothing is played while the
  * microphone is open — see the note in the panel about what that costs.
  */
-export function record({ lang, onFinal, onFailure }: ListenOptions): Listening {
+export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): Listening {
   let recorder: MediaRecorder | null = null;
   let stream: MediaStream | null = null;
   const chunks: Blob[] = [];
   let settled = false;
   let cancelled = false;
   let ceiling = 0;
+  let watching = 0;
+  let audio: AudioContext | null = null;
 
   const release = () => {
     window.clearTimeout(ceiling);
+    window.clearInterval(watching);
+    try {
+      void audio?.close();
+    } catch {
+      /* already closed */
+    }
+    audio = null;
     for (const track of stream?.getTracks() ?? []) track.stop();
     stream = null;
   };
@@ -302,6 +344,7 @@ export function record({ lang, onFinal, onFailure }: ListenOptions): Listening {
   };
 
   const send = async () => {
+    onWorking?.();
     const type = recorder?.mimeType || "audio/webm";
     const blob = new Blob(chunks, { type });
     /* Under a second of audio is somebody who pressed twice, not somebody
@@ -349,18 +392,69 @@ export function record({ lang, onFinal, onFailure }: ListenOptions): Listening {
     };
     recorder.onerror = () => settle(() => onFailure("unavailable"));
     recorder.start();
-    ceiling = window.setTimeout(() => {
+
+    const endRecording = () => {
       try {
-        recorder?.stop();
+        if (recorder && recorder.state === "recording") recorder.stop();
       } catch {
         settle(() => onFailure("silence"));
       }
-    }, RECORD_CEILING_MS);
+    };
+
+    ceiling = window.setTimeout(endRecording, RECORD_CEILING_MS);
+
+    /* Listen to the level to know when they have finished, so the button
+       does not have to be pressed twice. If any of this is unavailable the
+       recording simply runs to the ceiling or to a second press, which is
+       the behaviour without it. */
+    try {
+      const Ctx =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (Ctx) {
+        audio = new Ctx();
+        void audio.resume?.();
+        const source = audio.createMediaStreamSource(stream);
+        const meter = audio.createAnalyser();
+        meter.fftSize = 512;
+        source.connect(meter);
+        const frame = new Uint8Array(meter.fftSize);
+        let spoke = false;
+        let quietFrom = 0;
+
+        watching = window.setInterval(() => {
+          meter.getByteTimeDomainData(frame);
+          let peak = 0;
+          for (let i = 0; i < frame.length; i++) {
+            const d = Math.abs(frame[i] - 128);
+            if (d > peak) peak = d;
+          }
+          if (peak > SPEECH_LEVEL) {
+            spoke = true;
+            quietFrom = 0;
+            return;
+          }
+          /* Quiet before they have said anything is somebody thinking, not
+             somebody finished. Only silence after speech ends the turn. */
+          if (!spoke) return;
+          const now = Date.now();
+          if (!quietFrom) quietFrom = now;
+          else if (now - quietFrom >= SILENCE_MS) {
+            window.clearInterval(watching);
+            endRecording();
+          }
+        }, SILENCE_TICK_MS);
+      }
+    } catch {
+      /* No meter: the ceiling and the second press still end it. */
+    }
   })();
 
   return {
     stop: () => {
       window.clearTimeout(ceiling);
+      window.clearInterval(watching);
       try {
         if (recorder && recorder.state === "recording") recorder.stop();
         else if (!settled) settle(() => onFailure("silence"));

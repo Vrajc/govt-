@@ -344,7 +344,7 @@ export const en = {
     intro: "Press the round button and say what you need. You will hear the answer, and see the steps.",
     press: "Press, then speak",
     listening: "Listening. Say it now.",
-    listeningPressDone: "Listening. Say it, then press again.",
+    listeningPressDone: "Listening. Say it — it stops on its own.",
     thinking: "One moment",
     youSaid: "You said",
     steps: "What to do",

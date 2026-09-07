@@ -396,6 +396,11 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
         catching.current = text;
         setSaid(text);
       },
+      /* The microphone has closed and the words are on their way. Say so:
+         the recording path takes seconds over this, and the panel was still
+         reading "listening, press again" throughout — with a button that
+         did nothing, because the session had already ended. */
+      onWorking: () => setPhase("thinking"),
       onFinal: (text) => {
         session.current = null;
         void ask(text);
