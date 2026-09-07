@@ -245,6 +245,142 @@ const RESTARTS = 3;
 /** If `stop()` produces neither an end nor an error, settle anyway. */
 const STOP_GRACE_MS = 1_200;
 
+/* ==================================================================
+ * Recording, for the ten languages the browser cannot be trusted with
+ * ================================================================== */
+
+/** Long enough to say a sentence; short enough that a forgotten press ends. */
+const RECORD_CEILING_MS = 20_000;
+
+/**
+ * Whether this device can record at all. Every phone can; a few old
+ * WebViews cannot, and they still have the box to type in.
+ */
+export function canRecord(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.isSecureContext !== false &&
+    typeof MediaRecorder !== "undefined" &&
+    Boolean(navigator.mediaDevices?.getUserMedia)
+  );
+}
+
+/**
+ * Record what is said and have it transcribed on the server.
+ *
+ * This is the path that works in all eleven languages, and it exists
+ * because the browser's own recogniser does not. Its coverage of these
+ * languages varies between Android builds with no way to ask in advance —
+ * a phone that transcribes English perfectly will open the microphone for
+ * Gujarati and hand back nothing at all, silently. That is not a failure
+ * anything here can detect and route around; it just looks like a person
+ * who said nothing.
+ *
+ * The shape is deliberately the same as `listen` so the panel can hold
+ * either: press to start, press again to send. Nothing is played while the
+ * microphone is open — see the note in the panel about what that costs.
+ */
+export function record({ lang, onFinal, onFailure }: ListenOptions): Listening {
+  let recorder: MediaRecorder | null = null;
+  let stream: MediaStream | null = null;
+  const chunks: Blob[] = [];
+  let settled = false;
+  let cancelled = false;
+  let ceiling = 0;
+
+  const release = () => {
+    window.clearTimeout(ceiling);
+    for (const track of stream?.getTracks() ?? []) track.stop();
+    stream = null;
+  };
+
+  const settle = (fn: () => void) => {
+    if (settled) return;
+    settled = true;
+    release();
+    if (!cancelled) fn();
+  };
+
+  const send = async () => {
+    const type = recorder?.mimeType || "audio/webm";
+    const blob = new Blob(chunks, { type });
+    /* Under a second of audio is somebody who pressed twice, not somebody
+       who spoke. Saying "nothing was heard" is the honest answer and costs
+       no round trip. */
+    if (blob.size < 1200) return settle(() => onFailure("silence"));
+
+    try {
+      const form = new FormData();
+      form.append("audio", blob, "said");
+      form.append("language", lang);
+      const res = await fetch("/api/listen", { method: "POST", body: form });
+      if (!res.ok) return settle(() => onFailure("network"));
+      const body = (await res.json()) as { text?: string };
+      const text = (body.text ?? "").trim();
+      if (!text) return settle(() => onFailure("silence"));
+      settle(() => onFinal(text));
+    } catch {
+      settle(() => onFailure("network"));
+    }
+  };
+
+  void (async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      const name = (err as { name?: string })?.name ?? "";
+      return settle(() =>
+        onFailure(name === "NotFoundError" ? "unavailable" : "blocked"),
+      );
+    }
+    if (cancelled) return release();
+
+    try {
+      recorder = new MediaRecorder(stream);
+    } catch {
+      return settle(() => onFailure("unavailable"));
+    }
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
+    recorder.onstop = () => {
+      if (cancelled) return release();
+      void send();
+    };
+    recorder.onerror = () => settle(() => onFailure("unavailable"));
+    recorder.start();
+    ceiling = window.setTimeout(() => {
+      try {
+        recorder?.stop();
+      } catch {
+        settle(() => onFailure("silence"));
+      }
+    }, RECORD_CEILING_MS);
+  })();
+
+  return {
+    stop: () => {
+      window.clearTimeout(ceiling);
+      try {
+        if (recorder && recorder.state === "recording") recorder.stop();
+        else if (!settled) settle(() => onFailure("silence"));
+      } catch {
+        settle(() => onFailure("silence"));
+      }
+    },
+    cancel: () => {
+      cancelled = true;
+      settled = true;
+      try {
+        if (recorder && recorder.state === "recording") recorder.stop();
+      } catch {
+        /* nothing to stop */
+      }
+      release();
+    },
+  };
+}
+
 export function listen({ lang, onPartial, onFinal, onFailure }: ListenOptions): Listening {
   const Ctor = ctor();
   if (!Ctor) {

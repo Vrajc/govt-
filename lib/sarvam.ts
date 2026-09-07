@@ -144,6 +144,74 @@ export async function speakSarvam(text: string, lang: Lang): Promise<ArrayBuffer
 }
 
 /* ------------------------------------------------------------------ *
+ * Listening
+ * ------------------------------------------------------------------ */
+
+const STT_HOST = "https://api.sarvam.ai/speech-to-text";
+const STT_MODEL = "saaras:v3";
+const STT_TIMEOUT_MS = 25_000;
+
+/**
+ * What somebody said, transcribed.
+ *
+ * The browser has a recogniser of its own and it is the reason this exists.
+ * Android's coverage of these languages is patchy and inconsistent between
+ * builds — it does not do Odia at all, it names Punjabi by its script and
+ * rejects the tag everything else uses, and in practice a phone that
+ * transcribes English perfectly will open the microphone for Gujarati and
+ * return nothing at all. There is no way to ask it in advance which
+ * languages it has.
+ *
+ * Sarvam transcribes all eleven, the same way for every device, and it
+ * takes the audio a phone already produces: Android Chrome records
+ * webm/opus and iOS Safari records mp4/aac, and both were confirmed to come
+ * back correct without any transcoding in between.
+ */
+export async function transcribeSarvam(
+  audio: Blob,
+  lang: Lang,
+): Promise<string | null> {
+  const key = process.env.SARVAM_API_KEY?.trim();
+  if (!hasSarvamKey() || !key) return null;
+  /* A moment of nothing. Sending it costs a round trip to be told so. */
+  if (audio.size < 1200) return null;
+
+  const form = new FormData();
+  /* The extension is how the service reads the container, and the blob's
+     own type is what the browser actually recorded in. */
+  const ext = audio.type.includes("mp4") || audio.type.includes("mpeg")
+    ? "m4a"
+    : audio.type.includes("ogg")
+      ? "ogg"
+      : audio.type.includes("wav")
+        ? "wav"
+        : "webm";
+  form.append("file", audio, `said.${ext}`);
+  form.append("model", STT_MODEL);
+  form.append("language_code", TAG[lang]);
+
+  const control = new AbortController();
+  const timer = setTimeout(() => control.abort(), STT_TIMEOUT_MS);
+  try {
+    const res = await fetch(STT_HOST, {
+      method: "POST",
+      signal: control.signal,
+      headers: { "api-subscription-key": key },
+      body: form,
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { transcript?: string };
+    const text = body.transcript?.trim();
+    return text ? text : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/* ------------------------------------------------------------------ *
  * Answering
  * ------------------------------------------------------------------ */
 

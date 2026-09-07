@@ -13,8 +13,10 @@ import {
 import { primeAudio, speakBest, stopAudio, type Spoken } from "@/lib/speakBest";
 import {
   canListen,
+  canRecord,
   checkMic,
   listen,
+  record,
   type ListenFailure,
   type Listening,
 } from "@/lib/voiceInput";
@@ -133,7 +135,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
 
   /* ---------------- whether this phone can listen at all ---------------- */
   useEffect(() => {
-    const usable = canListen();
+    const usable = canListen() || canRecord();
     setMicUsable(usable);
     if (!usable) return;
 
@@ -369,7 +371,26 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
        nothing and is the only place its answer is needed. */
     setPhase("listening");
 
-    session.current = listen({
+    /**
+     * Record and have it transcribed, wherever that is possible.
+     *
+     * The browser's own recogniser is the fallback now rather than the
+     * first choice, and only because of what it does when it cannot manage
+     * a language: nothing. It opens the microphone for Gujarati on a phone
+     * that transcribes English perfectly, listens, and returns an empty
+     * result with no error — indistinguishable from somebody who said
+     * nothing, and unfixable from here because there is no way to ask it
+     * which languages it has. Ten of these eleven were arriving that way.
+     *
+     * Recording gives up the words appearing as they are spoken, which is a
+     * real loss: watching them appear is how somebody knows the phone is
+     * hearing them. In exchange it works in all eleven, identically, on
+     * every device. That trade is worth making for a panel whose whole
+     * purpose is the reader who cannot use the screen.
+     */
+    const listenNow = canRecord() ? record : listen;
+
+    session.current = listenNow({
       lang,
       onPartial: (text) => {
         catching.current = text;
@@ -438,8 +459,17 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     setTrouble("");
   }, [hush]);
 
+  /* Recording gives no words on screen as they are spoken, so the label has
+     to say when to stop. Without it somebody waits for their words to appear
+     and the twenty-second ceiling ends the sentence for them. */
   const micLabel =
-    phase === "listening" ? t("voice.listening") : phase === "thinking" ? t("voice.thinking") : t("voice.press");
+    phase === "listening"
+      ? canRecord()
+        ? t("voice.listeningPressDone")
+        : t("voice.listening")
+      : phase === "thinking"
+        ? t("voice.thinking")
+        : t("voice.press");
 
   return (
     <div className="voice-scrim" onMouseDown={(e) => e.target === e.currentTarget && close()}>
