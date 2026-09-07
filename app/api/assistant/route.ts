@@ -2,6 +2,7 @@ import {
   destinationMenu,
   resolveDestination,
   serviceDestination,
+  type Destination,
 } from "@/lib/assistant/destinations";
 import { fallbackAnswer, matchService, tFor } from "@/lib/assistant/fallback";
 import { describePath } from "@/lib/assistant/where";
@@ -50,7 +51,10 @@ const cache = new Map<string, Answered>();
 interface Answered {
   say: string;
   steps: string[];
-  goto: { href: string; label: string } | null;
+  /* Carries the number as well as the page, so the panel can say "this is
+     number 2" without the model ever having been shown a number to get
+     wrong. Same rule as the destination itself: looked up, never invented. */
+  goto: Destination | null;
   /** Which provider actually answered, surfaced in /result technical details. */
   source: "sarvam" | "gemini" | "fallback";
 }

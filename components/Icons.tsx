@@ -297,3 +297,17 @@ export const Mic = ({ size = 22, className }: P) => (
     <path d="M8 21h8" />
   </svg>
 );
+
+/**
+ * The number list. A hash, because it is the one symbol on a telephone
+ * keypad that this audience has already been taught means "number" — by
+ * every automated line they have ever been put through.
+ */
+export const Hash = ({ size = 22, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M9.5 3.5 7.5 20.5" />
+    <path d="M16.5 3.5 14.5 20.5" />
+    <path d="M3.5 9h17" />
+    <path d="M3 15h17" />
+  </svg>
+);

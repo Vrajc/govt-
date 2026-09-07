@@ -3998,3 +3998,174 @@ a.col-item:hover .col-go { gap: 10px; }
 @media print {
   .voice-launch, .voice-scrim { display: none !important; }
 }
+
+/* ==================================================================
+   The numbers (lib/numbers.ts)
+
+   Every service carries a fixed number so that one person can tell
+   another which door to open without either of them reading a word. The
+   badge is a rounded rectangle rather than the filled circle the voice
+   panel uses for its steps: a step number means "third thing to do" and
+   this one means "the name of this door", and drawing them alike would
+   make them one idea.
+   ================================================================== */
+.num-badge {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--sunk);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  /* So 1 and 14 sit on the same left edge down a column of fourteen. */
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.num-badge-lg {
+  min-width: 42px;
+  height: 42px;
+  font-size: var(--fs-lg);
+}
+/* The one place it sits on a filled button instead of on paper. */
+.num-badge-invert {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--paper);
+}
+
+.num-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* The line above everything on a service page. */
+.svc-number { margin: 0 0 20px; }
+
+/* ---- the box you dial into ---- */
+.num-box { margin: 0; }
+/* On the hub and on /n, where it is a thing on the page rather than a
+   row inside something else. */
+.num-box-card {
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+/* In the voice panel, matching the box to type a question into. */
+.num-box-panel {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.num-box-l {
+  display: block;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+}
+.num-box-hint {
+  margin: 4px 0 10px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.num-box-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.num-box-in {
+  flex: 0 0 auto;
+  width: 6.5rem;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  /* Big, and centred: it holds one or two characters and it is aimed at
+     somebody typing with one finger while holding a phone to their ear. */
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.num-box-in::placeholder {
+  color: var(--placeholder);
+  font-size: var(--fs-md);
+  font-weight: 400;
+}
+.num-box-go {
+  flex: 0 0 auto;
+  min-height: var(--tap);
+  padding: 0 24px;
+  border: 1px solid var(--primary);
+  border-radius: var(--r-sm);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+.num-box-go:disabled { opacity: 0.5; cursor: not-allowed; }
+.num-box-miss {
+  margin: 10px 0 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--attention-text);
+}
+
+/* ---- the list, which is written to be read down a phone line ---- */
+.num-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.num-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* The same tap target as the hub's rows, and for the same reason. */
+  min-height: 56px;
+  padding: 9px 10px;
+  margin: 0 -10px;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.num-list-item:hover { background: var(--sunk); }
+.num-list-name { min-width: 0; }
+
+/* A service name with its number in front of it, inside a card title that
+   also holds a chevron at its far end. */
+.card-title-num {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* The go-there button now carries a badge as well as its words. */
+.voice-go {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}

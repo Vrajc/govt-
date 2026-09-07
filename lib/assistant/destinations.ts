@@ -1,5 +1,6 @@
 import type { Dict } from "@/lib/i18n";
 import { CATALOGUE, isServiceId } from "@/lib/services/catalogue";
+import { NUMBERED, idForNumber, numberOf } from "@/lib/numbers";
 
 /**
  * Where the voice assistant is allowed to send somebody.
@@ -20,6 +21,11 @@ import { CATALOGUE, isServiceId } from "@/lib/services/catalogue";
 export interface Destination {
   href: string;
   label: string;
+  /**
+   * The number printed beside it and read out with it — see lib/numbers.
+   * Null for the pages nobody is ever told to go to by number.
+   */
+  n: number | null;
 }
 
 /** The fixed pages, and the one-line description the model is given. */
@@ -69,7 +75,7 @@ export function resolveDestination(raw: unknown, d: Dict): Destination | null {
   if (!id || id === "none") return null;
 
   const page = PAGES[id];
-  if (page) return { href: page.href, label: page.label(d) };
+  if (page) return { href: page.href, label: page.label(d), n: numberOf(id) };
 
   if (id.startsWith(SVC_PREFIX)) {
     const svc = id.slice(SVC_PREFIX.length);
@@ -77,6 +83,7 @@ export function resolveDestination(raw: unknown, d: Dict): Destination | null {
     return {
       href: `/service/${svc}`,
       label: (d.svc as Record<string, string>)[`${svc}Name`] ?? svc,
+      n: numberOf(id),
     };
   }
 
@@ -90,7 +97,29 @@ export function serviceDestination(id: string, d: Dict): Destination | null {
 
 export function pageDestination(id: keyof typeof PAGES, d: Dict): Destination {
   const page = PAGES[id];
-  return { href: page.href, label: page.label(d) };
+  return { href: page.href, label: page.label(d), n: numberOf(id) };
+}
+
+/**
+ * The number list, resolved into pages and names in the reader's language.
+ *
+ * Built by walking the numbers and asking the same resolver the voice
+ * assistant asks, so the list on /help and the button under a spoken
+ * answer can never disagree about what number 9 is.
+ */
+export function numberedList(d: Dict): { n: number; href: string; label: string }[] {
+  const out: { n: number; href: string; label: string }[] = [];
+  for (const { n, id } of NUMBERED) {
+    const dest = resolveDestination(id, d);
+    if (dest) out.push({ n, href: dest.href, label: dest.label });
+  }
+  return out;
+}
+
+/** Where a dialled number goes, or nothing when there is no such number. */
+export function destinationForNumber(n: number, d: Dict): Destination | null {
+  const id = idForNumber(n);
+  return id === null ? null : resolveDestination(id, d);
 }
 
 /**

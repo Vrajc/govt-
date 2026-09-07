@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useApp } from "@/lib/app-state";
 import { ScreenShell } from "@/components/ScreenShell";
-import { Book, Chevron, MapPin, Phone } from "@/components/Icons";
+import { Book, Chevron, Hash, MapPin, Phone } from "@/components/Icons";
+import { NumberList } from "@/components/NumberList";
+import { NumberBox } from "@/components/NumberBox";
 
 /** Static mock list. A real one would use the device location. */
 const CENTRES = [
@@ -14,7 +16,7 @@ const CENTRES = [
   { name: "Common Service Centre, Bopal", area: "South Bopal, Ahmedabad", km: "7.6", open: "9 – 6" },
 ];
 
-type Panel = null | "centres" | "steps";
+type Panel = null | "centres" | "steps" | "numbers";
 
 /** /help — three big options, and never a dead end. */
 export default function HelpScreen() {
@@ -70,6 +72,23 @@ export default function HelpScreen() {
         </span>
         <span className="card-sub">{t("help.stepsSub")}</span>
       </button>
+
+      {/* On /help rather than only on the hub, because the person most
+          likely to need it is on the phone to somebody who is reading
+          numbers off their own screen — and this is the page they were
+          told to open. */}
+      <button
+        type="button"
+        className="card"
+        onClick={() => setOpen(open === "numbers" ? null : "numbers")}
+        aria-expanded={open === "numbers"}
+      >
+        <span className="card-title">
+          <Hash size={26} />
+          {t("num.show")}
+        </span>
+        <span className="card-sub">{t("num.showSub")}</span>
+      </button>
       </div>
 
       {open === "centres" && (
@@ -106,6 +125,19 @@ export default function HelpScreen() {
               </li>
             ))}
           </ol>
+        </div>
+      )}
+
+      {open === "numbers" && (
+        <div className="panel" style={{ marginTop: 16 }}>
+          <h2 className="section-title" style={{ marginTop: 0 }}>
+            {t("num.title")}
+          </h2>
+          <p className="helper" style={{ marginTop: 0 }}>
+            {t("num.guide")}
+          </p>
+          <NumberBox />
+          <NumberList />
         </div>
       )}
 

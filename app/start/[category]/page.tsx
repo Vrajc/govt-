@@ -6,7 +6,9 @@ import { useApp } from "@/lib/app-state";
 import { ScreenShell } from "@/components/ScreenShell";
 import { BigLink } from "@/components/BigButton";
 import { Chevron, Search } from "@/components/Icons";
+import { NumberBadge } from "@/components/NumberBadge";
 import { servicesIn } from "@/lib/services/catalogue";
+import { numberOfService } from "@/lib/numbers";
 import type { Category } from "@/lib/services/types";
 
 const CATEGORIES: Category[] = ["start", "have", "family"];
@@ -47,14 +49,22 @@ export default function CategoryScreen({
       title={title}
       guide={t("hub.guide")}
       speakExtra={services
-        .map((s) => (d.svc as Record<string, string>)[`${s.id}Name`])
+        .map(
+          (s) =>
+            `${(d.svc as Record<string, string>)[`${s.id}Name`]}. ${t("num.of", {
+              n: numberOfService(s.id),
+            })}`,
+        )
         .join(". ")}
     >
       <div role="list" className="grid-list">
         {services.map((s) => (
           <Link key={s.id} href={`/service/${s.id}`} className="card" role="listitem">
             <span className="card-title card-title-row">
-              <span>{(d.svc as Record<string, string>)[`${s.id}Name`]}</span>
+              <span className="card-title-num">
+                <NumberBadge n={numberOfService(s.id)} />
+                <span>{(d.svc as Record<string, string>)[`${s.id}Name`]}</span>
+              </span>
               <Chevron size={22} />
             </span>
             <span className="card-sub">

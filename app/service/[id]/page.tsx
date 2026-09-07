@@ -6,7 +6,9 @@ import { useApp } from "@/lib/app-state";
 import { ScreenShell } from "@/components/ScreenShell";
 import { BigButton, BigLink } from "@/components/BigButton";
 import { Check, Chevron, Clock, Info } from "@/components/Icons";
+import { NumberBadge } from "@/components/NumberBadge";
 import { serviceById } from "@/lib/services/catalogue";
+import { numberOfService } from "@/lib/numbers";
 import { dlcWindow } from "@/lib/dlcWindow";
 import { localeOf } from "@/lib/i18n/util";
 
@@ -76,7 +78,9 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
       ]}
       title={name}
       guide={SVC[`${svc.id}Short`]}
-      speakExtra={`${SVC[`${svc.id}Who`]}. ${SVC[`${svc.id}What`]}`}
+      speakExtra={`${t("num.of", { n: numberOfService(svc.id) })}. ${SVC[`${svc.id}Who`]}. ${
+        SVC[`${svc.id}What`]
+      }`}
       action={
         <>
           <BigButton onClick={begin} icon={<Chevron size={22} />}>
@@ -88,6 +92,14 @@ export default function ServiceScreen({ params }: { params: Promise<{ id: string
         </>
       }
     >
+      {/* Above everything else, because this is the line somebody is going
+          to read out to whoever is helping them — or write down before they
+          walk to the centre. It is the address of this page in a form that
+          survives being spoken down a bad phone line. */}
+      <p className="svc-number">
+        <NumberBadge n={numberOfService(svc.id)} size="lg" withWord />
+      </p>
+
       {/* On a phone this is one column, in this order. On a desktop the
           facts move alongside and stay put while the rest scrolls. */}
       <div className="split-main">

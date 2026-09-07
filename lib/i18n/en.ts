@@ -375,6 +375,10 @@ export const en = {
     stepFace: "Take one photograph of your face, in good light.",
     stepSend: "Check the answers once, then send it.",
     stepFinder: "Answer the four short questions.",
+    /* Spoken after the answer and before the steps. Written here rather
+       than by the model, so the number said out loud is always the number
+       printed on the card. */
+    numberIs: "This is number {n}.",
   },
 
 } as const;

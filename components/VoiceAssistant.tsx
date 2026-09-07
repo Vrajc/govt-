@@ -21,6 +21,10 @@ import {
   type Listening,
 } from "@/lib/voiceInput";
 import { Mic, Speaker, StopSquare } from "./Icons";
+import { NumberBadge } from "./NumberBadge";
+import { NumberBox } from "./NumberBox";
+import { destinationForNumber } from "@/lib/assistant/destinations";
+import { onlyANumber } from "@/lib/numbers";
 
 /**
  * Ask out loud.
@@ -58,12 +62,36 @@ type Phase = "idle" | "listening" | "thinking" | "answered" | "trouble";
 interface Destination {
   href: string;
   label: string;
+  /** The number printed on the same page everywhere else in the app. */
+  n: number | null;
 }
 
 interface Answer {
   say: string;
   steps: string[];
   goto: Destination | null;
+}
+
+/**
+ * The whole answer as one spoken passage: the sentence, then the number,
+ * then the steps in order.
+ *
+ * The number is said as a sentence — "this is number two" — and not as a
+ * numeral in front of the name, which is the form that makes it worth
+ * saying at all. It is also the one part of the answer the model did not
+ * write: it is looked up from the destination the server resolved, so what
+ * is spoken is always what is printed on the card.
+ *
+ * The steps themselves still go out unnumbered. Half the voices on the
+ * market read "1." as "one full stop", and their numerals are on the
+ * screen for whoever can see them.
+ */
+function passage(
+  a: Answer,
+  t: (path: string, vars?: Record<string, string | number>) => string,
+): string {
+  const number = a.goto?.n != null ? t("voice.numberIs", { n: a.goto.n }) : "";
+  return [a.say, number, ...a.steps].filter(Boolean).join(" ");
 }
 
 export function VoiceAssistant() {
@@ -97,7 +125,7 @@ export function VoiceAssistant() {
 }
 
 function VoicePanel({ onClose }: { onClose: () => void }) {
-  const { t, lang } = useApp();
+  const { t, d, lang } = useApp();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -270,11 +298,44 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     };
   }, [hush]);
 
+  /* ---------------- going ---------------- */
+  /* Defined above `ask` because `ask` needs it: a question that turns out
+     to be a number never reaches the model at all. */
+  const goThere = useCallback(
+    (href: string) => {
+      hush();
+      session.current?.cancel();
+      router.push(href);
+      onClose();
+    },
+    [hush, onClose, router]
+  );
+
   /* ---------------- asking ---------------- */
   const ask = useCallback(
     async (text: string) => {
       const question = text.trim();
       if (!question) return;
+
+      /**
+       * A sentence that is nothing but a number is somebody dialling.
+       *
+       * They were told "nine" — by the helpline, by a neighbour, by the
+       * list on /help — and repeating it back is not a question to be
+       * interpreted. Sending it to the model would spend a round trip and
+       * a second and a half to arrive, at best, exactly here.
+       *
+       * Strict about what counts, deliberately: "I am 65" has a number in
+       * it and is not a request to go anywhere. Only an utterance with no
+       * words at all is treated this way.
+       */
+      const dialled = onlyANumber(question);
+      const straight = dialled === null ? null : destinationForNumber(dialled, d);
+      if (straight) {
+        goThere(straight.href);
+        return;
+      }
+
       hush();
       setSaid(question);
       setAnswer(null);
@@ -299,12 +360,9 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
       const got: Answer = { say: res.data.say, steps: res.data.steps, goto: res.data.goto };
       setAnswer(got);
       setPhase("answered");
-      // Read out as one passage: the sentence, then the steps in order.
-      // No numbers — half the voices on the market pronounce "1." as "one
-      // full stop", and the numbers are on the screen for whoever can see.
-      say([got.say, ...got.steps].join(" "));
+      say(passage(got, t));
     },
-    [hush, lang, pathname, say, t]
+    [d, goThere, hush, lang, pathname, say, t]
   );
 
   /* ---------------- listening ---------------- */
@@ -444,16 +502,6 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     session.current = null;
   }, []);
 
-  const goThere = useCallback(
-    (href: string) => {
-      hush();
-      session.current?.cancel();
-      router.push(href);
-      onClose();
-    },
-    [hush, onClose, router]
-  );
-
   const reset = useCallback(() => {
     hush();
     setPhase("idle");
@@ -548,7 +596,11 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
                   className="voice-go"
                   onClick={() => goThere(answer.goto!.href)}
                 >
-                  {t("voice.goThere", { page: answer.goto.label })}
+                  {/* The number on the button as well as in the sentence
+                      that was just spoken, so it is still there to be
+                      written down after the voice has finished. */}
+                  {answer.goto.n !== null && <NumberBadge n={answer.goto.n} invert />}
+                  <span>{t("voice.goThere", { page: answer.goto.label })}</span>
                 </button>
               )}
               {/* Hidden rather than dead when there is no voice to replay with. */}
@@ -556,9 +608,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
                 <button
                   type="button"
                   className="voice-minor"
-                  onClick={() =>
-                    speaking ? hush() : say([answer.say, ...answer.steps].join(" "))
-                  }
+                  onClick={() => (speaking ? hush() : say(passage(answer, t)))}
                 >
                   {speaking ? <StopSquare size={18} /> : <Speaker size={18} />}
                   <span>{speaking ? t("common.stop") : t("voice.replay")}</span>
@@ -599,6 +649,12 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </form>
+
+        {/* For the person who opened this panel already knowing the answer.
+            Somebody rang the helpline, was told "nine", and pressed the
+            microphone out of habit — nine is faster than saying it, and it
+            cannot be misheard. */}
+        <NumberBox className="num-box-panel" onGo={goThere} />
 
         <p className="voice-privacy">{t("voice.privacy")}</p>
       </div>

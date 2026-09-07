@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useApp } from "@/lib/app-state";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Chevron, Clock, People, Person, Search } from "@/components/Icons";
+import { NumberBadge } from "@/components/NumberBadge";
+import { NumberBox } from "@/components/NumberBox";
 import { servicesIn } from "@/lib/services/catalogue";
+import { numberOfService } from "@/lib/numbers";
 import type { Category } from "@/lib/services/types";
 
 /**
@@ -47,9 +50,17 @@ export default function StartScreen() {
       crumbs={[{ label: t("nav.home") }]}
       title={t("hub.title")}
       guide={t("hub.guide")}
+      /* The number goes after the name, so the Listen button reads out the
+         one part of this screen somebody can write on the back of an
+         envelope and carry to a helpline. */
       speakExtra={doors
         .map((door) =>
-          [door.title, ...servicesIn(door.c).map((s) => SVC[`${s.id}Name`])].join(". "),
+          [
+            door.title,
+            ...servicesIn(door.c).map(
+              (s) => `${SVC[`${s.id}Name`]}. ${t("num.of", { n: numberOfService(s.id) })}`,
+            ),
+          ].join(". "),
         )
         .join(". ")}
     >
@@ -74,6 +85,7 @@ export default function StartScreen() {
                       className="hub-door-item"
                       onClick={() => resetApp()}
                     >
+                      <NumberBadge n={numberOfService(s.id)} />
                       <span className="hub-door-words">
                         <span className="hub-door-name">{SVC[`${s.id}Name`]}</span>
                         <span className="hub-door-who">{SVC[`${s.id}Who`]}</span>
@@ -95,6 +107,12 @@ export default function StartScreen() {
         </span>
         <span className="card-sub">{t("hub.notSureSub")}</span>
       </Link>
+
+      {/* Low on the page on purpose. Most people arrive here with a
+          situation and no number, and the doors above are for them; this is
+          for the one who arrives having already been told "nine", and for
+          whom every other row on this screen is something to scroll past. */}
+      <NumberBox className="num-box-card" />
 
       <p className="hub-track-link">
         <Link href="/track">{t("hub.track")}</Link>

@@ -137,6 +137,25 @@ export const svcEn = {
     trackEmpty: "Type the reference number first.",
   },
 
+  /**
+   * The numbers beside the services — see lib/numbers.ts for why they are
+   * fixed. The copy here is written for the sentence they exist to make
+   * possible: one person telling another, out loud, "yours is number two".
+   */
+  num: {
+    title: "The number list",
+    guide: "Everything here has a number. Say it, type it, or ask someone on the phone to read you one.",
+    label: "Go to a number",
+    hint: "If someone gave you a number, type it here. They run from 0 to {last}.",
+    placeholder: "Number",
+    go: "Go",
+    of: "Number {n}",
+    unknown: "There is no number {n}.",
+    taking: "Taking you to number {n}.",
+    show: "See every number",
+    showSub: "One short list, made to be read out over the phone",
+  },
+
   /* ================================================================
    * The finder
    * ================================================================ */
