@@ -58,7 +58,6 @@ export const te: PartialDict = {
 
     ppoLabel: "పీపీఓ నంబరు",
     ppoHelp: "పెన్షన్ రసీదు మీద ఉంటుంది, పన్నెండు అక్షరాలు.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ఆధార్ నంబరు",
     aadhaarHelp: "దీన్ని మేము ఎప్పుడూ దాచుకోము. ఈ నమూనాకి ఏ పన్నెండు అంకెలైనా సరిపోతాయి.",

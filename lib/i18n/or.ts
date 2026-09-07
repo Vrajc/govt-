@@ -58,7 +58,6 @@ export const or: PartialDict = {
 
     ppoLabel: "ପିପିଓ ନମ୍ବର",
     ppoHelp: "ପେନସନ ରସିଦରେ ଥାଏ, ବାରଟି ଅକ୍ଷର।",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ଆଧାର ନମ୍ବର",
     aadhaarHelp: "ଆମେ ଏହା କେବେ ରଖୁ ନାହିଁ। ଏହି ନମୁନା ପାଇଁ ଯେକୌଣସି ବାରଟି ଅଙ୍କ ଚଳିଯିବ।",

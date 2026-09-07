@@ -63,7 +63,6 @@ export const en = {
 
     ppoLabel: "PPO number",
     ppoHelp: "It is on the pension slip, 12 characters.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "Aadhaar number",
     aadhaarHelp: "We never store this. Use any 12 digits for this demo.",

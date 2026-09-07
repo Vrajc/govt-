@@ -59,7 +59,6 @@ export const ml: PartialDict = {
 
     ppoLabel: "പിപിഒ നമ്പർ",
     ppoHelp: "പെൻഷൻ രസീതിൽ ഉണ്ടാകും, പന്ത്രണ്ട് അക്ഷരം.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ആധാർ നമ്പർ",
     aadhaarHelp: "ഞങ്ങൾ ഇത് ഒരിക്കലും സൂക്ഷിക്കാറില്ല. ഈ മാതൃകയ്ക്ക് ഏതു പന്ത്രണ്ട് അക്കവും മതി.",

@@ -57,7 +57,6 @@ export const gu: Dict = {
 
     ppoLabel: "PPO નંબર",
     ppoHelp: "પેન્શનની સ્લિપ પર લખેલો છે, 12 અક્ષરનો.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "આધાર નંબર",
     aadhaarHelp: "અમે આ ક્યાંય રાખતા નથી. નમૂના માટે કોઈ પણ 12 આંકડા ચાલશે.",

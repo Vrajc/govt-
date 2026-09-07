@@ -1,4 +1,3 @@
-import { speak } from "@/lib/openai";
 import { speakCloud } from "@/lib/tts";
 import { speakSarvam } from "@/lib/sarvam";
 import { fail, langOf, readJson } from "@/lib/reqContext";
@@ -26,10 +25,11 @@ export async function POST(req: Request) {
 
   const lang = langOf(body?.language);
 
-  /* Sarvam first. It is the only one of the three that speaks all eleven —
-     Odia included, which nothing else here can — and it answers in about a
-     second where Gemini takes six to ten. Gemini and OpenAI stay behind it
-     for a deployment that has one of those keys and not this one. */
+  /* Sarvam, then Gemini. Sarvam is the only one that speaks all eleven —
+     Odia included, which nothing else here can — and answers in about a
+     second where Gemini takes six to ten. Gemini stays behind it for a
+     deployment that has that key and not this one. Below both, the device's
+     own voice, which needs no key and no network. */
   const native = await speakSarvam(text, lang);
   if (native) {
     return new Response(native, {
@@ -51,13 +51,6 @@ export async function POST(req: Request) {
            identical for every reader of that screen in that language. */
         "cache-control": "public, max-age=86400",
       },
-    });
-  }
-
-  const mp3 = await speak(text, lang);
-  if (mp3) {
-    return new Response(mp3, {
-      headers: { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" },
     });
   }
 

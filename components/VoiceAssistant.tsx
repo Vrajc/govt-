@@ -10,7 +10,7 @@ import {
   whenVoicesReady,
   type VoicePlan,
 } from "@/lib/speech";
-import { speakBest, type Spoken } from "@/lib/speakBest";
+import { primeAudio, speakBest, type Spoken } from "@/lib/speakBest";
 import {
   canListen,
   checkMic,
@@ -80,6 +80,7 @@ export function VoiceAssistant() {
              and Safari will not speak after one unless the page has already
              spoken inside a real press. This is that press. */
           primeSpeech();
+          primeAudio();
           setOpen(true);
         }}
         aria-haspopup="dialog"
@@ -136,9 +137,23 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     setMicUsable(usable);
     if (!usable) return;
 
-    /* A permission that was refused once stays refused, silently, and the
-       phone gives no sign of it until the button has been pressed and has
-       apparently done nothing. Where the browser will tell us, say so first. */
+    /**
+     * Watch the permission, but only ever to clear.
+     *
+     * This used to read the permission on mount and, if it was denied, put
+     * a red box on the panel before the person had pressed anything. That
+     * is an accusation on arrival: it greets somebody who came to ask a
+     * question with a complaint about their settings, and it was shown on
+     * every screen the panel opens over. Whether the microphone works is
+     * something the press finds out — pressing is also the only thing that
+     * makes a browser ask — so nothing is claimed until something is tried.
+     *
+     * What the watcher is genuinely good for is the other direction. When
+     * somebody follows the instructions and allows the microphone, the
+     * granting happens in browser chrome, outside this page, and the stale
+     * red box would otherwise sit there contradicting it until a reload.
+     * So: granted clears the message, and nothing here ever sets one.
+     */
     let watched: PermissionStatus | null = null;
     let alive = true;
     const perms = navigator.permissions;
@@ -148,14 +163,13 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
         .then((status) => {
           if (!alive) return;
           watched = status;
-          const check = () =>
-            setTrouble(status.state === "denied" ? t("voice.micBlocked") : "");
-          check();
-          status.onchange = check;
+          status.onchange = () => {
+            if (status.state === "granted") setTrouble("");
+          };
         })
         .catch(() => {
-          /* Firefox does not know this permission name. Nothing is lost: the
-             failure path below still reports a refusal accurately. */
+          /* Firefox does not know this permission name. Nothing is lost:
+             nothing was being claimed from it anyway. */
         });
     }
     return () => {
@@ -318,6 +332,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
 
   const startListening = useCallback(() => {
     primeSpeech();
+    primeAudio();
     hush();
     setSaid("");
     catching.current = "";

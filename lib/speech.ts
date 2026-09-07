@@ -236,17 +236,6 @@ export function toDevanagariAny(text: string): string {
   return text;
 }
 
-/**
- * Gujarati to Devanagari, kept under its old name.
- *
- * The whole app used to call this, and it is still the single most-used path
- * — Chrome ships a Hindi voice and no Gujarati one, so a Gujarati reader on
- * a laptop lands here every time.
- */
-export function guToDevanagari(text: string): string {
-  return toDevanagari(text, "gujr");
-}
-
 /* ==================================================================
  * Choosing a voice
  * ================================================================== */

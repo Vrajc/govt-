@@ -117,10 +117,7 @@ export const svcEn = {
        not by an i18n library, so it can move anywhere in the sentence a
        language needs it. Every category holds two or more services, so
        the plural form is the only one these ever render. */
-    commonHead: "Most people come here for",
     chooseHead: "Or choose your situation",
-    countOf:    "{n} services",
-    seeThem:    "See all {n}",
 
     catStart: "I want to start getting a pension",
     catStartSub: "I do not get one yet",

@@ -1,7 +1,7 @@
 import "server-only";
 import type { Lang } from "./types";
 import { langMeta } from "./i18n/languages";
-import { hasGeminiKey, liveKeys, noteKeyResult } from "./geminiKeys";
+import { liveKeys, noteKeyResult } from "./geminiKeys";
 
 /**
  * Reading a sentence aloud in a real voice, for the languages where the
@@ -119,10 +119,6 @@ function rateFromMime(mime: string | undefined): number {
 /* ------------------------------------------------------------------ *
  * Speaking
  * ------------------------------------------------------------------ */
-
-export function hasCloudVoice(): boolean {
-  return hasGeminiKey();
-}
 
 /**
  * One line, spoken. Returns null for every failure, and the caller falls

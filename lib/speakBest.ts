@@ -34,6 +34,47 @@ export interface Spoken {
   cancel: () => void;
 }
 
+/**
+ * The one <audio> element this app ever plays through, unlocked in advance.
+ *
+ * A phone will not let a page make a sound unless a person asked it to, and
+ * "asked it to" means the play() call happens while the press is still
+ * counted as user activation. Fetching the audio first spends that: the
+ * request takes about a second, play() is then refused, and the catch below
+ * falls through to the device's own voice — so the reader presses Listen,
+ * waits, and hears exactly the robotic reading the network voice existed to
+ * replace. Nothing errors, which is why it looks like the feature simply
+ * does not work on a phone.
+ *
+ * The fix is the same one every audio player on the web uses: play a moment
+ * of silence through the element during the press, which unlocks it, and
+ * then keep using that same element. It is unlocked once and stays unlocked.
+ */
+let unlocked: HTMLAudioElement | null = null;
+
+/** A tenth of a second of silence — enough to unlock, too short to hear. */
+const SILENCE =
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=";
+
+/**
+ * Call this synchronously inside the press, before anything is awaited.
+ * Safe to call repeatedly; it only does the work once.
+ */
+export function primeAudio(): void {
+  if (typeof window === "undefined" || unlocked) return;
+  try {
+    const audio = new Audio(SILENCE);
+    audio.volume = 0;
+    void audio.play().catch(() => {
+      /* Refused even now — a browser that will not play at all. The device
+         voice still works and speakBest falls back to it. */
+    });
+    unlocked = audio;
+  } catch {
+    /* No Audio constructor. Nothing here can help; the fallback will. */
+  }
+}
+
 export async function speakBest(
   text: string,
   plan: VoicePlan | null,
@@ -57,14 +98,22 @@ export async function speakBest(
         body: JSON.stringify({ text: clean, language: lang }),
       });
       if (res.ok) {
-        const audio = new Audio(URL.createObjectURL(await res.blob()));
+        /* Reuse the element unlocked during the press. A fresh one would be
+           refused, because by now the activation the press granted is long
+           spent on the fetch above. */
+        const audio = unlocked ?? new Audio();
+        const url = URL.createObjectURL(await res.blob());
         audio.onended = onEnd;
         audio.onerror = onEnd;
+        audio.volume = 1;
+        audio.src = url;
         await audio.play();
         return {
           cancel: () => {
             audio.pause();
-            audio.src = "";
+            audio.removeAttribute("src");
+            audio.load();
+            URL.revokeObjectURL(url);
           },
         };
       }

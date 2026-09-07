@@ -319,19 +319,3 @@ export async function precheckDocument(
 /* ==================================================================
  * 5.3 — Optional TTS upgrade
  * ================================================================== */
-export async function speak(text: string, lang: Lang): Promise<ArrayBuffer | null> {
-  const api = getClient();
-  if (!api) return null;
-  try {
-    const res = await api.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: "alloy",
-      input: text.slice(0, 800),
-      instructions: `Speak slowly and warmly in ${langName(lang)}, as if talking to an elderly person.`,
-      response_format: "mp3",
-    });
-    return await res.arrayBuffer();
-  } catch {
-    return null;
-  }
-}

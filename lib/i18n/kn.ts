@@ -58,7 +58,6 @@ export const kn: PartialDict = {
 
     ppoLabel: "ಪಿಪಿಒ ಸಂಖ್ಯೆ",
     ppoHelp: "ಪಿಂಚಣಿ ರಸೀದಿಯಲ್ಲಿ ಇರುತ್ತದೆ, ಹನ್ನೆರಡು ಅಕ್ಷರ.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ಆಧಾರ್ ಸಂಖ್ಯೆ",
     aadhaarHelp: "ಇದನ್ನು ನಾವು ಎಂದೂ ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ. ಈ ಮಾದರಿಗೆ ಯಾವುದೇ ಹನ್ನೆರಡು ಅಂಕಿ ಸಾಕು.",

@@ -58,7 +58,6 @@ export const hi: Dict = {
 
     ppoLabel: "पीपीओ नंबर",
     ppoHelp: "पेंशन की पर्ची पर लिखा होता है, 12 अक्षर.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "आधार नंबर",
     aadhaarHelp: "हम इसे कहीं नहीं रखते. इस नमूने में कोई भी 12 अंक चलेंगे.",

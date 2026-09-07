@@ -59,7 +59,6 @@ export const pa: PartialDict = {
 
     ppoLabel: "ਪੀਪੀਓ ਨੰਬਰ",
     ppoHelp: "ਪੈਨਸ਼ਨ ਦੀ ਪਰਚੀ ਉੱਤੇ ਹੁੰਦਾ ਹੈ, ਬਾਰਾਂ ਅੱਖਰ.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ਆਧਾਰ ਨੰਬਰ",
     aadhaarHelp: "ਅਸੀਂ ਇਹ ਕਦੇ ਨਹੀਂ ਰੱਖਦੇ. ਇਸ ਨਮੂਨੇ ਲਈ ਕੋਈ ਵੀ ਬਾਰਾਂ ਅੰਕ ਚੱਲ ਜਾਣਗੇ.",

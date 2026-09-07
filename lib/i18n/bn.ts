@@ -60,7 +60,6 @@ export const bn: PartialDict = {
 
     ppoLabel: "পিপিও নম্বর",
     ppoHelp: "পেনশনের রসিদে থাকে, বারোটা অক্ষর।",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "আধার নম্বর",
     aadhaarHelp: "আমরা এটা কখনও রাখি না। এই নমুনার জন্য যেকোনও বারোটা সংখ্যা চলবে।",

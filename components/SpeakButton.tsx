@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/app-state";
 import { planVoice, type VoicePlan } from "@/lib/speech";
-import { speakBest, TTS_FALLBACK_ENABLED, type Spoken } from "@/lib/speakBest";
+import { primeAudio, speakBest, TTS_FALLBACK_ENABLED, type Spoken } from "@/lib/speakBest";
 import { Speaker, StopSquare } from "./Icons";
 
 /**
@@ -26,7 +26,6 @@ export function SpeakButton({ text }: { text: string }) {
   const [supported, setSupported] = useState(true);
   const [plan, setPlan] = useState<VoicePlan | null>(null);
   const jobRef = useRef<Spoken | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const pathname = usePathname();
 
   /* Voices load asynchronously nearly everywhere, and the event that says so
@@ -83,10 +82,6 @@ export function SpeakButton({ text }: { text: string }) {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
     setSpeaking(false);
   }, []);
 
@@ -112,6 +107,9 @@ export function SpeakButton({ text }: { text: string }) {
       stop();
       return;
     }
+    /* First thing, before anything is awaited: this press is the only moment
+       the browser will let us unlock the sound. */
+    primeAudio();
     const clean = text.trim();
     if (!clean) return;
 

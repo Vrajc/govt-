@@ -63,7 +63,6 @@ export const mr: PartialDict = {
 
     ppoLabel: "पीपीओ नंबर",
     ppoHelp: "पेन्शनच्या पावतीवर असतो, बारा अक्षरांचा.",
-    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "आधार नंबर",
     aadhaarHelp: "आम्ही हा कधीच ठेवत नाही. या नमुन्यासाठी कोणतेही बारा आकडे चालतील.",
