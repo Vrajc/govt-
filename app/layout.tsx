@@ -91,8 +91,8 @@ export const viewport: Viewport = {
   // Never cap zoom — 200% is a requirement, not an edge case.
   maximumScale: 5,
   // The ground, exactly, so the phone's own chrome continues the page
-  // rather than framing it in a bar of some near-miss grey.
-  themeColor: "#F6F4F1",
+  // rather than framing it in a bar of some near-miss peach.
+  themeColor: "#FBF1E8",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

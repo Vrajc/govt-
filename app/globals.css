@@ -3,16 +3,18 @@
 /* ------------------------------------------------------------------
    Pension Saral — design tokens
 
-   Visual world: newsprint. A warm neutral grey stock, ink that is teal
-   rather than blue, and the neem-and-laterite pair kept from the passbook
-   draft that came before it — those two are the only colours in the
-   product that carry meaning rather than mood, and they were right.
+   Visual world: a warm peach paper with plum ink. It is the softest of
+   the ten light grounds this was chosen against, and it was chosen on
+   the real screens rather than on a swatch page — the one that reads
+   least like an office, which for a product whose whole job is to get
+   between an eighty-year-old and an office is the point.
 
-   Teal is the one deliberate departure, and it was chosen against three
-   other light grounds on the real screens rather than on a swatch page.
-   Every government site in the country is navy, and navy is exactly what
-   this audience has learned to associate with a form they could not fill
-   in. Teal reads as serious without reading as the uniform.
+   Two colours are not decoration and never move: neem green means it
+   worked, laterite rust means something is wrong. The plum is deliberately
+   darker and more purple than the rust so that a filled primary button and
+   a filled warning button are never read as the same thing — they sit in
+   the same family, which is what makes the page hang together, and two
+   steps apart in depth, which is what keeps them apart in meaning.
 
    The rest of this stylesheet is token-driven, so this block is the
    theme: change these thirty-odd declarations and all fourteen service
@@ -20,46 +22,44 @@
    page turn over with it.
    ------------------------------------------------------------------ */
 :root {
-  /* Warm grey rather than tan. A tan ground is a costume — it says
-     "old government form" before a word has been read, which is charming
-     to a designer and is the exact association this product is trying to
-     get out from under. This is the grey of a newspaper: warm enough not
-     to go clinical next to the ink, plain enough to disappear. */
-  --paper:        #F6F4F1;  /* ground */
-  --surface:      #FFFFFF;  /* raised */
+  /* Peach, not cream and not grey. Warm enough that the plum has somewhere
+     to sit, pale enough that forty lines of Malayalam on it are still the
+     highest-contrast thing on the screen. */
+  --paper:        #FBF1E8;  /* ground */
+  --surface:      #FFFDFA;  /* raised */
   /* One step below the ground, for the utility bar and the footer. Named
      rather than repeated as a fallback in three places. */
-  --sunk:         #E7E3DD;
+  --sunk:         #F0DECC;
 
-  --ink:          #1B1A18;
+  --ink:          #241C16;
   /* Secondary text. Darker than a designer would pick, because it has to
-     clear AAA 7:1 on the teal tint panels as well as on the ground. */
-  --ink-soft:     #3E3B37;
-  --line:         #DAD5CD;
+     clear AAA 7:1 on the plum tint panels as well as on the ground. */
+  --ink-soft:     #453930;
+  --line:         #E3D0BC;
 
-  --primary:      #14484F;  /* teal ink */
-  --primary-dark: #0C3238;  /* on a light ground, hover goes darker */
-  --primary-tint: #D9E7E8;
+  --primary:      #5A2440;  /* plum */
+  --primary-dark: #3F1830;  /* on a light ground, hover goes darker */
+  --primary-tint: #F1E1E8;
 
-  --success:      #2A5636;  /* neem */
-  --success-tint: #DEE9DA;
+  --success:      #2C5A3E;  /* neem */
+  --success-tint: #E4EAD6;
 
-  --attention:    #A2401E;  /* laterite */
-  --attention-tint:#F3DED3;
+  --attention:    #A8431F;  /* laterite */
+  --attention-tint:#F7E0D0;
   /* Laterite one step darker, for the hover state of a filled attention
      button. Mirrors --primary-dark and is named for the same role. */
-  --attention-dark:#7C2F13;
+  --attention-dark:#82330F;
   /* The rust above is a fill colour; as small text it does not reach 7:1.
      This is the same hue taken to AAA, used wherever rust becomes words. */
-  --attention-text:#85331A;
+  --attention-text:#8A3416;
   /* Note text sits on its own tint, so it needs its own value; these were
      literals in three rules and a copy in the audit until the ground moved
      and neither noticed. */
-  --note-good:    #123F27;
-  --note-warn:    #6E2911;
-  --placeholder:  #6F6A63;
+  --note-good:    #10442C;
+  --note-warn:    #7A2A11;
+  --placeholder:  #7C6F63;
 
-  --focus:        #835500;  /* haldi */
+  --focus:        #8A5A00;  /* haldi */
 
   /* The line around something you press or type into is not decoration —
      WCAG asks for 3:1 against what is behind it, and the hairline above is
@@ -67,18 +67,19 @@
      heavy without ever actually passing. So there are two lines: this one
      for controls, checked against all three grounds it is drawn on, and
      the hairline for the boxes that only need to say where they stop. */
-  --line-strong:  #777067;
+  --line-strong:  #8A7761;
 
   /* The edge of a tinted panel, one per tint.
 
      Not the strong colour. A tint panel is a wash the eye reads as one
-     soft shape; ringing it in full teal turns a quiet aside into a boxed
+     soft shape; ringing it in full plum turns a quiet aside into a boxed
      warning, and a page of those is a page of boxes. These are each tint
      carried a few steps toward its own hue — enough to close the shape,
-     not enough to shout. */
-  --primary-line:  #B4CDD0;
-  --success-line:  #B6CDB0;
-  --attention-line:#DFBBA7;
+     not enough to shout. The green and rust edges are warmed to match the
+     paper: a cool green line on a peach ground reads as a stain. */
+  --primary-line:  #DCC0CF;
+  --success-line:  #BCCFAE;
+  --attention-line:#E5BFA5;
 
   /* ----------------------------------------------------------------
      Radius and depth.
@@ -99,21 +100,21 @@
      paper resting on paper. Tinted toward the ink, so nothing goes cold
      and grey against a warm ground. */
   --shadow-1:
-    0 1px 1px rgba(27, 26, 24, 0.04),
-    0 2px 6px rgba(27, 26, 24, 0.05);
+    0 1px 1px rgba(36, 28, 22, 0.04),
+    0 2px 6px rgba(36, 28, 22, 0.05);
   --shadow-2:
-    0 1px 2px rgba(27, 26, 24, 0.05),
-    0 6px 16px rgba(27, 26, 24, 0.07),
-    0 16px 40px rgba(27, 26, 24, 0.06);
+    0 1px 2px rgba(36, 28, 22, 0.05),
+    0 6px 16px rgba(36, 28, 22, 0.07),
+    0 16px 40px rgba(36, 28, 22, 0.06);
   /* Reserved for the two things meant to lift off the page: the hero
      plate and the carousel. Spending it anywhere else flattens both. */
   --shadow-3:
-    0 2px 4px rgba(27, 26, 24, 0.06),
-    0 12px 28px rgba(27, 26, 24, 0.09),
-    0 34px 68px rgba(27, 26, 24, 0.07);
+    0 2px 4px rgba(36, 28, 22, 0.06),
+    0 12px 28px rgba(36, 28, 22, 0.09),
+    0 34px 68px rgba(36, 28, 22, 0.07);
   /* A solid action gets its own, tinted with its own colour rather than
      with grey, which is what stops it looking dirty. */
-  --shadow-btn: 0 1px 2px rgba(20, 72, 79, 0.18), 0 4px 12px rgba(20, 72, 79, 0.16);
+  --shadow-btn: 0 1px 2px rgba(90, 36, 64, 0.20), 0 4px 12px rgba(90, 36, 64, 0.18);
 
   --font-ui: var(--font-latn), system-ui, sans-serif;
   --leading: 1.6;
@@ -272,7 +273,7 @@ input:focus-visible, select:focus-visible, summary:focus-visible {
 .action-dock {
   position: sticky;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(246, 244, 241, 0) 0%, var(--paper) 22%);
+  background: linear-gradient(to bottom, rgba(251, 241, 232, 0) 0%, var(--paper) 22%);
   padding: 12px 0 10px;
   margin-top: 20px;
   z-index: 20;
@@ -353,7 +354,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   box-shadow: var(--shadow-btn);
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); }
-.btn-primary:active:not(:disabled) { box-shadow: 0 1px 2px rgba(20, 72, 79, 0.2); }
+.btn-primary:active:not(:disabled) { box-shadow: 0 1px 2px rgba(90, 36, 64, 0.2); }
 
 .btn-secondary {
   background: var(--surface);
@@ -373,7 +374,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--attention);
   border-color: var(--attention);
   color: var(--paper);
-  box-shadow: 0 1px 2px rgba(162, 64, 30, 0.18), 0 4px 12px rgba(162, 64, 30, 0.16);
+  box-shadow: 0 1px 2px rgba(168, 67, 31, 0.18), 0 4px 12px rgba(168, 67, 31, 0.16);
 }
 .btn-attention:hover:not(:disabled) { background: var(--attention-dark); border-color: var(--attention-dark); }
 
@@ -852,7 +853,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(27, 26, 24, 0.55);
+  background: rgba(36, 28, 22, 0.55);
   overflow-y: auto;
 }
 
@@ -869,7 +870,7 @@ p.body strong { color: var(--ink); font-weight: 700; }
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: 0 24px 64px rgba(27, 26, 24, 0.28);
+  box-shadow: 0 24px 64px rgba(36, 28, 22, 0.28);
 }
 
 .sample-title {
@@ -1341,7 +1342,7 @@ img, svg, video { max-width: 100%; }
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(27, 26, 24, 0.07);
+    box-shadow: 0 6px 16px rgba(36, 28, 22, 0.07);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1408,7 +1409,7 @@ img, svg, video { max-width: 100%; }
   border-bottom: 1px solid var(--line);
   /* The banner above it is opaque and the header sticks under it, so the
      shadow is what separates the pair from the page as it scrolls beneath. */
-  box-shadow: 0 1px 0 rgba(27, 26, 24, 0.03), 0 4px 14px rgba(27, 26, 24, 0.05);
+  box-shadow: 0 1px 0 rgba(36, 28, 22, 0.03), 0 4px 14px rgba(36, 28, 22, 0.05);
 }
 .site-header-inner {
   max-width: var(--page-max);
@@ -1742,7 +1743,7 @@ details.tech ul { padding-left: 18px; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(27, 26, 24, 0.55);
+  background: rgba(36, 28, 22, 0.55);
   overflow-y: auto;
 }
 
@@ -1753,7 +1754,7 @@ details.tech ul { padding-left: 18px; }
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 28px 24px 22px;
-  box-shadow: 0 24px 64px rgba(27, 26, 24, 0.28);
+  box-shadow: 0 24px 64px rgba(36, 28, 22, 0.28);
   margin: auto;
 }
 
@@ -2928,8 +2929,8 @@ body {
 .site-foot {
   background-color: var(--sunk);
   background-image:
-    repeating-linear-gradient(0deg, rgba(119, 112, 103, 0.05) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(90deg, rgba(119, 112, 103, 0.05) 0 1px, transparent 1px 6px);
+    repeating-linear-gradient(0deg, rgba(138, 119, 97, 0.05) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(90deg, rgba(138, 119, 97, 0.05) 0 1px, transparent 1px 6px);
 }
 .foot-bottom { border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 
@@ -3549,48 +3550,52 @@ a.col-item:hover .col-go { gap: 10px; }
    The hub (app/start/page.tsx)
    ================================================================== */
 
-.hub-common { margin-bottom: 32px; }
+/* Each door names what is behind it. The card is a plain container, not a
+   button: the services inside are the links, and wrapping links in a button
+   is both invalid and a keyboard trap. */
+.hub-door { display: flex; flex-direction: column; }
+.hub-door .card-title { margin: 0; font-size: var(--fs-lg); }
+.hub-door .card-sub { margin: 4px 0 0; }
 
-.hub-eyebrow {
-  margin: 0 0 14px;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.hub-door-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 2px;
 }
 
-.hub-common-rows { display: grid; gap: 10px; }
-
-.hub-row {
+.hub-door-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 78px;
-  padding: 14px 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
+  gap: 12px;
+  /* A 78-year-old's tap target, and the reason the list is not denser. */
+  min-height: 56px;
+  padding: 9px 10px;
+  margin: 0 -10px;
+  border-radius: var(--r-sm);
   color: var(--ink);
   text-decoration: none;
 }
-.hub-row:hover { border-color: var(--line-strong); }
-.hub-row > svg { flex: 0 0 auto; color: var(--primary); }
+.hub-door-item:hover { background: var(--sunk); }
+.hub-door-item > svg { flex: 0 0 auto; margin-left: auto; color: var(--primary); }
 
-.hub-row-words { flex: 1; min-width: 0; }
-.hub-row-t { display: block; font-size: var(--fs-lg); font-weight: 700; }
-.hub-row-b { display: block; margin-top: 2px; font-size: var(--fs-sm); color: var(--ink-soft); }
-
-/* The count, above the title, so the weight of the choice is read before
-   the choice itself. */
-.card-count {
+.hub-door-words { min-width: 0; }
+.hub-door-name {
   display: block;
-  margin-bottom: 8px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-md);
   font-weight: 700;
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  color: var(--primary);
+  line-height: 1.25;
+}
+/* Who it is for, not what it pays: the reader is matching themselves
+   against it, and the amount is on the service page a tap away. */
+.hub-door-who {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.35;
 }
 
 .hub-unsure { margin-top: 24px; }
@@ -3693,7 +3698,7 @@ a.col-item:hover .col-go { gap: 10px; }
   align-items: flex-end;
   justify-content: center;
   padding: 0;
-  background: rgba(27, 26, 24, 0.55);
+  background: rgba(36, 28, 22, 0.55);
 }
 @media (min-width: 640px) {
   /* Anchored over the launcher rather than centred on the screen. A panel
