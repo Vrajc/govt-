@@ -316,7 +316,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     [t]
   );
 
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(() => {
     primeSpeech();
     hush();
     setSaid("");
@@ -324,27 +324,16 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     setAnswer(null);
     setTrouble("");
 
-    /* Ask the device what it can do before telling the person what it
-       cannot. This is the difference between "your microphone is off" said
-       to somebody whose microphone is on, and a sentence they can act on. */
-    const verdict = await checkMic();
-    if (verdict !== "ready") {
-      setPhase("trouble");
-      const message =
-        verdict === "nodevice"
-          ? t("voice.micNoDevice")
-          : verdict === "policy"
-            ? t("voice.micSiteOff")
-            : verdict === "blocked"
-              ? t("voice.micBlocked")
-              : verdict === "insecure"
-                ? t("voice.micInsecure")
-                : t("voice.noMic");
-      setTrouble(message);
-      say(message);
-      return;
-    }
+    /* Start listening inside the press, with nothing awaited first.
+       Recognition has to begin while the browser still counts this as a
+       user gesture, and on a phone an `await` before `start()` spends that
+       gesture — the panel then sits on "Listening" having never opened the
+       microphone. Asking the device about itself first also meant taking
+       the microphone and handing it straight back a moment before the
+       recogniser wanted it, which is a race with no upside.
 
+       So the diagnosis moved into the failure path below, where it costs
+       nothing and is the only place its answer is needed. */
     setPhase("listening");
 
     session.current = listen({
@@ -362,6 +351,25 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
         setPhase("trouble");
         const message = troubleFor(why);
         setTrouble(message);
+
+        /* Now that something has gone wrong, ask the device why. It can
+           tell two things apart that the recogniser reports identically:
+           a page forbidden the microphone by its own policy header, and a
+           device with no microphone at all. Both would otherwise be read
+           out as "you did not allow it", which sends somebody to change a
+           setting that is either already right or beside the point. The
+           spoken sentence is not repeated — only the words on screen are
+           corrected, because being told the same failure twice in two
+           different ways is worse than being told it once. */
+        void checkMic().then((verdict) => {
+          const better =
+            verdict === "policy"
+              ? t("voice.micSiteOff")
+              : verdict === "nodevice"
+                ? t("voice.micNoDevice")
+                : null;
+          if (better) setTrouble(better);
+        });
         /* Anything caught before it went wrong belongs to the person who
            said it. It goes into the box, one press from being asked, rather
            than being thrown away with the failure. */

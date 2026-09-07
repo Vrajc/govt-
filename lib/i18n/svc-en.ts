@@ -210,6 +210,7 @@ export const svcEn = {
     authEpfo: "The PF office",
     authOffice: "The office you worked in, then the pay office",
     authBank: "Your bank",
+    authBankThenCpao: "Your bank, then the central pension office",
     authPda: "The office that pays your pension",
     authBankOrOffice: "Your bank, or the office they worked in",
     authGrievance: "The pension complaints cell",
@@ -243,7 +244,8 @@ export const svcEn = {
 
     epfpensionName: "Pension from your PF",
     epfpensionShort: "A monthly pension if a company cut PF from your pay for ten years or more",
-    epfpensionWho: "You worked somewhere that cut PF, for ten years or more, and you are 58 or over",
+    epfpensionWho:
+      "You worked somewhere that cut PF, for ten years or more, and you are 58 or over — or 50, for a smaller amount",
     epfpensionAmount: "Worked out from your pay and your years of work. Usually 1,000 rupees a month or more",
     epfpensionWhat:
       "This is the pension the PF office pays. The hard part is not the form, it is that your old company has to confirm the day you left before the PF office will look at it. We will tell you if that is what is holding it up. You can take a smaller pension from 50 if you want it early.",
@@ -403,6 +405,12 @@ export const svcEn = {
 
     ppo: "PPO number",
     ppoHelp: "It is on the pension slip, 12 characters. Your bank can tell you it.",
+    sanctionAuthority: "Who sanctioned the pension",
+    sanctionAuthorityAssisted: "Who sanctioned their pension",
+    sanctionAuthorityHelp:
+      "The office or department that granted it — printed on the PPO. Not the bank that pays it.",
+    sanctionAuthorityHelpAssisted:
+      "The office or department that granted it — printed on their PPO. Not the bank that pays it.",
     ppoCpaoHelp: "Twelve digits, on the first page of the PPO book. Your bank can tell you it.",
     ppoCpaoHelpAssisted:
       "Twelve digits, on the first page of their PPO book. Their bank can tell you it.",

@@ -51,6 +51,7 @@ export default function DemoScreen() {
         serviceYears: "32",
         retireDate: "2026-08-31",
         currentPension: "18400",
+        sanctionAuthority: "Accountant General, Gujarat",
         husbandName: "Manubhai Patel",
         husbandDeathDate: "2025-03-14",
         deathDate: "2025-03-14",

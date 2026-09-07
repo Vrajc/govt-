@@ -296,6 +296,9 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
       S.received,
       S.officeCheck,
       S.paoCheck,
+      /* The pay office works the pension out; the Central Pension Accounting
+         Office is what authorises it and sends the PPO to the bank. */
+      S.cpaoCheck,
       S.ppoIssued,
       S.bankSetup,
       S.firstPayment,
@@ -508,6 +511,7 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
       F.ppoAny,
       F.aadhaar,
       F.mobile,
+      F.sanctionAuthority,
       /* A life certificate is filed against a disbursing agency, not into
          the air: the real Jeevan Pramaan asks for the bank or post office
          paying the pension and the account it lands in, and without them
@@ -537,7 +541,7 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     category: "have",
     realPortal: "cpao.nic.in",
     realForm: "Pension transfer request",
-    authorityKey: "authBank",
+    authorityKey: "authBankThenCpao",
     typicalDays: 21,
     needsPhoto: false,
     eligibility: [

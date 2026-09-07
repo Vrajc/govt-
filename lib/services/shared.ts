@@ -80,6 +80,18 @@ export const F = {
    * the CPAO shape without turning away the majority who are not on it.
    * The box still refuses obvious nonsense and then gets out of the way.
    */
+  /**
+   * Who sanctioned the pension, as against who pays it out.
+   *
+   * Jeevan Pramaan asks for both, and they are usually different bodies —
+   * the sanctioning authority is the department or office that granted the
+   * pension, the disbursing agency is the bank or post office it arrives
+   * from. A certificate is matched on the pair.
+   */
+  sanctionAuthority: pension("sanctionAuthority", "text", true, {
+    labelKey: "sanctionAuthority",
+    helpKey: "sanctionAuthority",
+  }),
   ppoAny: pension("ppo", "ppo", true, {
     labelKey: "ppo",
     helpKey: "ppoAny",

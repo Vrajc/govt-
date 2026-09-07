@@ -22,6 +22,7 @@ const BASE = process.argv[2] ?? "http://localhost:3000";
    validation fails the check loudly, which is the point. */
 const SAMPLE = {
   fullName: "Ramanbhai Patel",
+  sanctionAuthority: "Accountant General, Gujarat",
   deceasedName: "Manubhai Patel",
   dob: "1944-11-12",
   gender: "m",
@@ -88,7 +89,9 @@ const SERVICES = [
   ["widow", "sanction", 6],
   ["disability", "sanction", 5],
   ["epfpension", "sanction", 6],
-  ["govtretire", "sanction", 6],
+  // Seven since CPAO joined the chain: it authorises the pension the pay
+  // office worked out, and issues the PPO the bank pays against.
+  ["govtretire", "sanction", 7],
   ["apy", "sanction", 3],
   ["annapurna", "grant", 4],
   ["familypension", "sanction", 5],
