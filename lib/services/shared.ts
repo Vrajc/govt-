@@ -151,6 +151,19 @@ export const F = {
     ],
   }),
   nomineeName: apy("nomineeName", "name"),
+  /**
+   * The same question, asked by Form 6-A rather than by APY.
+   *
+   * A government pension carries a family pension after the pensioner dies,
+   * and Form 6-A collects the family details that make that payable. This
+   * service already declares ERR_NOMINATION_MISSING as one of the ways it
+   * can come back — so without the question it could reject somebody for
+   * failing to answer something it never asked.
+   */
+  familyNominee: pension("nomineeName", "name", true, {
+    labelKey: "familyNominee",
+    helpKey: "familyNominee",
+  }),
 
   /* grievance */
   complaintAbout: complaint("complaintAbout", "choice", true, {
@@ -218,6 +231,11 @@ export const S = {
   epfoCheck: s("epfoCheck", "office", 2),
   officeCheck: s("officeCheck", "office", 2),
   paoCheck: s("paoCheck", "office", 2),
+  /* A bank cannot move a pension between banks on its own. The old paying
+     branch sends it to the Central Pension Accounting Office, which reissues
+     the authority to the new one — which is why the transfer takes weeks
+     rather than the afternoon a bank transfer would. */
+  cpaoCheck: s("cpaoCheck", "office", 3),
 
   /* common tail */
   ppoIssued: s("ppoIssued", "system", 1),

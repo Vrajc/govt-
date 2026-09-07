@@ -469,6 +469,12 @@ export const svcHi: SvcDict = {
     nomineeName: "आपको कुछ हो जाए तो किसे मिले",
     nomineeNameAssisted: "उन्हें कुछ हो जाए तो किसे मिले",
     nomineeNameHelp: "आम तौर पर पति या पत्नी.",
+    familyNominee: "पारिवारिक पेंशन किसे मिले",
+    familyNomineeAssisted: "उनकी पारिवारिक पेंशन किसे मिले",
+    familyNomineeHelp:
+      "आम तौर पर पति या पत्नी. फ़ॉर्म यह इसलिए पूछता है कि आपके बाद पेंशन परिवार में चलती रहे.",
+    familyNomineeHelpAssisted:
+      "आम तौर पर उनके पति या पत्नी. फ़ॉर्म यह इसलिए पूछता है कि उनके बाद पेंशन परिवार में चलती रहे.",
     nomineeNameHelpAssisted: "आम तौर पर उनके पति या पत्नी.",
 
     complaintAbout: "क्या गड़बड़ हुई?",
@@ -597,6 +603,7 @@ export const svcHi: SvcDict = {
     epfoCheck: "पीएफ़ दफ़्तर में जाँचा गया",
     officeCheck: "दफ़्तर ने जाँचा",
     paoCheck: "वेतन दफ़्तर ने हिसाब लगाया",
+    cpaoCheck: "केंद्रीय पेंशन दफ़्तर ने आगे भेजा",
     ppoIssued: "पेंशन आदेश बन गया",
     bankSetup: "आपके बैंक में लग गया",
     firstPayment: "पहला पैसा आपके खाते में",

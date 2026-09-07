@@ -136,12 +136,34 @@ export type MicVerdict =
   | "insecure"
   /** There is no microphone attached at all. */
   | "nodevice"
+  /**
+   * The page itself is forbidden the microphone by its own
+   * Permissions-Policy header, whatever the reader has allowed.
+   *
+   * This is our bug, never theirs, and it is worth its own answer: the app
+   * shipped `microphone=()` — an empty allowlist — for months, so every
+   * reader who pressed the button was told to go and change a browser
+   * setting that was already correct. Telling somebody to fix something
+   * they cannot fix is worse than saying nothing.
+   */
+  | "policy"
   /** There is one, and this site is not allowed to use it. */
   | "blocked";
 
 export async function checkMic(): Promise<MicVerdict> {
   if (ctor() === null) return "unsupported";
   if (window.isSecureContext === false) return "insecure";
+
+  /* Asked before the microphone is, because a policy refusal and a reader
+     refusal look identical from getUserMedia and need opposite advice. */
+  const policy = (document as unknown as {
+    featurePolicy?: { allowsFeature?: (f: string) => boolean };
+    permissionsPolicy?: { allowsFeature?: (f: string) => boolean };
+  });
+  const allows = policy.permissionsPolicy?.allowsFeature ?? policy.featurePolicy?.allowsFeature;
+  if (allows && allows.call(policy.permissionsPolicy ?? policy.featurePolicy, "microphone") === false) {
+    return "policy";
+  }
 
   const media = navigator.mediaDevices;
   /* An old WebView with a recogniser but no mediaDevices: nothing here can

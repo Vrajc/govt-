@@ -94,7 +94,9 @@ const SERVICES = [
   ["familypension", "sanction", 5],
   ["nfbs", "grant", 5],
   ["lifecert", "lifecert", 3],
-  ["changebank", "change", 4],
+  // Five since the transfer was routed through the central pension office,
+  // which is what actually reissues the payment authority to the new bank.
+  ["changebank", "change", 5],
   ["age80", "increase", 4],
   ["restorecommuted", "increase", 4],
   ["notarrived", "grievance", 4],

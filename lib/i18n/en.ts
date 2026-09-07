@@ -359,6 +359,7 @@ export const en = {
     micBlocked:
       "The microphone was not allowed. Allow it from the small icon at the end of the address bar, then press again — or write it here.",
     micNoDevice: "No microphone was found on this device. Write what you need instead.",
+    micSiteOff: "This page is not letting the microphone work. That is ours to fix, not yours — write what you need instead.",
     micInsecure: "Listening needs a secure address. Write what you need instead.",
     micLang: "This browser cannot listen in this language yet. Write it here instead.",
     micBusy: "Something else is using the microphone. Close it, then press again.",

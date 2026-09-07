@@ -469,6 +469,12 @@ export const svcGu: SvcDict = {
     nomineeName: "તમને કંઈ થાય તો કોને મળે",
     nomineeNameAssisted: "એમને કંઈ થાય તો કોને મળે",
     nomineeNameHelp: "સામાન્ય રીતે પતિ કે પત્ની.",
+    familyNominee: "કુટુંબ પેન્શન કોને મળે",
+    familyNomineeAssisted: "એમનું કુટુંબ પેન્શન કોને મળે",
+    familyNomineeHelp:
+      "સામાન્ય રીતે પતિ કે પત્ની. ફોર્મ એટલા માટે પૂછે છે કે તમારા પછી પેન્શન કુટુંબમાં ચાલુ રહે.",
+    familyNomineeHelpAssisted:
+      "સામાન્ય રીતે એમના પતિ કે પત્ની. ફોર્મ એટલા માટે પૂછે છે કે એમના પછી પેન્શન કુટુંબમાં ચાલુ રહે.",
     nomineeNameHelpAssisted: "સામાન્ય રીતે એમના પતિ કે પત્ની.",
 
     complaintAbout: "શું ગડબડ થઈ?",
@@ -597,6 +603,7 @@ export const svcGu: SvcDict = {
     epfoCheck: "પીએફ કચેરીમાં તપાસાયું",
     officeCheck: "કચેરીએ તપાસ્યું",
     paoCheck: "પગાર કચેરીએ હિસાબ કાઢ્યો",
+    cpaoCheck: "કેન્દ્રીય પેન્શન કચેરીએ આગળ મોકલ્યું",
     ppoIssued: "પેન્શન હુકમ બની ગયો",
     bankSetup: "તમારી બૅન્કમાં ગોઠવાઈ ગયું",
     firstPayment: "પહેલા પૈસા તમારા ખાતામાં",

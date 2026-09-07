@@ -505,6 +505,12 @@ export const svcEn = {
     nomineeName: "Who should get it if something happens to you",
     nomineeNameAssisted: "Who should get it if something happens to them",
     nomineeNameHelp: "Usually your husband or wife.",
+    familyNominee: "Who should get the family pension",
+    familyNomineeAssisted: "Who should get their family pension",
+    familyNomineeHelp:
+      "Usually your husband or wife. The form asks so the pension can carry on in the family after you.",
+    familyNomineeHelpAssisted:
+      "Usually their husband or wife. The form asks so the pension can carry on in the family after them.",
     nomineeNameHelpAssisted: "Usually their husband or wife.",
 
     complaintAbout: "What has gone wrong?",
@@ -653,6 +659,7 @@ export const svcEn = {
     epfoCheck: "Checked at the PF office",
     officeCheck: "Checked by the office",
     paoCheck: "Worked out by the pay office",
+    cpaoCheck: "Sent on by the central pension office",
     ppoIssued: "Pension order made",
     bankSetup: "Set up at your bank",
     firstPayment: "First money in your account",

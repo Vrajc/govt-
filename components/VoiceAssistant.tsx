@@ -333,11 +333,13 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
       const message =
         verdict === "nodevice"
           ? t("voice.micNoDevice")
-          : verdict === "blocked"
-            ? t("voice.micBlocked")
-            : verdict === "insecure"
-              ? t("voice.micInsecure")
-              : t("voice.noMic");
+          : verdict === "policy"
+            ? t("voice.micSiteOff")
+            : verdict === "blocked"
+              ? t("voice.micBlocked")
+              : verdict === "insecure"
+                ? t("voice.micInsecure")
+                : t("voice.noMic");
       setTrouble(message);
       say(message);
       return;
