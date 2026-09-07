@@ -279,6 +279,24 @@ const SILENCE_MS = 1_800;
 const SILENCE_TICK_MS = 150;
 
 /**
+ * How often the words so far are asked for, while somebody is still talking.
+ *
+ * The recogniser this replaced showed each word as it was said, and that is
+ * not decoration: watching the words appear is how a person knows the phone
+ * is hearing them. Take it away and they stop mid-sentence to check, or
+ * repeat themselves, or give up. Recording alone cannot do it — there is
+ * nothing to show until the recording ends.
+ *
+ * So the audio so far is sent every couple of seconds and the words come
+ * back for the screen. Each one is the whole recording from the beginning
+ * rather than the newest slice, because a MediaRecorder chunk after the
+ * first has no header and will not decode on its own. That costs a request
+ * per two seconds of speech, which is the price of the sentence appearing
+ * as it is spoken.
+ */
+const PARTIAL_MS = 2_000;
+
+/**
  * Above the noise floor. A quiet room reads 1-3 on this scale and speech
  * reads well above 10, so this sits between them with room on both sides —
  * a threshold too low never stops, and one too high cuts somebody off.
@@ -313,12 +331,20 @@ export function canRecord(): boolean {
  * either: press to start, press again to send. Nothing is played while the
  * microphone is open — see the note in the panel about what that costs.
  */
-export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): Listening {
+export function record({
+  lang,
+  onPartial,
+  onWorking,
+  onFinal,
+  onFailure,
+}: ListenOptions): Listening {
   let recorder: MediaRecorder | null = null;
   let stream: MediaStream | null = null;
   const chunks: Blob[] = [];
   let settled = false;
   let cancelled = false;
+  /** Set the moment the turn is ending, so no late partial lands after it. */
+  let closing = false;
   let ceiling = 0;
   let watching = 0;
   let audio: AudioContext | null = null;
@@ -343,23 +369,50 @@ export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): 
     if (!cancelled) fn();
   };
 
+  /** Everything recorded so far, as one file the decoder will accept. */
+  const soFar = (): Blob =>
+    new Blob(chunks, { type: recorder?.mimeType || "audio/webm" });
+
+  const transcribe = async (blob: Blob): Promise<string | null> => {
+    const form = new FormData();
+    form.append("audio", blob, "said");
+    form.append("language", lang);
+    const res = await fetch("/api/listen", { method: "POST", body: form });
+    if (!res.ok) throw new Error(String(res.status));
+    const body = (await res.json()) as { text?: string };
+    return (body.text ?? "").trim() || null;
+  };
+
+  /* One partial in the air at a time. They are worth having but not worth
+     queueing: a backlog would still be arriving after the answer. */
+  let partialInFlight = false;
+
+  const showSoFar = async () => {
+    if (!onPartial || partialInFlight || settled || closing) return;
+    const blob = soFar();
+    if (blob.size < 1200) return;
+    partialInFlight = true;
+    try {
+      const text = await transcribe(blob);
+      if (text && !settled && !closing) onPartial(text);
+    } catch {
+      /* A partial that does not arrive costs nothing: the next one, or the
+         final, carries the same words. */
+    } finally {
+      partialInFlight = false;
+    }
+  };
+
   const send = async () => {
     onWorking?.();
-    const type = recorder?.mimeType || "audio/webm";
-    const blob = new Blob(chunks, { type });
+    const blob = soFar();
     /* Under a second of audio is somebody who pressed twice, not somebody
        who spoke. Saying "nothing was heard" is the honest answer and costs
        no round trip. */
     if (blob.size < 1200) return settle(() => onFailure("silence"));
 
     try {
-      const form = new FormData();
-      form.append("audio", blob, "said");
-      form.append("language", lang);
-      const res = await fetch("/api/listen", { method: "POST", body: form });
-      if (!res.ok) return settle(() => onFailure("network"));
-      const body = (await res.json()) as { text?: string };
-      const text = (body.text ?? "").trim();
+      const text = await transcribe(blob);
       if (!text) return settle(() => onFailure("silence"));
       settle(() => onFinal(text));
     } catch {
@@ -385,15 +438,22 @@ export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): 
     }
     recorder.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) chunks.push(e.data);
+      /* Every slice is a chance to put the words on screen. Not once the
+         turn is ending — the final transcription is already on its way and
+         a late partial would overwrite it with less. */
+      if (!closing) void showSoFar();
     };
     recorder.onstop = () => {
       if (cancelled) return release();
       void send();
     };
     recorder.onerror = () => settle(() => onFailure("unavailable"));
-    recorder.start();
+    /* A slice every couple of seconds, so there is something to transcribe
+       before the person has finished speaking. */
+    recorder.start(PARTIAL_MS);
 
     const endRecording = () => {
+      closing = true;
       try {
         if (recorder && recorder.state === "recording") recorder.stop();
       } catch {
@@ -453,6 +513,7 @@ export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): 
 
   return {
     stop: () => {
+      closing = true;
       window.clearTimeout(ceiling);
       window.clearInterval(watching);
       try {
@@ -465,6 +526,7 @@ export function record({ lang, onWorking, onFinal, onFailure }: ListenOptions): 
     cancel: () => {
       cancelled = true;
       settled = true;
+      closing = true;
       try {
         if (recorder && recorder.state === "recording") recorder.stop();
       } catch {
