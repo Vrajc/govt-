@@ -176,17 +176,37 @@ export async function transcribeSarvam(
   /* A moment of nothing. Sending it costs a round trip to be told so. */
   if (audio.size < 1200) return null;
 
-  const form = new FormData();
-  /* The extension is how the service reads the container, and the blob's
-     own type is what the browser actually recorded in. */
-  const ext = audio.type.includes("mp4") || audio.type.includes("mpeg")
+  /**
+   * Strip the codec off the media type before sending it on.
+   *
+   * Every browser MediaRecorder labels its output with the codec as well as
+   * the container — `audio/webm;codecs=opus` on Android and desktop Chrome,
+   * `audio/mp4;codecs=mp4a.40.2` on Safari — and the service refuses the
+   * whole request on it: "Invalid file type: audio/webm;codecs=opus". The
+   * same bytes under the bare `audio/webm` transcribe perfectly.
+   *
+   * It is worth being precise about how this hid. The bytes were always
+   * fine, the upload always arrived, and the service answered 400 rather
+   * than anything that reads like a rejection downstream — so the route
+   * returned no words and the panel said "nothing was heard", which is what
+   * it should say to somebody who stayed silent. Every test written against
+   * a hand-made Blob passed, because a hand-made Blob is given a bare type
+   * and a real recording never has one.
+   */
+  const container = audio.type.split(";")[0].trim().toLowerCase();
+  const ext = container.includes("mp4") || container.includes("mpeg")
     ? "m4a"
-    : audio.type.includes("ogg")
+    : container.includes("ogg")
       ? "ogg"
-      : audio.type.includes("wav")
+      : container.includes("wav")
         ? "wav"
         : "webm";
-  form.append("file", audio, `said.${ext}`);
+  const clean = new Blob([await audio.arrayBuffer()], {
+    type: container || "audio/webm",
+  });
+
+  const form = new FormData();
+  form.append("file", clean, `said.${ext}`);
   form.append("model", STT_MODEL);
   form.append("language_code", TAG[lang]);
 
