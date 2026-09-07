@@ -88,7 +88,16 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     needsPhoto: true,
     eligibility: [
       { id: "widowed", type: "yesno", pass: ["yes"], failKey: "eligWidow" },
-      { id: "age", type: "age", range: { min: 40 }, failKey: "eligAge40" },
+      {
+        id: "age",
+        type: "age",
+        /* IGNWPS runs 40 to 79. At 80 she moves to the old-age pension,
+           which pays more — so this is a transfer, not a refusal. */
+        range: { min: 40, max: 79 },
+        failKey: "eligAge40",
+        failOverKey: "eligOver79",
+        suggestOver: "oldage",
+      },
       { id: "bpl", type: "yesno", pass: ["yes"], failKey: "eligBpl" },
       { id: "remarried", type: "yesno", pass: ["no"], failKey: "eligRemarried" },
     ],
@@ -140,7 +149,15 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     typicalDays: 60,
     needsPhoto: true,
     eligibility: [
-      { id: "age", type: "age", range: { min: 18 }, failKey: "eligAge18" },
+      {
+        id: "age",
+        type: "age",
+        /* IGNDPS runs 18 to 79, and transfers to the old-age pension at 80. */
+        range: { min: 18, max: 79 },
+        failKey: "eligAge18",
+        failOverKey: "eligOver79",
+        suggestOver: "oldage",
+      },
       { id: "certified", type: "yesno", pass: ["yes"], failKey: "eligDisabilityCert" },
       { id: "severity", type: "yesno", pass: ["yes"], failKey: "eligDisability80" },
       { id: "bpl", type: "yesno", pass: ["yes"], failKey: "eligBpl" },
@@ -486,7 +503,17 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     needsPhoto: true,
     eligibility: [],
     documents: [],
-    fields: [F.ppo, F.aadhaar, F.mobile],
+    fields: [
+      F.ppoAny,
+      F.aadhaar,
+      F.mobile,
+      /* A life certificate is filed against a disbursing agency, not into
+         the air: the real Jeevan Pramaan asks for the bank or post office
+         paying the pension and the account it lands in, and without them
+         the certificate cannot be matched to a pensioner. */
+      F.bankName,
+      F.accountNumber,
+    ],
     stages: [S.received, S.faceMatch, S.recordUpdated],
     outcome: "lifecert",
     codes: [
@@ -616,7 +643,7 @@ export const CATALOGUE: Record<ServiceId, ServiceDef> = {
     documents: [D.ppoCopy, D.bankPassbook, D.pensionSlip],
     fields: [
       F.fullName,
-      F.ppo,
+      F.ppoAny,
       F.mobile,
       F.complaintAbout,
       F.monthsMissing,

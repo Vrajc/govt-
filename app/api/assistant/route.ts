@@ -6,6 +6,7 @@ import {
 import { fallbackAnswer, matchService, tFor } from "@/lib/assistant/fallback";
 import { describePath } from "@/lib/assistant/where";
 import { askVoice, hasGeminiKey } from "@/lib/gemini";
+import { askSarvam, hasSarvamKey } from "@/lib/sarvam";
 import { dictFor } from "@/lib/i18n";
 import { fail, langOf, ok, readJson } from "@/lib/reqContext";
 
@@ -50,7 +51,8 @@ interface Answered {
   say: string;
   steps: string[];
   goto: { href: string; label: string } | null;
-  source: "gemini" | "fallback";
+  /** Which provider actually answered, surfaced in /result technical details. */
+  source: "sarvam" | "gemini" | "fallback";
 }
 
 function remember(key: string, value: Answered): Answered {
@@ -81,10 +83,22 @@ export async function POST(req: Request) {
 
   const key = `${lang}|${path}|${said.toLowerCase()}`;
   const hit = cache.get(key);
-  if (hit) return ok({ ...hit, cached: true, keyPresent: hasGeminiKey() });
+  if (hit) return ok({ ...hit, cached: true, keyPresent: hasSarvamKey() || hasGeminiKey() });
 
   const dEn = dictFor("en");
-  const reply = await askVoice(said, lang, destinationMenu(dEn), describePath(path, dEn));
+  const menu = destinationMenu(dEn);
+  const here = describePath(path, dEn);
+
+  /* Sarvam answers first: it was trained on these languages rather than
+     prompted into them, and it comes back in about a second. Gemini is the
+     second try, and the dictionary underneath both is a real answer, so a
+     reader is never told to ask again. */
+  let source: Answered["source"] = "sarvam";
+  let reply = await askSarvam(said, lang, menu, here);
+  if (!reply) {
+    source = "gemini";
+    reply = await askVoice(said, lang, menu, here);
+  }
 
   if (reply) {
     /* The model gets to choose the destination, but not to leave somebody
@@ -96,14 +110,14 @@ export async function POST(req: Request) {
       serviceDestination(matchService(said, d) ?? "", d);
 
     return ok({
-      ...remember(key, { say: reply.say, steps: reply.steps, goto, source: "gemini" }),
-      keyPresent: hasGeminiKey(),
+      ...remember(key, { say: reply.say, steps: reply.steps, goto, source }),
+      keyPresent: hasSarvamKey() || hasGeminiKey(),
     });
   }
 
   const answer = fallbackAnswer(said, d, t);
   return ok({
     ...remember(key, { ...answer, source: "fallback" }),
-    keyPresent: hasGeminiKey(),
+    keyPresent: hasSarvamKey() || hasGeminiKey(),
   });
 }

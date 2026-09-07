@@ -65,6 +65,22 @@ export interface FieldDef {
   helpKey?: string;
   /** Exact digit count for `digits` fields. */
   digits?: number;
+  /**
+   * What this field looks like when it is filled in correctly, for the
+   * types where that differs per service rather than per type.
+   *
+   * A PPO number is the case this exists for. There is no such thing as
+   * "the" PPO format: the Central Pension Accounting Office issues twelve
+   * digits, the EPFO writes an office code with slashes in it, and every
+   * state scheme does its own thing. Showing one invented example to all of
+   * them teaches the wrong shape to five people out of six.
+   */
+  example?: string;
+  /**
+   * Source-form regular expression the value must match, anchored by the
+   * validator. Kept as a string so a service definition stays plain data.
+   */
+  pattern?: string;
   options?: { value: string; labelKey: string }[];
   /** Render only when another field holds one of these values. */
   showIf?: { field: string; equals: string[] };
@@ -103,6 +119,17 @@ export interface EligQ {
   failKey: string;
   /** Where to send them instead — the whole point of asking. */
   suggest?: ServiceId;
+  /**
+   * For an age range, the other end.
+   *
+   * Being under the minimum and being over the maximum are not the same
+   * news. A 38-year-old widow is early and should come back; an 82-year-old
+   * widow is not early, she has aged out of this scheme into a better one,
+   * and telling her "the widow pension starts at 40" is both wrong and
+   * cruel. When these are absent the single failKey covers both ends.
+   */
+  failOverKey?: string;
+  suggestOver?: ServiceId;
 }
 
 /* ==================================================================

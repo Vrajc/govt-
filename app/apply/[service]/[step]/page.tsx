@@ -298,17 +298,18 @@ function EligibilityStep({
 
   /* ---- disqualified: say why, and point somewhere real ---- */
   if (checked && result.failed) {
-    const q = result.failed;
+    const failKey = result.failKey ?? result.failed.failKey;
+    const suggest = result.suggest;
     return (
       <ScreenShell
         {...shell}
         title={t("elig.failTitle")}
         guide={t("elig.failGuide")}
-        speakExtra={ELIG[q.failKey]}
+        speakExtra={ELIG[failKey]}
         action={
           <>
-            {q.suggest && (
-              <BigLink href={`/service/${q.suggest}`} icon={<Chevron size={22} />}>
+            {suggest && (
+              <BigLink href={`/service/${suggest}`} icon={<Chevron size={22} />}>
                 {t("elig.tryOther")}
               </BigLink>
             )}
@@ -328,17 +329,17 @@ function EligibilityStep({
       >
         <div className="note note-warn">
           <Alert size={22} />
-          <span style={{ fontSize: "var(--fs-md)" }}>{ELIG[q.failKey]}</span>
+          <span style={{ fontSize: "var(--fs-md)" }}>{ELIG[failKey]}</span>
         </div>
 
-        {q.suggest && (
+        {suggest && (
           <div className="panel panel-good">
             <p className="review-key">{t("elig.tryOther")}</p>
             <p style={{ fontSize: "var(--fs-lg)", fontWeight: 700, margin: "2px 0 6px" }}>
-              {SVC[`${q.suggest}Name`]}
+              {SVC[`${suggest}Name`]}
             </p>
             <p className="helper">
-              {SVC[`${q.suggest}Short`]}
+              {SVC[`${suggest}Short`]}
             </p>
           </div>
         )}

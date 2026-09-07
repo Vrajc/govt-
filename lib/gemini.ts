@@ -1,6 +1,7 @@
 import "server-only";
 import type { Lang } from "./types";
 import { langMeta } from "./i18n/languages";
+import { hasGeminiKey, liveKeys, noteKeyResult } from "./geminiKeys";
 
 /**
  * Everything Gemini, in one server-only module.
@@ -42,13 +43,9 @@ const HOST = "https://generativelanguage.googleapis.com/v1beta/models";
    concludes that nothing is happening. Past it, the dictionary answers. */
 const TIMEOUT_MS = 11_000;
 
-export function hasGeminiKey(): boolean {
-  const key = process.env.GEMINI_API_KEY?.trim();
-  // The value copied out of .env.example ends in "...". Treating that as a
-  // real key costs every request a full timeout before it falls back,
-  // which is exactly the delay the fallback exists to avoid.
-  return Boolean(key) && key!.length > 20 && !key!.includes("...");
-}
+/* Re-exported so every existing caller keeps its import. The judgement of
+   what counts as a usable key now lives with the pool. */
+export { hasGeminiKey };
 
 function langName(lang: Lang): string {
   const m = langMeta(lang);
@@ -77,7 +74,7 @@ export interface VoiceReply {
  * pensioner's own language, is the most harmful thing this feature could
  * do.
  */
-function systemPrompt(lang: Lang, menu: string, where: string): string {
+export function voicePrompt(lang: Lang, menu: string, where: string): string {
   return [
     "You are the voice helper inside Pension Saral, a prototype of an Indian government service for pensioners and their families.",
     "The person speaking is usually old, often cannot read, and has asked out loud for help. Answer them. Do not describe the website.",
@@ -183,14 +180,14 @@ export async function askVoice(
   menu: string,
   where: string
 ): Promise<VoiceReply | null> {
-  const key = process.env.GEMINI_API_KEY?.trim();
-  if (!hasGeminiKey() || !key) return null;
+  const keys = liveKeys();
+  if (!keys.length) return null;
 
-  const system = systemPrompt(lang, menu, where);
+  const system = voicePrompt(lang, menu, where);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-  const call = (model: string, plain: boolean) =>
+  const call = (key: string, model: string, plain: boolean) =>
     fetch(`${HOST}/${model}:generateContent`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": key },
@@ -200,22 +197,37 @@ export async function askVoice(
     });
 
   try {
-    for (const model of MODELS) {
-      let res = await call(model, false);
-      // A rejected request is worth one more try with nothing optional in it.
-      if (res.status === 400) res = await call(model, true);
-      /* A model that is missing, overloaded or rate-limited is worth trying
-         under the next name — "high demand" on one flash model is routine
-         and the next one is usually answering. A refused key is not: it
-         will be refused identically all the way down the list. */
-      if (res.status === 404 || res.status === 429 || res.status >= 500) continue;
-      if (!res.ok) return null;
+    /* Keys outside, models inside. Whether a key is blocked or out of quota
+       is a fact about the project and holds under every model, so there is
+       nothing to learn by walking the model list with it — but one spent
+       key must not take the feature down when another in the pool answers. */
+    for (const key of keys) {
+      let spent = false;
 
-      const reply = parse(await res.json());
-      if (reply) return reply;
-      /* Answered, but with something unusable — truncated, or six steps of
-         essay. Another model may do better; if none does, the dictionary
-         will. */
+      for (const model of MODELS) {
+        let res = await call(key, model, false);
+        // A rejected request is worth one more try with nothing optional in it.
+        if (res.status === 400) res = await call(key, model, true);
+        noteKeyResult(key, res.status);
+
+        if (res.status === 401 || res.status === 403 || res.status === 429) {
+          spent = true;
+          break; // it will say the same under every model
+        }
+        /* Missing or overloaded is about the model, not the key: the next
+           name under the same key is usually answering. */
+        if (res.status === 404 || res.status >= 500) continue;
+        if (!res.ok) break;
+
+        const reply = parse(await res.json());
+        if (reply) return reply;
+        /* Answered, but unusable — truncated, or six steps of essay.
+           Another model may do better. */
+      }
+
+      /* Reachable and simply unhelpful: another key would answer the same,
+         so stop rather than spending the pool on it. */
+      if (!spent) return null;
     }
     return null;
   } catch {
@@ -237,16 +249,34 @@ interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];
 }
 
+/** Gemini's envelope, unwrapped. The judging below is shared. */
 function parse(raw: unknown): VoiceReply | null {
   const text = (raw as GeminiResponse)?.candidates?.[0]?.content?.parts
     ?.map((p) => p?.text ?? "")
     .join("")
     .trim();
-  if (!text) return null;
+  return text ? parseVoiceReply(text) : null;
+}
 
+/**
+ * One reply, held to the contract, whichever provider wrote it.
+ *
+ * Shared with the Sarvam path so that both are judged identically: the same
+ * length limits, the same jargon ban, the same refusal to ship one step or
+ * seven. A reply that fails any of it is discarded and the next provider —
+ * or the dictionary — answers, which is always a real answer rather than an
+ * apology.
+ */
+export function parseVoiceReply(text: string): VoiceReply | null {
   let obj: Record<string, unknown>;
   try {
-    obj = JSON.parse(text) as Record<string, unknown>;
+    /* A chat completion is likelier than a schema-constrained call to wrap
+       its JSON in a code fence or a line of preamble. Take the outermost
+       braces rather than refusing over punctuation. */
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start < 0 || end <= start) return null;
+    obj = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
   } catch {
     return null;
   }

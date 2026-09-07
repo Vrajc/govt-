@@ -3,10 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/app-state";
-import { planVoice, speakAll, type Speaking, type VoicePlan } from "@/lib/speech";
+import { planVoice, type VoicePlan } from "@/lib/speech";
+import { speakBest, TTS_FALLBACK_ENABLED, type Spoken } from "@/lib/speakBest";
 import { Speaker, StopSquare } from "./Icons";
-
-const TTS_FALLBACK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_TTS_FALLBACK === "true";
 
 /**
  * §5.3 — reads the screen aloud.
@@ -26,7 +25,7 @@ export function SpeakButton({ text }: { text: string }) {
   const [speaking, setSpeaking] = useState(false);
   const [supported, setSupported] = useState(true);
   const [plan, setPlan] = useState<VoicePlan | null>(null);
-  const jobRef = useRef<Speaking | null>(null);
+  const jobRef = useRef<Spoken | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const pathname = usePathname();
 
@@ -116,35 +115,17 @@ export function SpeakButton({ text }: { text: string }) {
     const clean = text.trim();
     if (!clean) return;
 
-    if (plan && typeof window !== "undefined" && "speechSynthesis" in window) {
-      setSpeaking(true);
-      jobRef.current = speakAll(clean, plan, { onEnd: () => setSpeaking(false) });
-      return;
-    }
-
-    if (!TTS_FALLBACK_ENABLED) {
-      setSupported(false);
-      return;
-    }
-
+    /* One rule for the whole app, in lib/speakBest.ts: the real voice
+       first, the device's own as the fallback. Duplicating it here is how
+       the Listen button and the voice helper drift apart. */
     setSpeaking(true);
-    try {
-      const res = await fetch("/api/speak", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: clean, language: lang }),
-      });
-      if (!res.ok) throw new Error("tts");
-      const blob = await res.blob();
-      const audio = new Audio(URL.createObjectURL(blob));
-      audioRef.current = audio;
-      audio.onended = () => setSpeaking(false);
-      audio.onerror = () => setSpeaking(false);
-      await audio.play();
-    } catch {
+    const handle = await speakBest(clean, plan, lang, () => setSpeaking(false));
+    if (!handle) {
       setSpeaking(false);
       setSupported(false);
+      return;
     }
+    jobRef.current = handle;
   }, [speaking, stop, text, plan, lang]);
 
   // No voice and no fallback: hide the control rather than offer a dead end.

@@ -1,4 +1,4 @@
-import type { EligQ, FieldDef, ServiceDef } from "./types";
+import type { EligQ, FieldDef, ServiceDef, ServiceId } from "./types";
 
 /**
  * The shared logic behind /apply/[service]/[step]. Kept out of the page so
@@ -115,6 +115,14 @@ export interface EligResult {
   complete: boolean;
   /** The first question whose answer disqualifies, if any. */
   failed: EligQ | null;
+  /**
+   * The message and the way out that actually apply to this failure.
+   *
+   * Resolved here rather than at the call site because only this function
+   * knows which end of an age range was missed.
+   */
+  failKey: string | null;
+  suggest: ServiceId | null;
 }
 
 export function evaluateEligibility(
@@ -137,18 +145,26 @@ export function evaluateEligibility(
         continue;
       }
       const { min, max } = q.range ?? {};
-      if ((min !== undefined && n < min) || (max !== undefined && n > max)) {
-        return { complete: true, failed: q };
+      if (max !== undefined && n > max) {
+        return {
+          complete: true,
+          failed: q,
+          failKey: q.failOverKey ?? q.failKey,
+          suggest: q.suggestOver ?? q.suggest ?? null,
+        };
+      }
+      if (min !== undefined && n < min) {
+        return { complete: true, failed: q, failKey: q.failKey, suggest: q.suggest ?? null };
       }
       continue;
     }
 
     if (q.pass && !q.pass.includes(a)) {
-      return { complete: true, failed: q };
+      return { complete: true, failed: q, failKey: q.failKey, suggest: q.suggest ?? null };
     }
   }
 
-  return { complete, failed: null };
+  return { complete, failed: null, failKey: null, suggest: null };
 }
 
 /* ==================================================================
@@ -198,6 +214,14 @@ export function validateField(f: FieldDef, raw: string, t: T): string | null {
       return f.options?.some((o) => o.value === v) ? null : t("apply.errPick");
     case "account":
       return digits(v).length >= 6 ? null : t("apply.errRequired");
+    case "ppo": {
+      /* No pattern means the service takes whatever its office issues. */
+      if (!f.pattern) return null;
+      const re = new RegExp(`^(?:${f.pattern})$`, "i");
+      return re.test(v.replace(/\s+/g, ""))
+        ? null
+        : t("apply.errPpoShape", { example: f.example ?? "" });
+    }
     default:
       return null;
   }
@@ -254,7 +278,7 @@ export function inputPropsFor(f: FieldDef): {
     case "account":
       return { inputMode: "numeric", autoComplete: "off" };
     case "ppo":
-      return { autoComplete: "off", placeholder: "PPO-2024-000123" };
+      return { autoComplete: "off", placeholder: f.example ?? "700020240123" };
     default:
       return { autoComplete: "off" };
   }

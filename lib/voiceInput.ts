@@ -112,6 +112,78 @@ export function canListen(): boolean {
   return window.isSecureContext !== false;
 }
 
+/**
+ * What this device will actually do, asked rather than assumed.
+ *
+ * The Permissions API alone is not enough. It answers "prompt" on a laptop
+ * with no microphone plugged in at all, which is how somebody ends up
+ * pressing a live-looking button that can never work; and on a desktop
+ * where the site was blocked once, months ago, it answers "denied" with no
+ * hint that the fix is two clicks away in the address bar.
+ *
+ * So: ask for the device list, and — only when the permission is not
+ * already granted — actually ask for the microphone. Requesting it is the
+ * one call that cannot be wrong, because it is the same call recognition
+ * itself will make. The track is stopped again immediately; this is a
+ * question, not a recording.
+ */
+export type MicVerdict =
+  /** Recognition can be started right now. */
+  | "ready"
+  /** The browser has no recogniser — Firefox, most WebViews. */
+  | "unsupported"
+  /** Plain http. Recognition is refused outright and nothing can fix it here. */
+  | "insecure"
+  /** There is no microphone attached at all. */
+  | "nodevice"
+  /** There is one, and this site is not allowed to use it. */
+  | "blocked";
+
+export async function checkMic(): Promise<MicVerdict> {
+  if (ctor() === null) return "unsupported";
+  if (window.isSecureContext === false) return "insecure";
+
+  const media = navigator.mediaDevices;
+  /* An old WebView with a recogniser but no mediaDevices: nothing here can
+     be checked, so let the recogniser speak for itself rather than refusing
+     on its behalf. */
+  if (!media?.getUserMedia) return "ready";
+
+  try {
+    const devices = await media.enumerateDevices();
+    /* Before permission is granted the labels are blank but the entries are
+       there, so counting them is meaningful even on a first visit. An empty
+       list on a browser that does report devices means no microphone. */
+    if (devices.length > 0 && !devices.some((d) => d.kind === "audioinput")) {
+      return "nodevice";
+    }
+  } catch {
+    /* Device enumeration is a nicety. The real test is below. */
+  }
+
+  /* Already granted: do not touch the microphone, just say so. Acquiring
+     and releasing it here has been seen to make the recogniser that starts
+     a moment later miss its first syllable. */
+  try {
+    const status = await navigator.permissions?.query({
+      name: "microphone" as PermissionName,
+    });
+    if (status?.state === "granted") return "ready";
+  } catch {
+    /* Firefox does not know the name. Fall through and ask properly. */
+  }
+
+  try {
+    const stream = await media.getUserMedia({ audio: true });
+    for (const track of stream.getTracks()) track.stop();
+    return "ready";
+  } catch (err) {
+    const name = (err as { name?: string })?.name ?? "";
+    if (name === "NotFoundError" || name === "OverconstrainedError") return "nodevice";
+    return "blocked";
+  }
+}
+
 /** Why the listening stopped, in the ways the caller can say something about. */
 export type ListenFailure =
   /** The phone would not hand over the microphone. */

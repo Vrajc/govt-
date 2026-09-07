@@ -7,12 +7,17 @@ import { apiFetch } from "@/lib/api";
 import {
   planVoice,
   primeSpeech,
-  speakAll,
   whenVoicesReady,
-  type Speaking,
   type VoicePlan,
 } from "@/lib/speech";
-import { canListen, listen, type ListenFailure, type Listening } from "@/lib/voiceInput";
+import { speakBest, type Spoken } from "@/lib/speakBest";
+import {
+  canListen,
+  checkMic,
+  listen,
+  type ListenFailure,
+  type Listening,
+} from "@/lib/voiceInput";
 import { Mic, Speaker, StopSquare } from "./Icons";
 
 /**
@@ -105,7 +110,7 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   /** Settled separately from `plan`, because null means two things until it is. */
   const [voiceless, setVoiceless] = useState(false);
 
-  const job = useRef<Speaking | null>(null);
+  const job = useRef<Spoken | null>(null);
   const session = useRef<Listening | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   /** The newest words off the microphone, readable without waiting for React. */
@@ -143,7 +148,8 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
         .then((status) => {
           if (!alive) return;
           watched = status;
-          const check = () => setTrouble(status.state === "denied" ? t("voice.micBlocked") : "");
+          const check = () =>
+            setTrouble(status.state === "denied" ? t("voice.micBlocked") : "");
           check();
           status.onchange = check;
         })
@@ -159,7 +165,12 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   }, [t]);
 
   /* ---------------- speaking ---------------- */
+  /* Bumped on every hush and every new sentence, so a network voice that
+     arrives late is discarded rather than talking over a newer one. */
+  const generation = useRef(0);
+
   const hush = useCallback(() => {
+    generation.current++;
     job.current?.cancel();
     job.current = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -171,14 +182,22 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   const say = useCallback(
     (text: string) => {
       const clean = text.trim();
-      // No voice on this phone for this language at all: the panel still
-      // shows every word, and the note above says why it is quiet.
-      if (!clean || !plan) return;
+      // No voice for this language anywhere: the panel still shows every
+      // word, and the note above says why it is quiet.
+      if (!clean) return;
       hush();
       setSpeaking(true);
-      job.current = speakAll(clean, plan, { onEnd: () => setSpeaking(false) });
+      /* Fire and forget: for a language this device cannot say, speakBest
+         goes to the network, so the handle arrives well after the press. */
+      const mine = generation.current;
+      void speakBest(clean, plan, lang, () => {
+        if (generation.current === mine) setSpeaking(false);
+      }).then((handle) => {
+        if (generation.current !== mine) handle?.cancel();
+        else job.current = handle;
+      });
     },
-    [hush, plan]
+    [hush, plan, lang]
   );
 
   /* The panel introduces itself. Somebody who opened a voice helper is
@@ -297,13 +316,33 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     [t]
   );
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     primeSpeech();
     hush();
     setSaid("");
     catching.current = "";
     setAnswer(null);
     setTrouble("");
+
+    /* Ask the device what it can do before telling the person what it
+       cannot. This is the difference between "your microphone is off" said
+       to somebody whose microphone is on, and a sentence they can act on. */
+    const verdict = await checkMic();
+    if (verdict !== "ready") {
+      setPhase("trouble");
+      const message =
+        verdict === "nodevice"
+          ? t("voice.micNoDevice")
+          : verdict === "blocked"
+            ? t("voice.micBlocked")
+            : verdict === "insecure"
+              ? t("voice.micInsecure")
+              : t("voice.noMic");
+      setTrouble(message);
+      say(message);
+      return;
+    }
+
     setPhase("listening");
 
     session.current = listen({

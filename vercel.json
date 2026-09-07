@@ -2,6 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "regions": ["bom1"],
+  "functions": {
+    "app/api/speak/route.ts": { "maxDuration": 60 },
+    "app/api/assistant/route.ts": { "maxDuration": 30 },
+    "app/api/precheck/route.ts": { "maxDuration": 30 },
+    "app/api/doccheck/route.ts": { "maxDuration": 30 }
+  },
   "headers": [
     {
       "source": "/(.*)",

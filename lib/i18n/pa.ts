@@ -59,7 +59,7 @@ export const pa: PartialDict = {
 
     ppoLabel: "ਪੀਪੀਓ ਨੰਬਰ",
     ppoHelp: "ਪੈਨਸ਼ਨ ਦੀ ਪਰਚੀ ਉੱਤੇ ਹੁੰਦਾ ਹੈ, ਬਾਰਾਂ ਅੱਖਰ.",
-    ppoPlaceholder: "PPO-2024-000123",
+    ppoPlaceholder: "700020240123",
 
     aadhaarLabel: "ਆਧਾਰ ਨੰਬਰ",
     aadhaarHelp: "ਅਸੀਂ ਇਹ ਕਦੇ ਨਹੀਂ ਰੱਖਦੇ. ਇਸ ਨਮੂਨੇ ਲਈ ਕੋਈ ਵੀ ਬਾਰਾਂ ਅੰਕ ਚੱਲ ਜਾਣਗੇ.",
@@ -294,7 +294,7 @@ export const pa: PartialDict = {
     slow3g: "ਜੋੜ ਹੌਲੀ ਹੋਣ ਦਾ ਬਹਾਨਾ ਕਰੋ",
     slow3gSub: "ਹਰ ਬੇਨਤੀ ਉੱਤੇ ਲਗਭਗ 1.6 ਸਕਿੰਟ ਵਧਾਉਂਦਾ ਹੈ",
     prefill: "ਨਮੂਨੇ ਵਾਲੇ ਪੈਨਸ਼ਨਰ ਦੇ ਵੇਰਵੇ ਭਰੋ",
-    prefillDone: "ਭਰ ਦਿੱਤਾ. ਰਾਮਨਭਾਈ ਪਟੇਲ, PPO-2024-000123.",
+    prefillDone: "ਭਰ ਦਿੱਤਾ. ਰਾਮਨਭਾਈ ਪਟੇਲ, 700020240123.",
     reset: "ਸਭ ਮਿਟਾ ਕੇ ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ",
     resetDone: "ਮਿਟਾ ਦਿੱਤਾ.",
     apply: "ਇਹ ਸੈਟਿੰਗ ਸਾਂਭ ਲਓ",

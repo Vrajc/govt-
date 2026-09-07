@@ -42,14 +42,17 @@ export const TRANSPORT_FAILURE_RATE = 0;
  * Mock PPO registry — stands in for the pension-office lookup
  * ================================================================== */
 const PPO_REGISTRY: Record<string, { name: string; monthly: number }> = {
-  "PPO-2024-000123": { name: "Ramanbhai Patel", monthly: 18400 },
-  "PPO-2024-000456": { name: "Savitri Devi Sharma", monthly: 12750 },
-  "PPO-2023-009871": { name: "Abdul Karim Shaikh", monthly: 21200 },
+  /* Twelve digits, the shape the Central Pension Accounting Office issues.
+     The invented PPO-YYYY-NNNNNN shape these used to have taught every
+     reader a format no office in India would recognise. */
+  "700020240123": { name: "Ramanbhai Patel", monthly: 18400 },
+  "700020240456": { name: "Savitri Devi Sharma", monthly: 12750 },
+  "700020239871": { name: "Abdul Karim Shaikh", monthly: 21200 },
 };
 
 export const DEMO_PENSIONER = {
   name: "Ramanbhai Patel",
-  ppo: "PPO-2024-000123",
+  ppo: "700020240123",
   aadhaar: "998812344821",
   mobile: "9825012345",
   // Turned 80 in November 2024, so the 80+ arrears have almost two years to

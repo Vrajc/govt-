@@ -295,6 +295,45 @@ export function baseLangOf(voice: SpeechSynthesisVoice): string {
   return THREE_LETTER[first] ?? first;
 }
 
+/**
+ * Engines that sound like a machine, and engines that sound like a person.
+ *
+ * A device commonly offers several voices for one language and the list is
+ * in no useful order, so taking the first match is a coin toss. On a Windows
+ * laptop that coin decides between Chrome's Google voice and a legacy SAPI
+ * one; on Linux and on cheap Android builds it decides between a real voice
+ * and eSpeak, which is a formant synthesiser from the 1990s and is the
+ * single biggest reason somebody presses Listen once and never again.
+ *
+ * None of this is a hard rule — the names are vendor strings and they
+ * change — so it is scored rather than filtered. The worst case is that a
+ * good voice loses to another good voice.
+ */
+const POOR_ENGINE = /espeak|pico|flite|compact|eloquence/i;
+const RICH_ENGINE = /natural|neural|premium|enhanced|wavenet|studio|online/i;
+
+function scoreVoice(v: SpeechSynthesisVoice, wanted: string): number {
+  const tag = v.lang.toLowerCase().replace(/_/g, "-");
+  const want = wanted.toLowerCase();
+  const name = v.name ?? "";
+  let score = 0;
+
+  /* The region matters for these languages: a pa-IN voice reads Gurmukhi,
+     a pa-PK one reads Shahmukhi and will make nothing of it. */
+  if (tag === want) score += 40;
+  else if (baseLangOf(v) === want.split("-")[0]) score += 20;
+
+  if (RICH_ENGINE.test(name)) score += 30;
+  if (POOR_ENGINE.test(name)) score -= 60;
+  /* Chrome's Indic voices are served from Google's own engine and are far
+     ahead of anything shipped with the operating system. */
+  if (/google/i.test(name)) score += 18;
+  if (/microsoft/i.test(name)) score += 6;
+  if (v.default) score += 2;
+
+  return score;
+}
+
 /** Which of our languages are written in a given script. */
 function sameScriptLangs(script: Script): Lang[] {
   return LANGS.filter((l) => langMeta(l).script === script);
@@ -311,12 +350,16 @@ export function planVoice(lang: Lang, voices: SpeechSynthesisVoice[]): VoicePlan
   const meta = langMeta(lang);
   const asIs = (s: string) => s;
 
+  /* Every voice that could read this language, best first. */
   const findExact = (code: string) => {
     const wanted = code.toLowerCase();
-    return (
-      voices.find((v) => v.lang.toLowerCase().replace(/_/g, "-") === wanted) ??
-      voices.find((v) => baseLangOf(v) === wanted.split("-")[0]) ??
-      null
+    const base = wanted.split("-")[0];
+    const candidates = voices.filter(
+      (v) => v.lang.toLowerCase().replace(/_/g, "-") === wanted || baseLangOf(v) === base,
+    );
+    if (!candidates.length) return null;
+    return candidates.reduce((best, v) =>
+      scoreVoice(v, wanted) > scoreVoice(best, wanted) ? v : best,
     );
   };
 

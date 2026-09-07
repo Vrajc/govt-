@@ -403,6 +403,13 @@ export const svcEn = {
 
     ppo: "PPO number",
     ppoHelp: "It is on the pension slip, 12 characters. Your bank can tell you it.",
+    ppoCpaoHelp: "Twelve digits, on the first page of the PPO book. Your bank can tell you it.",
+    ppoCpaoHelpAssisted:
+      "Twelve digits, on the first page of their PPO book. Their bank can tell you it.",
+    ppoAnyHelp:
+      "Exactly as it is printed on the pension paper — central, state or PF, whichever yours is.",
+    ppoAnyHelpAssisted:
+      "Exactly as it is printed on their pension paper — central, state or PF, whichever theirs is.",
     ppoHelpAssisted: "It is on the pension slip, 12 characters. Their bank can tell you it.",
     uan: "UAN number",
     uanHelp: "12 digits, on your PF slip. Leave it empty if you do not know it.",
@@ -662,6 +669,10 @@ export const svcEn = {
     actorVillage: "Village or ward office",
     actorBlock: "Taluka office",
     actorDistrict: "Collector's office",
+    /* Named once the district is known. "It is with the Collector" is true of
+       every applicant in India at once; "it is at the Gandhinagar Collector's
+       office" is a room, in a town, that somebody can actually ring. */
+    actorDistrictIn: "{place} Collector's office",
     actorOffice: "Pension office",
     actorBank: "Your bank",
     actorSystem: "Automatic",
@@ -768,6 +779,7 @@ export const svcEn = {
 
     eligAge60: "The old-age pension starts at 60.",
     eligAge40: "The widow pension starts at 40.",
+    eligOver79: "From 80 this becomes the old-age pension, which pays more. Ask for that one instead.",
     eligAge18: "This one starts at 18.",
     eligAge58Eps: "The PF pension starts at 58. You can take a smaller one from 50.",
     eligApyAge: "This one is for people aged 18 to 40.",
@@ -840,6 +852,7 @@ export const svcEn = {
     errAge: "Type your age in years.",
     errAgeAssisted: "Type their age in years.",
     errPick: "Pick one of these.",
+    errPpoShape: "That is not the shape of this number. It looks like {example}.",
   },
 
   /* ================================================================

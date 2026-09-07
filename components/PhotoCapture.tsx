@@ -293,17 +293,27 @@ export function PhotoCapture({
 
   const coach = isDoc ? t(docCoachKey(docQuality)) : t(coachKey(quality));
 
-  const hiddenInput = (
+  /**
+  * Only a document may be chosen from the gallery.
+  *
+  * A face photo is the proof that somebody is alive today, and a picture
+  * from the gallery proves only that a picture exists. Offering the choice
+  * at all invites the one mistake this step cannot survive — a photograph
+  * of a photograph, sent in good faith by a son who thought any picture of
+  * his mother would do. So for a face there is no file input on the page at
+  * all, rather than a disabled button explaining itself.
+  */
+  const hiddenInput = isDoc ? (
     <input
       ref={fileRef}
       type="file"
       accept="image/*"
-      capture={isDoc ? "environment" : "user"}
+      capture="environment"
       onChange={onFile}
       className="sr-only"
       aria-label={t("photo.uploadInstead")}
     />
-  );
+  ) : null;
 
   /* ---------------- confirm ---------------- */
   if (shot) {
@@ -431,15 +441,19 @@ export function PhotoCapture({
         )}
 
         <BigButton onClick={openCamera} icon={<Camera size={22} />}>
-          {t("apply.docsTake")}
+          {isDoc ? t("apply.docsTake") : t("photo.capture")}
         </BigButton>
-        <BigButton
-          variant="secondary"
-          onClick={() => fileRef.current?.click()}
-          icon={<Upload size={22} />}
-        >
-          {t("photo.uploadInstead")}
-        </BigButton>
+        {/* A paper may come from the gallery. A face may not — see the note
+            on `hiddenInput` above. */}
+        {isDoc && (
+          <BigButton
+            variant="secondary"
+            onClick={() => fileRef.current?.click()}
+            icon={<Upload size={22} />}
+          >
+            {t("photo.uploadInstead")}
+          </BigButton>
+        )}
         <BigButton variant="quiet" onClick={onCancel}>
           {t("common.back")}
         </BigButton>
@@ -472,12 +486,18 @@ export function PhotoCapture({
               <strong style={{ display: "block", marginBottom: 4 }}>
                 {t("photo.deniedTitle")}
               </strong>
-              {t("photo.deniedBody")}
+              {isDoc ? t("photo.deniedBody") : t("photo.deniedBodyFace")}
             </span>
           </div>
-          <BigButton onClick={() => fileRef.current?.click()} icon={<Upload size={22} />}>
-            {t("photo.uploadInstead")}
-          </BigButton>
+          {isDoc ? (
+            <BigButton onClick={() => fileRef.current?.click()} icon={<Upload size={22} />}>
+              {t("photo.uploadInstead")}
+            </BigButton>
+          ) : (
+            <BigButton onClick={openCamera} icon={<Refresh size={22} />}>
+              {t("photo.retryCamera")}
+            </BigButton>
+          )}
           <BigButton variant="quiet" onClick={onCancel}>
             {t("common.back")}
           </BigButton>
@@ -512,13 +532,15 @@ export function PhotoCapture({
                 {t("photo.switchCam")}
               </BigButton>
             )}
-            <BigButton
-              variant="secondary"
-              onClick={() => fileRef.current?.click()}
-              icon={<Upload size={22} />}
-            >
-              {t("photo.uploadInstead")}
-            </BigButton>
+            {isDoc && (
+              <BigButton
+                variant="secondary"
+                onClick={() => fileRef.current?.click()}
+                icon={<Upload size={22} />}
+              >
+                {t("photo.uploadInstead")}
+              </BigButton>
+            )}
           </div>
         </>
       )}

@@ -1,4 +1,6 @@
 import { speak } from "@/lib/openai";
+import { speakCloud } from "@/lib/tts";
+import { speakSarvam } from "@/lib/sarvam";
 import { fail, langOf, readJson } from "@/lib/reqContext";
 
 export const runtime = "nodejs";
@@ -22,15 +24,42 @@ export async function POST(req: Request) {
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   if (!text) return fail("NO_TEXT", "There was nothing to read out.", 400);
 
-  const audio = await speak(text, langOf(body?.language));
-  if (!audio) {
-    return fail("TTS_UNAVAILABLE", "Reading out loud is not available right now.", 503);
+  const lang = langOf(body?.language);
+
+  /* Sarvam first. It is the only one of the three that speaks all eleven —
+     Odia included, which nothing else here can — and it answers in about a
+     second where Gemini takes six to ten. Gemini and OpenAI stay behind it
+     for a deployment that has one of those keys and not this one. */
+  const native = await speakSarvam(text, lang);
+  if (native) {
+    return new Response(native, {
+      headers: {
+        "content-type": "audio/wav",
+        /* Safe to keep: the text is a fixed screen string and the reply is
+           identical for every reader of that screen in that language. */
+        "cache-control": "public, max-age=86400",
+      },
+    });
   }
 
-  return new Response(audio, {
-    headers: {
-      "content-type": "audio/mpeg",
-      "cache-control": "no-store",
-    },
-  });
+  const wav = await speakCloud(text, lang);
+  if (wav) {
+    return new Response(wav, {
+      headers: {
+        "content-type": "audio/wav",
+        /* Safe to keep: the text is a fixed screen string, and the reply is
+           identical for every reader of that screen in that language. */
+        "cache-control": "public, max-age=86400",
+      },
+    });
+  }
+
+  const mp3 = await speak(text, lang);
+  if (mp3) {
+    return new Response(mp3, {
+      headers: { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" },
+    });
+  }
+
+  return fail("TTS_UNAVAILABLE", "Reading out loud is not available right now.", 503);
 }

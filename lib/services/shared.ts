@@ -59,7 +59,33 @@ export const F = {
   district: home("district", "text"),
 
   /* pension identifiers */
-  ppo: pension("ppo", "ppo"),
+  /**
+   * Central civil pensioners — the CPAO number, twelve digits.
+   *
+   * This is the one the Central Pension Accounting Office prints on the
+   * first page of the PPO book, and it is what cpao.nic.in and the
+   * pensioners' portal both ask for.
+   */
+  ppo: pension("ppo", "ppo", true, {
+    helpKey: "ppoCpao",
+    example: "700020240123",
+    pattern: "\\d{12}",
+  }),
+  /**
+   * The same question asked by a service that serves every kind of
+   * pensioner at once.
+   *
+   * Jeevan Pramaan takes central, state, EPFO and defence pensioners, and
+   * the grievance portal takes anybody at all — so neither can insist on
+   * the CPAO shape without turning away the majority who are not on it.
+   * The box still refuses obvious nonsense and then gets out of the way.
+   */
+  ppoAny: pension("ppo", "ppo", true, {
+    labelKey: "ppo",
+    helpKey: "ppoAny",
+    example: "700020240123",
+    pattern: "[A-Z0-9][A-Z0-9/\\-]{6,24}",
+  }),
   uan: pension("uan", "uan"),
 
   /* bank */
@@ -91,7 +117,11 @@ export const F = {
 
   /* family pension */
   deceasedName: deceased("deceasedName", "name"),
-  deceasedPpo: deceased("deceasedPpo", "ppo"),
+  deceasedPpo: deceased("deceasedPpo", "ppo", true, {
+    helpKey: "deceasedPpo",
+    example: "700020240123",
+    pattern: "\\d{12}",
+  }),
   deathDate: deceased("deathDate", "date"),
   relationship: deceased("relationship", "choice", true, {
     options: [
