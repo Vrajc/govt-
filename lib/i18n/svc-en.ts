@@ -123,8 +123,8 @@ export const svcEn = {
     catStartSub: "I do not get one yet",
     catHave: "I already get a pension",
     catHaveSub: "Something needs doing",
-    catFamily: "Someone in my family has died",
-    catFamilySub: "There may be money owed to the family",
+    catFamily: "A pensioner in my family has died",
+    catFamilySub: "Or whoever earned for the house — there may be money owed",
 
     notSure: "I am not sure which one",
     notSureSub: "Answer four questions and we will tell you",
