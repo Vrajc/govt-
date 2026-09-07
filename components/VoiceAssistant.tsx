@@ -10,7 +10,7 @@ import {
   whenVoicesReady,
   type VoicePlan,
 } from "@/lib/speech";
-import { primeAudio, speakBest, type Spoken } from "@/lib/speakBest";
+import { primeAudio, speakBest, stopAudio, type Spoken } from "@/lib/speakBest";
 import {
   canListen,
   checkMic,
@@ -187,6 +187,9 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
     generation.current++;
     job.current?.cancel();
     job.current = null;
+    /* Directly, not only through the handle: a sentence still being fetched
+       has no handle yet and would otherwise arrive and start talking. */
+    stopAudio();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -331,8 +334,23 @@ function VoicePanel({ onClose }: { onClose: () => void }) {
   );
 
   const startListening = useCallback(() => {
-    primeSpeech();
-    primeAudio();
+    /**
+     * Silence first, and nothing primed.
+     *
+     * This used to wake the speech engine and play a moment of silence
+     * here, copied from the press that opens the panel, where both belong:
+     * they unlock *output*, and unlocking output is the last thing wanted a
+     * millisecond before recording. On a phone the speech engine and the
+     * recogniser contend for the same audio route, so an utterance — even a
+     * silent one — leaves the microphone open and hearing nothing. It is
+     * the exact shape of the fault: the panel says it is listening, waits
+     * its full twenty-five seconds, and reports that nothing was said.
+     *
+     * A desktop does not contend the same way, which is why this only ever
+     * failed on the phone it was built for. The opening press has already
+     * unlocked both for the session; there is nothing left to do here but
+     * stop talking.
+     */
     hush();
     setSaid("");
     catching.current = "";

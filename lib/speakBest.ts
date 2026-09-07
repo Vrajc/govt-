@@ -52,6 +52,33 @@ export interface Spoken {
  */
 let unlocked: HTMLAudioElement | null = null;
 
+/**
+ * Bumped by `stopAudio`. A sentence that was still being fetched when
+ * somebody asked for silence must not arrive a second later and start
+ * talking — which is precisely what happens when the panel's introduction
+ * is in flight and the microphone is pressed underneath it.
+ */
+let epoch = 0;
+
+/**
+ * Stop anything this module is saying, now, whether it has started or not.
+ *
+ * Cancelling the returned handle is not enough on its own: the handle only
+ * exists once the audio has arrived, so a press during the fetch has
+ * nothing to cancel and gets talked over a moment later.
+ */
+export function stopAudio(): void {
+  epoch++;
+  if (!unlocked) return;
+  try {
+    unlocked.pause();
+    unlocked.removeAttribute("src");
+    unlocked.load();
+  } catch {
+    /* Already torn down. */
+  }
+}
+
 /** A tenth of a second of silence — enough to unlock, too short to hear. */
 const SILENCE =
   "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=";
@@ -91,12 +118,16 @@ export async function speakBest(
     canLocal ? speakAll(clean, plan!, { onEnd }) : null;
 
   if (TTS_FALLBACK_ENABLED) {
+    const mine = epoch;
     try {
       const res = await fetch("/api/speak", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ text: clean, language: lang }),
       });
+      /* Silence was asked for while this was in the air. Say nothing. */
+      if (epoch !== mine) return null;
+
       if (res.ok) {
         /* Reuse the element unlocked during the press. A fresh one would be
            refused, because by now the activation the press granted is long
