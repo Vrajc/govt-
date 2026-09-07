@@ -118,6 +118,7 @@ export const svcEn = {
        language needs it. Every category holds two or more services, so
        the plural form is the only one these ever render. */
     chooseHead: "Or choose your situation",
+    seeThem: "See all {n}",
 
     catStart: "I want to start getting a pension",
     catStartSub: "I do not get one yet",

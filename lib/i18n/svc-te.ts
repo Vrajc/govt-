@@ -99,6 +99,7 @@ export const svcTe: PartialSvcDict = {
     guide: "మీకు సరిపోయేలా అనిపించేది ఎంచుకోండి.",
 
     chooseHead: "లేదా మీ పరిస్థితిని ఎంచుకోండి",
+    seeThem: "అన్నీ {n} చూడండి",
 
     catStart: "నాకు పెన్షన్ రావడం మొదలవ్వాలి",
     catStartSub: "నాకు ఇంకా రావట్లేదు",

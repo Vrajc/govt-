@@ -3553,7 +3553,9 @@ a.col-item:hover .col-go { gap: 10px; }
 /* Each door names what is behind it. The card is a plain container, not a
    button: the services inside are the links, and wrapping links in a button
    is both invalid and a keyboard trap. */
-.hub-door { display: flex; flex-direction: column; }
+/* The card is one target now, not a container full of them, so it needs
+   somewhere for the stretched link to anchor. */
+.hub-door { display: flex; flex-direction: column; position: relative; }
 .hub-door .card-title { margin: 0; font-size: var(--fs-lg); }
 .hub-door .card-sub { margin: 4px 0 0; }
 
@@ -3566,37 +3568,49 @@ a.col-item:hover .col-go { gap: 10px; }
   gap: 2px;
 }
 
-.hub-door-item {
+/* A name to be recognised, not a row to be pressed.
+
+   The tap target that used to be here is gone with the link that needed
+   it: fourteen 56px targets on the screen whose whole job is to reduce
+   the choice to three was the choice arriving twice. Without it the list
+   is tighter, which means all three doors are legible at once on a phone
+   rather than one door and the top of another. */
+.hub-door-point {
   display: flex;
   align-items: center;
   gap: 12px;
-  /* A 78-year-old's tap target, and the reason the list is not denser. */
-  min-height: 56px;
-  padding: 9px 10px;
-  margin: 0 -10px;
-  border-radius: var(--r-sm);
-  color: var(--ink);
-  text-decoration: none;
+  padding: 6px 0;
 }
-.hub-door-item:hover { background: var(--sunk); }
-.hub-door-item > svg { flex: 0 0 auto; margin-left: auto; color: var(--primary); }
-
-.hub-door-words { min-width: 0; }
 .hub-door-name {
-  display: block;
   font-size: var(--fs-md);
-  font-weight: 700;
-  line-height: 1.25;
+  font-weight: 600;
+  line-height: 1.3;
+  min-width: 0;
 }
-/* Who it is for, not what it pays: the reader is matching themselves
-   against it, and the amount is on the service page a tap away. */
-.hub-door-who {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  line-height: 1.35;
+
+/* One link, stretched over the card.
+
+   Everything else inside is plain text, so there is nothing for this to
+   cover that a person might have wanted to press instead — which is the
+   usual objection to the pattern and does not apply here. The z-index
+   keeps it above the card's own background and nothing else. */
+.hub-door-go { margin-top: auto; }
+.hub-door-go::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
 }
+/* The whole card lights up, since the whole card is the press. */
+.hub-door:hover { border-color: var(--primary-line); }
+.hub-door:hover .card-go { color: var(--primary-dark); }
+/* Focus lands on the link, so the ring has to be drawn on the card. */
+.hub-door:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.hub-door-go:focus-visible { outline: none; }
 
 .hub-unsure { margin-top: 24px; }
 

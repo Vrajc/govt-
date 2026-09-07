@@ -99,6 +99,7 @@ export const svcKn: PartialSvcDict = {
     guide: "ನಿಮಗೆ ಹೊಂದುವ ಹಾಗೆ ಅನಿಸುವುದನ್ನು ಆರಿಸಿ.",
 
     chooseHead: "ಅಥವಾ ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ಆರಿಸಿ",
+    seeThem: "ಎಲ್ಲಾ {n} ಸೇವೆಗಳನ್ನು ನೋಡಿ",
 
     catStart: "ನನಗೆ ಪಿಂಚಣಿ ಬರಲು ಶುರುವಾಗಬೇಕು",
     catStartSub: "ನನಗೆ ಇನ್ನೂ ಬರುತ್ತಿಲ್ಲ",

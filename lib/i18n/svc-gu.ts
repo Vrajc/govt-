@@ -99,6 +99,7 @@ export const svcGu: SvcDict = {
     guide: "જે તમારી વાત લાગે એ પસંદ કરો.",
 
     chooseHead: "અથવા તમારી સ્થિતિ પસંદ કરો",
+    seeThem: "બધી {n} જુઓ",
 
     catStart: "મારે પેન્શન ચાલુ કરાવવું છે",
     catStartSub: "અત્યારે મને કોઈ પેન્શન મળતું નથી",

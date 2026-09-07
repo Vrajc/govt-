@@ -99,6 +99,7 @@ export const svcPa: PartialSvcDict = {
     guide: "ਜਿਹੜੀ ਤੁਹਾਡੇ ਵਰਗੀ ਲੱਗੇ ਉਹ ਚੁਣੋ.",
 
     chooseHead: "ਜਾਂ ਆਪਣੀ ਹਾਲਤ ਚੁਣੋ",
+    seeThem: "ਸਾਰੀਆਂ {n} ਵੇਖੋ",
 
     catStart: "ਮੈਂ ਪੈਨਸ਼ਨ ਲੈਣੀ ਸ਼ੁਰੂ ਕਰਨੀ ਹੈ",
     catStartSub: "ਮੈਨੂੰ ਅਜੇ ਨਹੀਂ ਮਿਲਦੀ",

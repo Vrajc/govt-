@@ -11,24 +11,29 @@ import { numberOfService } from "@/lib/numbers";
 import type { Category } from "@/lib/services/types";
 
 /**
- * The hub: three doors, with what is behind each one written on it.
+ * The hub: three doors, with what is behind each one written on it — and
+ * one way in through each.
  *
- * Two earlier versions of this screen sat at the opposite ends of the same
- * argument. The first listed all fourteen scheme names at once, which is a
- * wall. The second hid every one of them behind "see all 7", which is a
- * door with no sign — the count tells you how much is inside and nothing
- * about whether any of it is yours, so the only way to find out is to open
- * all three.
+ * Three versions of this screen have now argued the same point from
+ * different ends. The first listed all fourteen scheme names as fourteen
+ * links, which is a wall. The second hid every one of them behind "see all
+ * 7", which is a door with no sign: the count tells you how much is inside
+ * and nothing about whether any of it is yours, so the only way to find
+ * out is to open all three. The third put the names back and made each one
+ * its own link, which fixed the sign and broke the door — fourteen targets
+ * on the screen that exists to reduce the choice to three, and every one
+ * of them a chance to land on the wrong scheme page from a name skimmed
+ * too fast.
  *
- * This is the middle. Each card names its services, so the words are on the
- * screen where somebody can recognise their own situation in them; the
- * grouping keeps them in threes and fives rather than fourteen; and the
- * card still opens on a page with the money, the rules and the papers for
- * each one, because a name is not enough to choose by.
+ * This is the two halves together. The names are on the card, so somebody
+ * can recognise their own situation in the words before committing to
+ * anything; they are not links, so the card is one target and the decision
+ * on this screen stays the decision the screen is for. The list inside is
+ * where the choosing happens, and that list has the money, the rules and
+ * the papers on it — which a name alone never had.
  *
- * The two shortcut rows above this are gone. They duplicated the first item
- * of two of the doors, which is a second place to press for the same thing,
- * and the services they named are now visible in the cards anyway.
+ * The numbers are here for the same reason they are everywhere else: this
+ * is the screen somebody is looking at when a helpline worker says "nine".
  */
 export default function StartScreen() {
   const { t, d, resetApp } = useApp();
@@ -75,26 +80,34 @@ export default function StartScreen() {
               </h2>
               <p className="card-sub">{door.sub}</p>
 
-              {/* Starting a journey clears whatever draft was in progress, so
-                  two services never bleed into each other. */}
+              {/* Names, not links. They are here to be recognised, and the
+                  press that acts on the recognition is the one below. */}
               <ul className="hub-door-list">
                 {services.map((s) => (
-                  <li key={s.id}>
-                    <Link
-                      href={`/service/${s.id}`}
-                      className="hub-door-item"
-                      onClick={() => resetApp()}
-                    >
-                      <NumberBadge n={numberOfService(s.id)} />
-                      <span className="hub-door-words">
-                        <span className="hub-door-name">{SVC[`${s.id}Name`]}</span>
-                        <span className="hub-door-who">{SVC[`${s.id}Who`]}</span>
-                      </span>
-                      <Chevron size={16} />
-                    </Link>
+                  <li key={s.id} className="hub-door-point">
+                    <NumberBadge n={numberOfService(s.id)} />
+                    <span className="hub-door-name">{SVC[`${s.id}Name`]}</span>
                   </li>
                 ))}
               </ul>
+
+              {/* The one link, stretched over the whole card by the rule in
+                  globals.css — so the card is a single target for a thumb,
+                  while a screen reader is given one short link with a name
+                  that says which door it opens rather than nine lines of
+                  scheme names read as the name of a link.
+
+                  Starting a journey clears whatever draft was in progress,
+                  so two services never bleed into each other. */}
+              <Link
+                href={`/start/${door.c}`}
+                className="card-go hub-door-go"
+                aria-label={`${door.title} — ${HUB.seeThem.replace("{n}", String(services.length))}`}
+                onClick={() => resetApp()}
+              >
+                {HUB.seeThem.replace("{n}", String(services.length))}
+                <Chevron size={15} />
+              </Link>
             </section>
           );
         })}

@@ -99,6 +99,7 @@ export const svcHi: SvcDict = {
     guide: "जो आपकी बात लगे, वही चुनिए.",
 
     chooseHead: "या अपनी स्थिति चुनिए",
+    seeThem: "सभी {n} देखिए",
 
     catStart: "मुझे पेंशन शुरू करवानी है",
     catStartSub: "अभी मुझे कोई पेंशन नहीं मिलती",

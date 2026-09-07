@@ -99,6 +99,7 @@ export const svcBn: PartialSvcDict = {
     guide: "যেটা আপনার মতো শোনায় সেটা বেছে নিন।",
 
     chooseHead: "বা আপনার অবস্থা বেছে নিন",
+    seeThem: "সবগুলি {n}টি দেখুন",
 
     catStart: "আমি পেনশন পাওয়া শুরু করতে চাই",
     catStartSub: "আমি এখনও পাই না",
